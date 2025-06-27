@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/Users/a1/Downloads/yolov8/backend/app.py", line 10, in <module>
+    from werkzeug.utils import secure_filename
+ModuleNotFoundError: No module named 'werkzeug'

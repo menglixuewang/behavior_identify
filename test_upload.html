@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .upload-area.dragover {
+            border-color: #007bff;
+            background-color: #e3f2fd;
+        }
+        .file-input {
+            display: none;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>文件上传测试</h1>
+    
+    <div class="upload-area" id="uploadArea">
+        <p>点击选择文件或拖拽文件到此处</p>
+        <p>支持格式: MP4, AVI, MOV, MKV, FLV, WMV</p>
+        <p>最大文件大小: 500MB</p>
+        <input type="file" id="fileInput" class="file-input" accept="video/*">
+    </div>
+    
+    <div id="fileInfo" style="display: none;">
+        <h3>文件信息:</h3>
+        <p id="fileName"></p>
+        <p id="fileSize"></p>
+        <p id="fileType"></p>
+    </div>
+    
+    <div id="uploadProgress" style="display: none;">
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <p id="progressText">0%</p>
+    </div>
+    
+    <div id="uploadStatus"></div>
+    
+    <button id="uploadBtn" onclick="uploadFile()" disabled>开始上传</button>
+    <button onclick="clearAll()">清除</button>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+        let selectedFile = null;
+        
+        // 文件选择处理
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+        
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                showFileInfo(file);
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        });
+        
+        // 拖拽处理
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                selectedFile = files[0];
+                showFileInfo(files[0]);
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        });
+        
+        function showFileInfo(file) {
+            document.getElementById('fileName').textContent = `文件名: ${file.name}`;
+            document.getElementById('fileSize').textContent = `文件大小: ${formatFileSize(file.size)}`;
+            document.getElementById('fileType').textContent = `文件类型: ${file.type}`;
+            document.getElementById('fileInfo').style.display = 'block';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function addStatus(message, isSuccess = true) {
+            const statusDiv = document.getElementById('uploadStatus');
+            const div = document.createElement('div');
+            div.className = `status ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            statusDiv.appendChild(div);
+        }
+        
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').textContent = percent + '%';
+        }
+        
+        async function uploadFile() {
+            if (!selectedFile) {
+                addStatus('请先选择文件', false);
+                return;
+            }
+            
+            // 检查文件大小
+            if (selectedFile.size > 500 * 1024 * 1024) {
+                addStatus('文件大小超过500MB限制', false);
+                return;
+            }
+            
+            // 检查文件类型
+            const allowedTypes = ['video/mp4', 'video/avi', 'video/quicktime', 'video/x-msvideo'];
+            if (!allowedTypes.includes(selectedFile.type)) {
+                addStatus('不支持的文件类型', false);
+                return;
+            }
+            
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('uploadProgress').style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('video', selectedFile);
+            formData.append('task_name', selectedFile.name);
+            formData.append('confidence', '0.5');
+            formData.append('input_size', '640');
+            formData.append('device', 'cpu');
+            
+            try {
+                addStatus('开始上传文件...', true);
+                
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        updateProgress(percent);
+                    }
+                });
+                
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        addStatus(`✅ 上传成功! 任务ID: ${response.task_id}`, true);
+                        updateProgress(100);
+                        
+                        // 开始检测
+                        startDetection(response.task_id);
+                    } else {
+                        addStatus(`❌ 上传失败: ${xhr.status} - ${xhr.statusText}`, false);
+                        document.getElementById('uploadBtn').disabled = false;
+                    }
+                });
+                
+                xhr.addEventListener('error', () => {
+                    addStatus('❌ 网络错误', false);
+                    document.getElementById('uploadBtn').disabled = false;
+                });
+                
+                xhr.open('POST', `${API_BASE_URL}/api/upload`);
+                xhr.send(formData);
+                
+            } catch (error) {
+                addStatus(`❌ 上传错误: ${error.message}`, false);
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        }
+        
+        async function startDetection(taskId) {
+            try {
+                addStatus('开始检测处理...', true);
+                
+                const response = await fetch(`${API_BASE_URL}/api/detect/video`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        task_id: taskId
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    addStatus('✅ 检测任务已启动', true);
+                } else {
+                    const errorData = await response.json();
+                    addStatus(`❌ 检测启动失败: ${errorData.error || '未知错误'}`, false);
+                }
+            } catch (error) {
+                addStatus(`❌ 检测启动错误: ${error.message}`, false);
+            }
+        }
+        
+        function clearAll() {
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('uploadStatus').innerHTML = '';
+            updateProgress(0);
+        }
+    </script>
+</body>
+</html> 
