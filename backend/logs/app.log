@@ -1,0 +1,44 @@
+2025-06-28 11:48:24,269 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 1
+2025-06-28 11:48:24,330 - behavior_detection - ERROR - app:detection_worker:266 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-28 15:05:01,009 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 2
+2025-06-28 15:32:24,387 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 3
+2025-06-28 15:42:56,195 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 4
+2025-06-28 16:07:50,058 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751094300_fall.mp4
+2025-06-28 16:44:35,135 - behavior_detection - INFO - app:serve_output_file:675 - 请求静态文件: result_1_1751098536.mp4
+2025-06-28 16:44:35,136 - behavior_detection - INFO - app:serve_output_file:680 - 文件路径: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751098536.mp4
+2025-06-28 16:44:35,138 - behavior_detection - INFO - app:serve_output_file:681 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend
+2025-06-28 16:44:35,139 - behavior_detection - INFO - app:serve_output_file:682 - outputs目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-06-28 16:44:35,140 - behavior_detection - INFO - app:serve_output_file:683 - 文件存在: True
+2025-06-28 16:44:35,142 - behavior_detection - INFO - app:serve_output_file:691 - 文件大小: 4621758 bytes
+2025-06-28 16:44:35,142 - behavior_detection - INFO - app:serve_output_file:747 - 普通文件请求
+2025-06-28 16:44:35,144 - behavior_detection - INFO - app:serve_output_file:770 - 返回普通文件响应
+2025-06-28 16:50:28,943 - behavior_detection - INFO - app:serve_output_file:675 - 请求静态文件: result_1_1751098536.mp4
+2025-06-28 16:50:28,944 - behavior_detection - INFO - app:serve_output_file:680 - 文件路径: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751098536.mp4
+2025-06-28 16:50:28,944 - behavior_detection - INFO - app:serve_output_file:681 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend
+2025-06-28 16:50:28,945 - behavior_detection - INFO - app:serve_output_file:682 - outputs目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-06-28 16:50:28,945 - behavior_detection - INFO - app:serve_output_file:683 - 文件存在: True
+2025-06-28 16:50:28,946 - behavior_detection - INFO - app:serve_output_file:691 - 文件大小: 4621758 bytes
+2025-06-28 16:50:28,946 - behavior_detection - INFO - app:serve_output_file:747 - 普通文件请求
+2025-06-28 16:50:28,948 - behavior_detection - INFO - app:serve_output_file:770 - 返回普通文件响应
+2025-06-28 16:50:29,348 - behavior_detection - INFO - app:serve_output_file:675 - 请求静态文件: result_1_1751098536.mp4
+2025-06-28 16:50:29,349 - behavior_detection - INFO - app:serve_output_file:680 - 文件路径: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751098536.mp4
+2025-06-28 16:50:29,350 - behavior_detection - INFO - app:serve_output_file:681 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend
+2025-06-28 16:50:29,350 - behavior_detection - INFO - app:serve_output_file:682 - outputs目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-06-28 16:50:29,351 - behavior_detection - INFO - app:serve_output_file:683 - 文件存在: True
+2025-06-28 16:50:29,352 - behavior_detection - INFO - app:serve_output_file:691 - 文件大小: 4621758 bytes
+2025-06-28 16:50:29,352 - behavior_detection - INFO - app:serve_output_file:696 - Range请求: bytes=0-
+2025-06-28 16:50:29,355 - behavior_detection - INFO - app:serve_output_file:728 - 返回Range响应: 0-4621757/4621758
+2025-06-28 16:50:29,897 - behavior_detection - INFO - app:serve_output_file:675 - 请求静态文件: result_1_1751098536.mp4
+2025-06-28 16:50:29,898 - behavior_detection - INFO - app:serve_output_file:680 - 文件路径: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751098536.mp4
+2025-06-28 16:50:29,898 - behavior_detection - INFO - app:serve_output_file:681 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend
+2025-06-28 16:50:29,899 - behavior_detection - INFO - app:serve_output_file:682 - outputs目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-06-28 16:50:29,899 - behavior_detection - INFO - app:serve_output_file:683 - 文件存在: True
+2025-06-28 16:50:29,901 - behavior_detection - INFO - app:serve_output_file:691 - 文件大小: 4621758 bytes
+2025-06-28 16:50:29,901 - behavior_detection - INFO - app:serve_output_file:696 - Range请求: bytes=4620288-
+2025-06-28 16:50:29,902 - behavior_detection - INFO - app:serve_output_file:728 - 返回Range响应: 4620288-4621757/4621758
+2025-06-28 16:51:17,376 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751095944_fall.mp4
+2025-06-28 16:51:19,503 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751096576_fall.mp4

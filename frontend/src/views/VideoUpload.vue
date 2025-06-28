@@ -194,7 +194,11 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="detections" label="检测数量" width="100" />
+        <el-table-column prop="detections" label="检测数量" width="100">
+          <template #default="scope">
+            {{ scope.row.detections || '--' }}
+          </template>
+        </el-table-column>
         
         <el-table-column prop="uploadTime" label="上传时间" width="160">
           <template #default="scope">
@@ -533,6 +537,10 @@ export default {
 
     // 工具函数
     const formatFileSize = (bytes) => {
+      // 处理空值、undefined 或无效数据
+      if (!bytes || bytes === null || bytes === undefined || isNaN(bytes)) {
+        return '--'
+      }
       if (bytes === 0) return '0 B'
       const k = 1024
       const sizes = ['B', 'KB', 'MB', 'GB']
@@ -541,11 +549,32 @@ export default {
     }
 
     const getFileExtension = (filename) => {
+      if (!filename || typeof filename !== 'string') {
+        return '--'
+      }
       return filename.split('.').pop().toUpperCase()
     }
 
     const formatDateTime = (timestamp) => {
-      return new Date(timestamp).toLocaleString()
+      // 处理空值、undefined 或无效时间戳
+      if (!timestamp || timestamp === null || timestamp === undefined) {
+        return '--'
+      }
+      
+      const date = new Date(timestamp)
+      // 检查日期是否有效
+      if (isNaN(date.getTime())) {
+        return '--'
+      }
+      
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
     }
 
     const getStatusType = (status) => {

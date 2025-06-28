@@ -111,7 +111,7 @@ export default {
     const checkSystemStatus = async () => {
       try {
         await checkHealth()
-        systemStatus.value = 'online'
+          systemStatus.value = 'online'
       } catch (error) {
         systemStatus.value = 'offline'
       }
@@ -121,7 +121,7 @@ export default {
     const getAlertCount = async () => {
       try {
         const data = await getAlerts({ unread: true })
-        alertCount.value = data.total || 0
+          alertCount.value = data.total || 0
       } catch (error) {
         console.error('获取报警数量失败:', error)
       }

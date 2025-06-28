@@ -8,7 +8,7 @@ import json
 import uuid
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
-from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask import Flask, request, jsonify, send_file, send_from_directory, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, disconnect, join_room, leave_room
 import threading
@@ -140,7 +140,8 @@ def create_app(config_name='development'):
             
             return jsonify({
                 'success': True,
-                'task_id': task.id,
+                'taskId': task.id,  # 使用驼峰命名匹配前端
+                'task_id': task.id,  # 保持向后兼容
                 'filename': safe_filename,
                 'file_path': file_path,
                 'message': '视频上传成功'
@@ -184,75 +185,92 @@ def create_app(config_name='development'):
             
             # 启动检测线程
             def detection_worker():
+                current_task = task  # 保存当前任务引用，避免作用域问题
                 try:
-                    detection_service = get_detection_service({
-                        'device': task.device,
-                        'input_size': task.input_size,
-                        'confidence_threshold': task.confidence_threshold
-                    })
-                    
-                    def progress_callback(task_id, progress):
-                        task.progress = progress
-                        db.session.commit()
+                    # 在检测线程中创建应用上下文
+                    with app.app_context():
+                        detection_service = get_detection_service({
+                            'device': current_task.device,
+                            'input_size': current_task.input_size,
+                            'confidence_threshold': current_task.confidence_threshold
+                        })
                         
-                        # 通过WebSocket发送进度更新
-                        socketio.emit('progress_update', {
-                            'task_id': task_id,
-                            'progress': progress
-                        }, namespace='/detection')
-                    
-                    # 执行检测
-                    result = detection_service.detect_video(
-                        task.source_path,
-                        output_path,
-                        progress_callback
-                    )
-                    
-                    if result['success']:
-                        # 保存检测结果到数据库
-                        for detection in result['results']:
-                            detection_result = DetectionResult(
-                                task_id=task.id,
-                                frame_number=detection['frame_number'],
-                                timestamp=detection['timestamp'],
-                                object_id=detection.get('object_id'),
-                                object_type=detection['object_type'],
-                                confidence=detection['confidence'],
-                                bbox_x1=detection['bbox']['x1'],
-                                bbox_y1=detection['bbox']['y1'],
-                                bbox_x2=detection['bbox']['x2'],
-                                bbox_y2=detection['bbox']['y2'],
-                                behavior_type=detection.get('behavior_type'),
-                                is_anomaly=detection.get('is_anomaly', False)
-                            )
-                            db.session.add(detection_result)
+                        def progress_callback(task_id, progress):
+                            # 确保在应用上下文中更新数据库
+                            with app.app_context():
+                                task_obj = DetectionTask.query.get(task_id)
+                                if task_obj:
+                                    task_obj.progress = progress
+                                    db.session.commit()
                             
-                            # 如果是异常行为，创建报警记录
-                            if detection.get('is_anomaly'):
-                                alert = AlertRecord(
-                                    task_id=task.id,
-                                    alert_type=detection['behavior_type'],
-                                    trigger_frame=detection['frame_number'],
-                                    trigger_timestamp=detection['timestamp'],
-                                    trigger_object_id=detection.get('object_id'),
-                                    trigger_behavior=detection['behavior_type'],
-                                    trigger_confidence=detection['confidence'],
-                                    description=f"检测到异常行为: {detection['behavior_type']}"
-                                )
-                                db.session.add(alert)
+                            # 通过WebSocket发送进度更新
+                            socketio.emit('progress_update', {
+                                'task_id': task_id,
+                                'progress': progress
+                            }, namespace='/detection')
                         
-                        # 更新任务状态
-                        task.status = 'completed'
-                        task.completed_at = datetime.utcnow()
-                        task.progress = 100.0
-                        task.detected_objects = len(result['results'])
-                        task.detected_behaviors = len([r for r in result['results'] if r.get('behavior_type')])
-                        
-                    else:
-                        task.status = 'failed'
-                        task.error_message = result['error']
+                        # 执行检测
+                        result = detection_service.detect_video(
+                            current_task.source_path,
+                            output_path,
+                            progress_callback
+                        )
                     
-                    db.session.commit()
+                        if result['success']:
+                            # 保存检测结果到数据库 (在应用上下文中)
+                            with app.app_context():
+                                task_obj = DetectionTask.query.get(current_task.id)
+                                if task_obj:
+                                    for detection in result['results']:
+                                        detection_result = DetectionResult(
+                                            task_id=task_obj.id,
+                                            frame_number=detection['frame_number'],
+                                            timestamp=detection['timestamp'],
+                                            object_id=detection.get('object_id'),
+                                            object_type=detection['object_type'],
+                                            confidence=detection['confidence'],
+                                            bbox_x1=detection['bbox']['x1'],
+                                            bbox_y1=detection['bbox']['y1'],
+                                            bbox_x2=detection['bbox']['x2'],
+                                            bbox_y2=detection['bbox']['y2'],
+                                            behavior_type=detection.get('behavior_type'),
+                                            is_anomaly=detection.get('is_anomaly', False)
+                                        )
+                                        db.session.add(detection_result)
+                                        
+                                        # 如果是异常行为，创建报警记录
+                                        if detection.get('is_anomaly'):
+                                            alert = AlertRecord(
+                                                task_id=task_obj.id,
+                                                alert_type=detection['behavior_type'],
+                                                trigger_frame=detection['frame_number'],
+                                                trigger_timestamp=detection['timestamp'],
+                                                trigger_object_id=detection.get('object_id'),
+                                                trigger_behavior=detection['behavior_type'],
+                                                trigger_confidence=detection['confidence'],
+                                                description=f"检测到异常行为: {detection['behavior_type']}"
+                                            )
+                                            db.session.add(alert)
+                                    
+                                    # 更新任务状态
+                                    task_obj.status = 'completed'
+                                    task_obj.completed_at = datetime.utcnow()
+                                    task_obj.progress = 100.0
+                                    task_obj.detected_objects = len(result['results'])
+                                    task_obj.detected_behaviors = len([r for r in result['results'] if r.get('behavior_type')])
+                                    db.session.commit()
+                                    
+                                    print(f"✓ 任务 {task_obj.id} 检测完成，结果已保存")
+                            
+                        else:
+                            # 更新失败状态 (在应用上下文中)
+                            with app.app_context():
+                                task_obj = DetectionTask.query.get(current_task.id)
+                                if task_obj:
+                                    task_obj.status = 'failed'
+                                    task_obj.error_message = result['error']
+                                    db.session.commit()
+                                    print(f"❌ 任务 {task_obj.id} 检测失败: {result['error']}")
                     
                     # 通过WebSocket发送完成通知
                     socketio.emit('task_completed', {
@@ -263,14 +281,20 @@ def create_app(config_name='development'):
                     
                 except Exception as e:
                     logger.error(f"检测任务执行失败: {str(e)}")
-                    task.status = 'failed'
-                    task.error_message = str(e)
-                    db.session.commit()
+                    # 更新失败状态 (在应用上下文中)
+                    with app.app_context():
+                        task_obj = DetectionTask.query.get(current_task.id)
+                        if task_obj:
+                            task_obj.status = 'failed'
+                            task_obj.error_message = str(e)
+                            db.session.commit()
                     
                     socketio.emit('task_failed', {
-                        'task_id': task.id,
+                        'task_id': current_task.id,
                         'error': str(e)
                     }, namespace='/detection')
+                    
+                    print(f"❌ 检测任务异常: {str(e)}")
             
             # 启动检测线程
             thread = threading.Thread(target=detection_worker, daemon=True)
@@ -278,7 +302,8 @@ def create_app(config_name='development'):
             
             return jsonify({
                 'success': True,
-                'task_id': task.id,
+                'taskId': task.id,  # 使用驼峰命名匹配前端
+                'task_id': task.id,  # 保持向后兼容
                 'message': '检测任务已启动'
             })
             
@@ -433,28 +458,114 @@ def create_app(config_name='development'):
     
     @app.route('/api/tasks/<int:task_id>/results')
     def get_task_results(task_id):
-        """获取任务检测结果"""
+        """获取任务完整结果（包含视频和统计信息）"""
         try:
-            page = request.args.get('page', 1, type=int)
-            per_page = request.args.get('per_page', 50, type=int)
+            # 获取任务信息
+            task = DetectionTask.query.get(task_id)
+            if not task:
+                return jsonify({'error': '任务不存在'}), 404
             
-            pagination = DetectionResult.query.filter_by(task_id=task_id).order_by(
-                DetectionResult.frame_number.asc()
-            ).paginate(page=page, per_page=per_page, error_out=False)
+            # 获取检测结果
+            results = DetectionResult.query.filter_by(task_id=task_id).all()
             
-            results = [result.to_dict() for result in pagination.items]
+            # 计算统计信息
+            total_detections = len(results)
+            detected_frames = len(set(result.frame_number for result in results))
+            alert_count = sum(1 for result in results if result.is_anomaly)
             
+            # 行为分析
+            behavior_stats = {}
+            for result in results:
+                behavior = result.behavior_type or 'unknown'
+                if behavior not in behavior_stats:
+                    behavior_stats[behavior] = {
+                        'count': 0,
+                        'confidence_sum': 0,
+                        'frames': []
+                    }
+                behavior_stats[behavior]['count'] += 1
+                behavior_stats[behavior]['confidence_sum'] += result.confidence
+                behavior_stats[behavior]['frames'].append(result.frame_number)
+            
+            behaviors = []
+            for behavior, stats in behavior_stats.items():
+                avg_confidence = stats['confidence_sum'] / stats['count'] if stats['count'] > 0 else 0
+                duration = (max(stats['frames']) - min(stats['frames'])) / 25.0 if stats['frames'] else 0
+                behaviors.append({
+                    'behavior': behavior,
+                    'count': stats['count'],
+                    'confidence': f"{avg_confidence:.2f}",
+                    'duration': f"{duration:.1f}s"
+                })
+            
+            # 构建视频URL
+            video_url = None
+            if task.output_path and os.path.exists(task.output_path):
+                filename = os.path.basename(task.output_path)
+                video_url = f"http://localhost:5000/api/outputs/{filename}"
+            
+            # 返回完整结果
             return jsonify({
                 'success': True,
-                'results': results,
-                'total': pagination.total,
-                'pages': pagination.pages,
-                'current_page': page
+                'filename': task.task_name,
+                'videoUrl': video_url,
+                'downloadUrl': f"http://localhost:5000/api/download/result/{task_id}",
+                'totalFrames': task.total_frames or 0,
+                'detectedFrames': detected_frames,
+                'totalDetections': total_detections,
+                'alertCount': alert_count,
+                'behaviors': behaviors,
+                'task': task.to_dict(),
+                'results': [result.to_dict() for result in results[:50]]  # 限制返回数量
             })
             
         except Exception as e:
-            logger.error(f"获取检测结果失败: {str(e)}")
+            logger.error(f"获取任务结果失败: {str(e)}")
             return jsonify({'error': f'获取失败: {str(e)}'}), 500
+    
+    @app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
+    def delete_task(task_id):
+        """删除任务及相关数据"""
+        try:
+            task = DetectionTask.query.get(task_id)
+            if not task:
+                return jsonify({'error': '任务不存在'}), 404
+            
+            # 删除相关的检测结果
+            DetectionResult.query.filter_by(task_id=task_id).delete()
+            
+            # 删除相关的报警记录
+            AlertRecord.query.filter_by(task_id=task_id).delete()
+            
+            # 删除输出文件
+            if task.output_path and os.path.exists(task.output_path):
+                try:
+                    os.remove(task.output_path)
+                    logger.info(f"删除输出文件: {task.output_path}")
+                except Exception as e:
+                    logger.warning(f"删除输出文件失败: {e}")
+            
+            # 删除上传文件
+            if task.source_path and os.path.exists(task.source_path):
+                try:
+                    os.remove(task.source_path)
+                    logger.info(f"删除源文件: {task.source_path}")
+                except Exception as e:
+                    logger.warning(f"删除源文件失败: {e}")
+            
+            # 删除任务记录
+            db.session.delete(task)
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': '任务删除成功'
+            })
+            
+        except Exception as e:
+            logger.error(f"删除任务失败: {str(e)}")
+            db.session.rollback()
+            return jsonify({'error': f'删除失败: {str(e)}'}), 500
     
     @app.route('/api/alerts')
     def get_alerts():
@@ -553,6 +664,116 @@ def create_app(config_name='development'):
         except Exception as e:
             logger.error(f"下载文件失败: {str(e)}")
             return jsonify({'error': f'下载失败: {str(e)}'}), 500
+    
+    # ========================= 静态文件服务 =========================
+    
+    @app.route('/api/outputs/<filename>')
+    def serve_output_file(filename):
+        """提供输出视频文件的静态访问，支持Range请求"""
+        try:
+            # 添加调试日志
+            logger.info(f"请求静态文件: {filename}")
+            
+            outputs_path = os.path.join(os.getcwd(), 'outputs')
+            file_path = os.path.join(outputs_path, filename)
+            
+            logger.info(f"文件路径: {file_path}")
+            logger.info(f"当前工作目录: {os.getcwd()}")
+            logger.info(f"outputs目录: {outputs_path}")
+            logger.info(f"文件存在: {os.path.exists(file_path)}")
+            
+            if not os.path.exists(file_path):
+                logger.error(f"文件不存在: {file_path}")
+                return jsonify({'error': '文件不存在', 'path': file_path}), 404
+            
+            # 获取文件信息
+            file_size = os.path.getsize(file_path)
+            logger.info(f"文件大小: {file_size} bytes")
+            
+            # 处理Range请求（视频播放必需）
+            range_header = request.headers.get('Range')
+            if range_header:
+                logger.info(f"Range请求: {range_header}")
+                # 解析Range头
+                byte_start = 0
+                byte_end = file_size - 1
+                
+                if range_header.startswith('bytes='):
+                    range_match = range_header[6:].split('-')
+                    if range_match[0]:
+                        byte_start = int(range_match[0])
+                    if range_match[1]:
+                        byte_end = int(range_match[1])
+                
+                # 确保范围有效
+                byte_start = max(0, byte_start)
+                byte_end = min(file_size - 1, byte_end)
+                content_length = byte_end - byte_start + 1
+                
+                # 读取指定范围的数据
+                with open(file_path, 'rb') as f:
+                    f.seek(byte_start)
+                    data = f.read(content_length)
+                
+                # 设置MIME类型
+                if filename.endswith('.avi'):
+                    mimetype = 'video/x-msvideo'
+                elif filename.endswith('.mp4'):
+                    mimetype = 'video/mp4'
+                elif filename.endswith('.webm'):
+                    mimetype = 'video/webm'
+                else:
+                    mimetype = 'video/mp4'
+                
+                logger.info(f"返回Range响应: {byte_start}-{byte_end}/{file_size}")
+                
+                # 创建Range响应
+                response = Response(
+                    data,
+                    206,  # Partial Content
+                    headers={
+                        'Content-Type': mimetype,
+                        'Accept-Ranges': 'bytes',
+                        'Content-Length': str(content_length),
+                        'Content-Range': f'bytes {byte_start}-{byte_end}/{file_size}',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET',
+                        'Access-Control-Allow-Headers': 'Content-Type, Range',
+                        'Cache-Control': 'no-cache'
+                    }
+                )
+                return response
+            else:
+                logger.info("普通文件请求")
+                # 普通请求
+                if filename.endswith('.avi'):
+                    mimetype = 'video/x-msvideo'
+                elif filename.endswith('.mp4'):
+                    mimetype = 'video/mp4'
+                elif filename.endswith('.webm'):
+                    mimetype = 'video/webm'
+                else:
+                    mimetype = 'video/mp4'
+                
+                response = send_from_directory(
+                    outputs_path, 
+                    filename, 
+                    mimetype=mimetype,
+                    as_attachment=False
+                )
+                response.headers['Accept-Ranges'] = 'bytes'
+                response.headers['Access-Control-Allow-Origin'] = '*'
+                response.headers['Access-Control-Allow-Methods'] = 'GET'
+                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Range'
+                response.headers['Cache-Control'] = 'no-cache'
+                
+                logger.info("返回普通文件响应")
+                return response
+            
+        except Exception as e:
+            logger.error(f"提供文件失败: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            return jsonify({'error': '文件服务异常', 'details': str(e)}), 500
     
     # ========================= WebSocket 事件 =========================
     

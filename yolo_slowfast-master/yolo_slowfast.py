@@ -131,12 +131,12 @@ def deepsort_update(Tracker, pred, xywh, np_img):
     print(f"\n跟踪结果 - 目标数: {len(outputs)}")
     for i, output in enumerate(outputs):
         # 检查输出长度并相应处理
-        if len(output) >= 7:  # 至少有位置、ID、类别和置信度
-            track_info = f"目标 {i + 1}: ID:{int(output[4])} | 类别:{int(output[5])} | 置信度:{output[6]:.2f} | "
+        if len(output) >= 7:  # 至少有位置、类别、ID和置信度
+            track_info = f"目标 {i + 1}: ID:{int(output[5])} | 类别:{int(output[4])} | 置信度:{output[6]:.2f} | "
             track_info += f"位置:[{output[0]:.0f},{output[1]:.0f},{output[2]:.0f},{output[3]:.0f}]"
             # 检查是否有速度信息
-            if len(output) >= 9:
-                track_info += f" | 速度(vx,vy):[{output[7]:.2f},{output[8]:.2f}]"
+            if len(output) >= 8:
+                track_info += f" | 速度(vx,vy):[{output[6]:.2f},{output[7]:.2f}]"
             print(track_info)
     return outputs
 
@@ -263,10 +263,12 @@ def main(config):
                         # SlowFast模型推理被提交到独立的流
                         slowfaster_preds = video_model(inputs, inp_boxes_gpu)
                     
-                    # .cpu() 会隐式地同步该流，以确保在传输回CPU之前计算已完成
-                    slowfaster_preds_cpu = slowfaster_preds.cpu()
+                    # 修复数据类型转换问题 - 确保正确的数据类型转换
+                    slowfaster_preds_cpu = slowfaster_preds.cpu().float()  # 确保为float类型
+                    pred_labels = torch.argmax(slowfaster_preds_cpu, dim=1).numpy().astype(np.int32)
+                    track_ids = pred_result.pred[0][:, 5].astype(np.int32)
 
-                    result_queue.put((idx, pred_result.pred[0][:, 5].tolist(), np.argmax(slowfaster_preds_cpu, axis=1).tolist()))
+                    result_queue.put((idx, track_ids.tolist(), pred_labels.tolist()))
             clip_queue.task_done()
 
     threading.Thread(target=slowfast_worker, daemon=True).start()

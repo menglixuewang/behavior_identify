@@ -28,7 +28,20 @@ class Config:
     CONFIDENCE_THRESHOLD = 0.5
     IOU_THRESHOLD = 0.4
     INPUT_SIZE = 640
-    DEVICE = 'cpu'  # 'cpu' 或 'cuda'
+    
+    # 设备配置 - 自动检测GPU
+    @staticmethod
+    def get_default_device():
+        """自动检测最佳设备"""
+        try:
+            import torch
+            if torch.cuda.is_available():
+                return 'cuda'
+        except ImportError:
+            pass
+        return 'cpu'
+    
+    DEVICE = get_default_device()  # 自动选择最佳设备
     
     # 报警配置
     ALERT_BEHAVIORS = [

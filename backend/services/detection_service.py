@@ -33,38 +33,60 @@ except ImportError as e:
 class BehaviorDetectionService:
     """行为检测服务类"""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Dict[str, Any]):
         """
         初始化检测服务
         
         Args:
-            config: 配置参数字典
+            config: 配置字典，包含设备、输入尺寸、置信度阈值等参数
         """
-        self.config = config or {}
-        self.device = self.config.get('device', 'cpu')
-        self.imsize = self.config.get('input_size', 640)
-        self.confidence_threshold = self.config.get('confidence_threshold', 0.5)
+        # 设备配置 - 修复GPU检测
+        if config.get('device', 'cpu').lower() == 'cuda':
+            if torch.cuda.is_available():
+                self.device = 'cuda'
+                print(f"✓ 使用GPU: {torch.cuda.get_device_name()}")
+            else:
+                self.device = 'cpu'
+                print("⚠ CUDA不可用，回退到CPU")
+        else:
+            self.device = 'cpu'
+            print("✓ 使用CPU")
         
-        # 模型路径配置
-        self.yolo_model_path = self.config.get('yolo_model_path', 'yolov8n.pt')
-        self.slowfast_weights_path = self.config.get('slowfast_weights_path', 'SLOWFAST_8x8_R50_DETECTION.pyth')
-        self.deepsort_weights_path = self.config.get('deepsort_weights_path', 'deep_sort/deep_sort/deep/checkpoint/ckpt.t7')
-        self.ava_labels_path = self.config.get('ava_labels_path', 'selfutils/temp.pbtxt')
+        # 加载COCO类别名称
+        coco_names_path = os.path.join(yolo_slowfast_path, 'selfutils', 'coco_names.txt')
+        self.coco_names = []
+        if os.path.exists(coco_names_path):
+            with open(coco_names_path, 'r') as f:
+                self.coco_names = [line.strip() for line in f.readlines()]
+            print(f"✓ 加载COCO类别名称: {len(self.coco_names)}个类别")
+        else:
+            print("⚠ COCO类别名称文件不存在")
+            # 使用默认类别
+            self.coco_names = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane']
         
-        # 算法模型
+        self.input_size = config.get('input_size', 640)
+        self.confidence_threshold = config.get('confidence_threshold', 0.5)
+        
+        # 初始化标志
+        self.models_initialized = False
+        self.task_lock = threading.Lock()
+        self.stopped_tasks = set()
+        self.current_tasks = {}  # 当前运行的任务，保持兼容性
+        
+        # 模型相关路径
+        self.yolo_model_path = 'yolov8n.pt'
+        self.slowfast_weights_path = 'SLOWFAST_8x8_R50_DETECTION.pyth'
+        self.deepsort_weights_path = 'ckpt.t7'
+        self.ava_labels_path = 'temp.pbtxt'
+        
+        # 模型对象
         self.yolo_model = None
         self.video_model = None
         self.deepsort_tracker = None
         self.ava_labelnames = None
-        self.color_map = None
-        
-        # 运行状态
-        self.is_initialized = False
-        self.current_tasks = {}  # 当前运行的任务
-        self.task_lock = threading.Lock()
         
         # 报警配置
-        self.alert_behaviors = self.config.get('alert_behaviors', ['fall down', 'fight', 'enter', 'exit'])
+        self.alert_behaviors = config.get('alert_behaviors', ['fall down', 'fight', 'enter', 'exit'])
         
     def initialize_models(self) -> bool:
         """
@@ -100,8 +122,15 @@ class BehaviorDetectionService:
                 self.deepsort_tracker = DeepSort(self.deepsort_weights_path)
                 print(f"✓ DeepSort跟踪器已加载: {self.deepsort_weights_path}")
             else:
-                print(f"⚠ DeepSort权重文件不存在: {self.deepsort_weights_path}")
-                return False
+                # 如果绝对路径不存在，尝试相对路径
+                relative_path = "deep_sort/deep_sort/deep/checkpoint/ckpt.t7"
+                if os.path.exists(relative_path):
+                    self.deepsort_tracker = DeepSort(relative_path)
+                    print(f"✓ DeepSort跟踪器已加载: {relative_path}")
+                else:
+                    print(f"⚠ DeepSort权重文件不存在: {self.deepsort_weights_path}")
+                    print(f"⚠ 相对路径也不存在: {relative_path}")
+                    return False
             
             # 加载AVA标签
             if os.path.exists(self.ava_labels_path):
@@ -117,7 +146,7 @@ class BehaviorDetectionService:
             # 恢复原始目录
             os.chdir(original_cwd)
             
-            self.is_initialized = True
+            self.models_initialized = True
             print("✓ 所有模型初始化完成")
             return True
             
@@ -143,13 +172,22 @@ class BehaviorDetectionService:
         Returns:
             Dict: 检测结果
         """
-        if not self.is_initialized:
+        if not self.models_initialized:
             if not self.initialize_models():
                 return {'success': False, 'error': '模型初始化失败'}
         
         try:
             # 创建任务ID
             task_id = f"video_{int(time.time())}"
+            
+            # 转换为绝对路径（在切换目录前）
+            video_path = os.path.abspath(video_path)
+            if output_path:
+                output_path = os.path.abspath(output_path)
+            
+            # 检查视频文件是否存在
+            if not os.path.exists(video_path):
+                return {'success': False, 'error': f'视频文件不存在: {video_path}'}
             
             # 切换到算法目录
             original_cwd = os.getcwd()
@@ -159,7 +197,7 @@ class BehaviorDetectionService:
             config = type('Config', (), {})()
             config.input = video_path
             config.output = output_path or ''
-            config.imsize = self.imsize
+            config.imsize = self.input_size
             config.device = self.device
             config.show = False
             config.conf = self.confidence_threshold
@@ -221,7 +259,7 @@ class BehaviorDetectionService:
         Returns:
             str: 任务ID
         """
-        if not self.is_initialized:
+        if not self.models_initialized:
             if not self.initialize_models():
                 raise Exception('模型初始化失败')
         
@@ -237,7 +275,7 @@ class BehaviorDetectionService:
                 config = type('Config', (), {})()
                 config.input = source
                 config.output = ''
-                config.imsize = self.imsize
+                config.imsize = self.input_size
                 config.device = self.device
                 config.show = False
                 config.conf = self.confidence_threshold
@@ -322,18 +360,58 @@ class BehaviorDetectionService:
             total_frames = int(cap.cap.get(cv2.CAP_PROP_FRAME_COUNT))
             processed_frames = 0
             
-            # 设置输出视频
+            # 设置输出视频 - 修复编解码器问题
             outputvideo = None
             if config.output:
                 video = cv2.VideoCapture(config.input)
                 width, height = int(video.get(3)), int(video.get(4))
+                fps = int(video.get(cv2.CAP_PROP_FPS)) or 25
                 video.release()
-                outputvideo = cv2.VideoWriter(
-                    config.output, 
-                    cv2.VideoWriter_fourcc(*"mp4v"), 
-                    25, 
-                    (width, height)
-                )
+                
+                # 确保输出目录存在
+                os.makedirs(os.path.dirname(config.output), exist_ok=True)
+                
+                # 使用浏览器兼容的MP4格式，优先尝试H.264编解码器
+                output_mp4 = config.output.replace('.avi', '.mp4')
+                
+                # 尝试不同的编解码器，优先使用浏览器兼容性最好的
+                codecs_to_try = [
+                    ('avc1', 'H.264 (最佳浏览器兼容性)'),
+                    ('h264', 'H.264'),
+                    ('mp4v', 'MPEG-4'),
+                ]
+                
+                outputvideo = None
+                used_codec = None
+                
+                for codec, desc in codecs_to_try:
+                    try:
+                        fourcc = cv2.VideoWriter_fourcc(*codec)
+                        test_writer = cv2.VideoWriter(output_mp4, fourcc, fps, (width, height))
+                        
+                        if test_writer.isOpened():
+                            outputvideo = test_writer
+                            used_codec = f"{codec} ({desc})"
+                            config.output = output_mp4
+                            print(f"✓ 使用 {used_codec} 编解码器输出: {output_mp4}")
+                            break
+                        else:
+                            test_writer.release()
+                    except Exception as e:
+                        print(f"⚠ {codec} 编解码器失败: {e}")
+                        continue
+                
+                # 如果所有MP4编解码器都失败，回退到AVI
+                if not outputvideo or not outputvideo.isOpened():
+                    print("⚠ 所有MP4编解码器失败，回退到AVI格式")
+                    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                    outputvideo = cv2.VideoWriter(config.output, fourcc, fps, (width, height))
+                    if outputvideo.isOpened():
+                        used_codec = "XVID (AVI)"
+                        print(f"✓ 使用 {used_codec} 编解码器")
+                    else:
+                        print("❌ 所有视频编解码器都失败")
+                        outputvideo = None
             
             while not cap.end:
                 ret, img = cap.read()
@@ -364,46 +442,110 @@ class BehaviorDetectionService:
                     temp = deepsort_update(self.deepsort_tracker, pred, xywh, img)
                     temp = temp if len(temp) else np.ones((0, 8)).astype(np.float32)
                     
-                    # 存储检测结果
-                    for detection in temp:
-                        if len(detection) >= 7:
-                            result = {
-                                'frame_number': processed_frames,
-                                'timestamp': processed_frames / 25.0,
-                                'object_id': int(detection[4]),
-                                'object_type': 'person',
-                                'confidence': float(detection[6]),
-                                'bbox': {
-                                    'x1': float(detection[0]),
-                                    'y1': float(detection[1]),
-                                    'x2': float(detection[2]),
-                                    'y2': float(detection[3])
-                                },
-                                'behavior_type': id_to_ava_labels.get(int(detection[4]), 'unknown'),
-                                'is_anomaly': self._is_anomaly_behavior(id_to_ava_labels.get(int(detection[4]), ''))
-                            }
-                            results.append(result)
+                                    # 行为识别（SlowFast） - 先进行行为识别再绘制视频帧
+                if len(cap.stack) == 25:
+                    clip = cap.get_video_clip()
+                    if temp.shape[0] > 0:
+                        try:
+                            # 获取边界框位置（前4列）
+                            boxes = temp[:, 0:4].astype(np.float32)
+                            track_ids = temp[:, 5].astype(np.int32)  # 跟踪ID在第5列
+                            
+                            inputs, inp_boxes, _ = ava_inference_transform(clip, boxes, crop_size=config.imsize)
+                            
+                            # 修复数据类型问题
+                            inp_boxes = inp_boxes.float()  # 确保为float类型
+                            inp_boxes = torch.cat([torch.zeros(inp_boxes.shape[0], 1), inp_boxes], dim=1)
+                            
+                            if isinstance(inputs, list):
+                                inputs = [inp.unsqueeze(0).to(self.device) for inp in inputs]
+                            else:
+                                inputs = inputs.unsqueeze(0).to(self.device)
+                            
+                            with torch.no_grad():
+                                slowfaster_preds = self.video_model(inputs, inp_boxes.to(self.device))
+                            
+                            # 获取预测结果
+                            pred_labels = torch.argmax(slowfaster_preds.cpu(), axis=1).numpy()
+                            
+                            # 更新行为标签映射
+                            for tid, avalabel in zip(track_ids, pred_labels):
+                                if avalabel < len(self.ava_labelnames):
+                                    id_to_ava_labels[int(tid)] = self.ava_labelnames[avalabel + 1]
+                                    
+                            print(f"✓ SlowFast检测到{len(pred_labels)}个行为，更新标签映射")
+                            
+                        except Exception as e:
+                            print(f"SlowFast处理错误: {e}")
+                            import traceback
+                            traceback.print_exc()
+
+                # 创建可视化图像 - 在行为识别完成后绘制
+                vis_img = img.copy()
+                cv2.putText(vis_img, f'Frame: {processed_frames}', 
+                           (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                
+                # 存储检测结果并绘制（包含最新的行为信息）
+                for detection in temp:
+                    if len(detection) >= 7:
+                        x1, y1, x2, y2 = int(detection[0]), int(detection[1]), int(detection[2]), int(detection[3])
+                        class_id = int(detection[4])  # 这是YOLO的类别ID
+                        track_id = int(detection[5])  # 这是DeepSort的跟踪ID
+                        confidence = float(detection[6])
+                        
+                        # 映射YOLO类别ID到类别名称
+                        object_type = 'unknown'
+                        if 0 <= class_id < len(self.coco_names):
+                            object_type = self.coco_names[class_id]
+                        
+                        # 获取最新的行为标签
+                        behavior_type = id_to_ava_labels.get(track_id, 'walking')
+                        
+                        # 绘制边界框
+                        color = (0, 0, 255) if self._is_anomaly_behavior(behavior_type) else (0, 255, 0)
+                        cv2.rectangle(vis_img, (x1, y1), (x2, y2), color, 2)
+                        
+                        # 绘制对象标签（包含行为信息）
+                        label1 = f"ID:{track_id} {object_type}"
+                        label2 = f"Action: {behavior_type}"  # 使用英文避免中文乱码
+                        
+                        cv2.putText(vis_img, label1, (x1, y1-25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                        cv2.putText(vis_img, label2, (x1, y1-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                        
+                        result = {
+                            'frame_number': processed_frames,
+                            'timestamp': processed_frames / 25.0,
+                            'object_id': track_id,
+                            'object_type': object_type,
+                            'confidence': confidence,
+                            'bbox': {
+                                'x1': float(detection[0]),
+                                'y1': float(detection[1]),
+                                'x2': float(detection[2]),
+                                'y2': float(detection[3])
+                            },
+                            'behavior_type': behavior_type,
+                            'is_anomaly': self._is_anomaly_behavior(behavior_type)
+                        }
+                        results.append(result)
+                
+                # 写入视频帧（修复帧格式问题）
+                if outputvideo and outputvideo.isOpened():
+                    # 确保帧尺寸正确
+                    if vis_img.shape[:2] != (height, width):
+                        vis_img = cv2.resize(vis_img, (width, height))
                     
-                    # 行为识别（SlowFast）
-                    if len(cap.stack) == 25:
-                        clip = cap.get_video_clip()
-                        if temp.shape[0] > 0:
-                            try:
-                                inputs, inp_boxes, _ = ava_inference_transform(clip, temp[:, 0:4], crop_size=config.imsize)
-                                inp_boxes = torch.cat([torch.zeros(inp_boxes.shape[0], 1), inp_boxes], dim=1)
-                                
-                                if isinstance(inputs, list):
-                                    inputs = [inp.unsqueeze(0).to(config.device) for inp in inputs]
-                                else:
-                                    inputs = inputs.unsqueeze(0).to(config.device)
-                                
-                                with torch.no_grad():
-                                    slowfaster_preds = self.video_model(inputs, inp_boxes.to(config.device))
-                                
-                                for tid, avalabel in zip(temp[:, 5].tolist(), np.argmax(slowfaster_preds.cpu(), axis=1).tolist()):
-                                    id_to_ava_labels[tid] = self.ava_labelnames[avalabel + 1]
-                            except Exception as e:
-                                print(f"SlowFast处理错误: {e}")
+                    # 确保帧格式正确（BGR）
+                    if len(vis_img.shape) == 3 and vis_img.shape[2] == 3:
+                        success = outputvideo.write(vis_img)
+                        if not success:
+                            print(f"⚠ 写入视频帧失败: 帧 {processed_frames}, 尺寸: {vis_img.shape}")
+                    else:
+                        print(f"⚠ 帧格式错误: {vis_img.shape}")
+                        # 转换为BGR格式
+                        if len(vis_img.shape) == 2:
+                            vis_img = cv2.cvtColor(vis_img, cv2.COLOR_GRAY2BGR)
+                        success = outputvideo.write(vis_img)
                 
                 # 更新进度
                 if progress_callback and total_frames > 0:
@@ -419,6 +561,13 @@ class BehaviorDetectionService:
             cap.release()
             if outputvideo:
                 outputvideo.release()
+            
+                # 检查输出文件
+                if os.path.exists(config.output):
+                    file_size = os.path.getsize(config.output)
+                    print(f"✓ 视频保存成功: {config.output} ({file_size} bytes)")
+                else:
+                    print(f"❌ 输出文件未生成: {config.output}")
             
         except Exception as e:
             print(f"检测过程错误: {e}")
@@ -588,7 +737,7 @@ class BehaviorDetectionService:
         if 'device' in new_config:
             self.device = new_config['device']
         if 'input_size' in new_config:
-            self.imsize = new_config['input_size']
+            self.input_size = new_config['input_size']
         if 'confidence_threshold' in new_config:
             self.confidence_threshold = new_config['confidence_threshold']
         if 'alert_behaviors' in new_config:

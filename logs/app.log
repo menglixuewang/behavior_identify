@@ -1,0 +1,89 @@
+2025-06-28 10:56:02,016 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 1
+2025-06-28 11:18:45,628 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 2
+2025-06-28 11:18:54,701 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 3
+2025-06-28 11:33:56,923 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 4
+2025-06-28 11:34:12,614 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 5
+2025-06-28 11:39:20,141 - behavior_detection - ERROR - app:detection_worker:265 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-28 11:39:42,924 - behavior_detection - ERROR - app:detection_worker:265 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-28 11:43:06,401 - behavior_detection - ERROR - app:detection_worker:265 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-28 11:50:46,194 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 6
+2025-06-28 11:50:46,225 - behavior_detection - ERROR - app:detection_worker:266 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-28 11:51:52,157 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 7
+2025-06-28 11:51:52,194 - behavior_detection - ERROR - app:detection_worker:266 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-28 12:03:43,788 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 8
+2025-06-28 12:03:43,811 - behavior_detection - ERROR - app:detection_worker:266 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-28 12:04:18,733 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 9
+2025-06-28 12:04:18,762 - behavior_detection - ERROR - app:detection_worker:266 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-28 14:38:04,419 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 10
+2025-06-28 14:38:04,457 - behavior_detection - ERROR - app:detection_worker:279 - 检测任务执行失败: local variable 'task' referenced before assignment
+2025-06-28 15:11:01,706 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 11
+2025-06-28 15:19:26,280 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 12
+2025-06-28 15:19:57,965 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 13
+2025-06-28 15:22:52,230 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 14
+2025-06-28 15:23:09,944 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 15
+2025-06-28 15:25:52,278 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 16
+2025-06-28 15:25:53,684 - behavior_detection - ERROR - app:detection_worker:283 - 检测任务执行失败: 'BehaviorDetectionService' object has no attribute 'current_tasks'
+2025-06-28 15:54:57,836 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 17
+2025-06-28 16:14:27,201 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751095166_fall.mp4
+2025-06-28 16:14:30,972 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751095197_fall.mp4
+2025-06-28 16:14:42,695 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751095372_fall.mp4
+2025-06-28 16:14:44,740 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751095389_fall.mp4
+2025-06-28 16:14:46,750 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751095552_fall.mp4
+2025-06-28 16:15:01,252 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751097297_fall.mp4
+2025-06-28 16:15:02,897 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751094661_fall.mp4
+2025-06-28 16:15:36,920 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 1
+2025-06-28 17:11:25,495 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall.mp4, 任务ID: 2
+2025-06-28 17:13:33,434 - behavior_detection - INFO - app:serve_output_file:675 - 请求静态文件: result_2_1751101885.mp4
+2025-06-28 17:13:33,436 - behavior_detection - INFO - app:serve_output_file:680 - 文件路径: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs\result_2_1751101885.mp4
+2025-06-28 17:13:33,442 - behavior_detection - INFO - app:serve_output_file:681 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-06-28 17:13:33,444 - behavior_detection - INFO - app:serve_output_file:682 - outputs目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs
+2025-06-28 17:13:33,449 - behavior_detection - INFO - app:serve_output_file:683 - 文件存在: False
+2025-06-28 17:13:33,451 - behavior_detection - ERROR - app:serve_output_file:686 - 文件不存在: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs\result_2_1751101885.mp4
+2025-06-28 17:13:33,933 - behavior_detection - INFO - app:serve_output_file:675 - 请求静态文件: result_2_1751101885.mp4
+2025-06-28 17:13:33,934 - behavior_detection - INFO - app:serve_output_file:680 - 文件路径: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs\result_2_1751101885.mp4
+2025-06-28 17:13:33,935 - behavior_detection - INFO - app:serve_output_file:681 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-06-28 17:13:33,936 - behavior_detection - INFO - app:serve_output_file:682 - outputs目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs
+2025-06-28 17:13:33,946 - behavior_detection - INFO - app:serve_output_file:683 - 文件存在: False
+2025-06-28 17:13:33,949 - behavior_detection - ERROR - app:serve_output_file:686 - 文件不存在: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs\result_2_1751101885.mp4
+2025-06-28 17:13:41,515 - behavior_detection - INFO - app:serve_output_file:675 - 请求静态文件: result_2_1751101885.mp4
+2025-06-28 17:13:41,516 - behavior_detection - INFO - app:serve_output_file:680 - 文件路径: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs\result_2_1751101885.mp4
+2025-06-28 17:13:41,519 - behavior_detection - INFO - app:serve_output_file:681 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-06-28 17:13:41,521 - behavior_detection - INFO - app:serve_output_file:682 - outputs目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs
+2025-06-28 17:13:41,527 - behavior_detection - INFO - app:serve_output_file:683 - 文件存在: False
+2025-06-28 17:13:41,529 - behavior_detection - ERROR - app:serve_output_file:686 - 文件不存在: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs\result_2_1751101885.mp4
+2025-06-28 17:13:41,816 - behavior_detection - INFO - app:serve_output_file:675 - 请求静态文件: result_2_1751101885.mp4
+2025-06-28 17:13:41,820 - behavior_detection - INFO - app:serve_output_file:680 - 文件路径: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs\result_2_1751101885.mp4
+2025-06-28 17:13:41,824 - behavior_detection - INFO - app:serve_output_file:681 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-06-28 17:13:41,829 - behavior_detection - INFO - app:serve_output_file:682 - outputs目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs
+2025-06-28 17:13:41,832 - behavior_detection - INFO - app:serve_output_file:683 - 文件存在: False
+2025-06-28 17:13:41,836 - behavior_detection - ERROR - app:serve_output_file:686 - 文件不存在: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\outputs\result_2_1751101885.mp4
+2025-06-28 17:14:11,281 - behavior_detection - INFO - app:delete_task:544 - 删除输出文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_2_1751101885.mp4
+2025-06-28 17:14:11,283 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751101885_fall.mp4
