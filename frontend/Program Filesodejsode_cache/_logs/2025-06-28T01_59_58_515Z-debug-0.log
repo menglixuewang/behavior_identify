@@ -1,0 +1,13 @@
+0 verbose cli F:\Program Files\nodejs\node.exe F:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.16.0
+3 silly config load:file:F:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:F:\shixun\behavior_identify\behavior_identify\frontend\.npmrc
+5 silly config load:file:C:\Users\18575\.npmrc
+6 silly config load:file:F:\shixun\behavior_identify\behavior_identify\frontend\Program Filesodejsode_global\etc\npmrc
+7 verbose title npm run serve
+8 verbose argv "run" "serve"
+9 verbose logfile logs-max:10 dir:F:\shixun\behavior_identify\behavior_identify\frontend\Program Filesodejsode_cache\_logs\2025-06-28T01_59_58_515Z-
+10 verbose logfile F:\shixun\behavior_identify\behavior_identify\frontend\Program Filesodejsode_cache\_logs\2025-06-28T01_59_58_515Z-debug-0.log
+11 silly logfile done cleaning log files
+12 http fetch GET 200 https://registry.npmjs.org/npm 3816ms
