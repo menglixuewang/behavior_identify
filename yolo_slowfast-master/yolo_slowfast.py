@@ -198,8 +198,8 @@ def main(config):
     video_model.load_state_dict(checkpoint['model_state'])
     video_model = video_model.eval().to(device)
 
-    deepsort_tracker = DeepSort("deep_sort/deep_sort/deep/checkpoint/ckpt.t7")
-    ava_labelnames, _ = AvaLabeledVideoFramePaths.read_label_map("selfutils/temp.pbtxt")
+    deepsort_tracker = DeepSort("ckpt.t7")
+    ava_labelnames, _ = AvaLabeledVideoFramePaths.read_label_map("temp.pbtxt")
 
     coco_color_map = [[random.randint(0, 255) for _ in range(3)] for _ in range(80)]
 
