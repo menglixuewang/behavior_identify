@@ -674,7 +674,9 @@ def create_app(config_name='development'):
             # 添加调试日志
             logger.info(f"请求静态文件: {filename}")
             
-            outputs_path = os.path.join(os.getcwd(), 'outputs')
+            # 使用应用程序所在目录作为基准路径，确保正确找到outputs文件夹
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            outputs_path = os.path.join(current_dir, 'outputs')
             file_path = os.path.join(outputs_path, filename)
             
             logger.info(f"文件路径: {file_path}")
@@ -840,4 +842,4 @@ if __name__ == '__main__':
                     host='0.0.0.0', 
                     port=5000, 
                     debug=True, 
-                    use_reloader=False) 
+                    use_reloader=False)
