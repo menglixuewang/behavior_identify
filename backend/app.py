@@ -416,16 +416,40 @@ def create_app(config_name='development'):
             page = request.args.get('page', 1, type=int)
             per_page = request.args.get('per_page', 10, type=int)
             status = request.args.get('status')
+            task_type = request.args.get('type')  # 添加type参数处理
             
             query = DetectionTask.query
             if status:
                 query = query.filter(DetectionTask.status == status)
+            if task_type:
+                query = query.filter(DetectionTask.source_type == task_type)
             
             pagination = query.order_by(DetectionTask.created_at.desc()).paginate(
                 page=page, per_page=per_page, error_out=False
             )
             
-            tasks = [task.to_dict() for task in pagination.items]
+            # 转换为前端期望的格式
+            tasks = []
+            for task in pagination.items:
+                # 计算文件大小
+                file_size = 0
+                try:
+                    if task.source_path and os.path.exists(task.source_path):
+                        file_size = os.path.getsize(task.source_path)
+                except Exception:
+                    file_size = 0
+                
+                task_data = {
+                    'id': task.id,
+                    'filename': task.task_name,  # 使用task_name作为filename
+                    'size': file_size,  # 计算文件大小
+                    'status': task.status,
+                    'detections': task.detected_objects or 0,  # 使用detected_objects作为detections
+                    'uploadTime': task.created_at.isoformat() if task.created_at else None,  # 使用created_at作为uploadTime
+                    'progress': task.progress,
+                    'source_type': task.source_type
+                }
+                tasks.append(task_data)
             
             return jsonify({
                 'success': True,
