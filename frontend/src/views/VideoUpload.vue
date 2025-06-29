@@ -328,7 +328,7 @@ export default {
       inputSize: 640,
       device: 'cpu',
       outputFormat: 'both',
-      alertBehaviors: ['fall down', 'fight', 'enter', 'exit'],
+      alertBehaviors: ['fall down', 'fight', 'enter'], // 默认只对最重要的三种异常行为报警
       saveResults: true
     })
 
@@ -381,10 +381,34 @@ export default {
       uploadStatus.value = ''
       uploadStatusText.value = '准备上传...'
 
+      // 添加调试信息：打印前端配置
+      console.log('🔧 前端检测配置:', detectConfig)
+      console.log('📤 准备上传文件:', {
+        name: selectedFile.value.name,
+        size: selectedFile.value.size,
+        type: selectedFile.value.type
+      })
+
       try {
         const formData = new FormData()
         formData.append('video', selectedFile.value)
-        formData.append('config', JSON.stringify(detectConfig))
+
+        // 将配置参数分别添加到FormData中，而不是作为JSON字符串
+        formData.append('confidence', detectConfig.confidence.toString())
+        formData.append('input_size', detectConfig.inputSize.toString())
+        formData.append('device', detectConfig.device)
+        formData.append('output_format', detectConfig.outputFormat)
+        formData.append('alert_behaviors', JSON.stringify(detectConfig.alertBehaviors))
+        formData.append('save_results', detectConfig.saveResults.toString())
+
+        console.log('📤 上传参数:', {
+          confidence: detectConfig.confidence,
+          input_size: detectConfig.inputSize,
+          device: detectConfig.device,
+          output_format: detectConfig.outputFormat,
+          alert_behaviors: detectConfig.alertBehaviors,
+          save_results: detectConfig.saveResults
+        })
 
         const xhr = new XMLHttpRequest()
         
@@ -427,37 +451,55 @@ export default {
     const startDetection = async (taskId) => {
       try {
         uploadStatusText.value = '检测处理中...'
-        
+
+        const requestData = {
+          task_id: taskId,
+          config: {
+            confidence: detectConfig.confidence,
+            input_size: detectConfig.inputSize,
+            device: detectConfig.device,
+            output_format: detectConfig.outputFormat,
+            alert_behaviors: detectConfig.alertBehaviors,
+            save_results: detectConfig.saveResults
+          }
+        }
+
+        console.log('🚀 开始检测请求:', requestData)
+
         const response = await fetch('http://localhost:5000/api/detect/video', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            task_id: taskId,
-            config: detectConfig
-          })
+          body: JSON.stringify(requestData)
         })
+
+        console.log('📡 检测响应状态:', response.status)
 
         if (response.ok) {
           const result = await response.json()
+          console.log('✅ 检测响应数据:', result)
+
           uploadProgress.value = 100
           uploadStatus.value = 'success'
           uploadStatusText.value = '检测完成'
-          
+
           ElMessage.success('视频检测完成')
-          
+
           // 重置状态
           setTimeout(() => {
             uploading.value = false
             removeFile()
             refreshHistory()
           }, 2000)
-          
+
         } else {
-          throw new Error('检测失败')
+          const errorData = await response.json()
+          console.error('❌ 检测失败响应:', errorData)
+          throw new Error(errorData.error || '检测失败')
         }
       } catch (error) {
+        console.error('❌ 检测错误:', error)
         ElMessage.error('检测失败: ' + error.message)
         uploading.value = false
         uploadStatus.value = 'exception'

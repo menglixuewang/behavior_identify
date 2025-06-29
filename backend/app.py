@@ -102,53 +102,88 @@ def create_app(config_name='development'):
     def upload_video():
         """上传视频文件"""
         try:
+            # 添加调试信息：打印接收到的请求数据
+            logger.info("📥 收到视频上传请求")
+            logger.info(f"📋 Form数据: {dict(request.form)}")
+            logger.info(f"📁 文件列表: {list(request.files.keys())}")
+
             if 'video' not in request.files:
+                logger.error("❌ 没有上传文件")
                 return jsonify({'error': '没有上传文件'}), 400
-            
+
             file = request.files['video']
             if file.filename == '':
+                logger.error("❌ 未选择文件")
                 return jsonify({'error': '未选择文件'}), 400
-            
+
             if not allowed_file(file.filename, app.config['ALLOWED_VIDEO_EXTENSIONS']):
+                logger.error(f"❌ 不支持的文件格式: {file.filename}")
                 return jsonify({'error': '不支持的文件格式'}), 400
-            
+
             # 检查文件大小
             if get_file_size(file) > app.config['MAX_CONTENT_LENGTH']:
+                logger.error(f"❌ 文件大小超出限制: {get_file_size(file)}")
                 return jsonify({'error': '文件大小超出限制'}), 400
-            
+
             # 保存文件
             filename = secure_filename(file.filename)
             timestamp = int(time.time())
             safe_filename = f"{timestamp}_{filename}"
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_filename)
             file.save(file_path)
-            
+
+            # 获取配置参数
+            confidence = float(request.form.get('confidence', 0.5))
+            input_size = int(request.form.get('input_size', 640))
+            device = request.form.get('device', 'cpu')
+            output_format = request.form.get('output_format', 'both')
+            save_results = request.form.get('save_results', 'true').lower() == 'true'
+
+            # 解析报警行为
+            alert_behaviors_str = request.form.get('alert_behaviors', '[]')
+            try:
+                alert_behaviors = json.loads(alert_behaviors_str)
+            except:
+                alert_behaviors = ['fall down', 'fight', 'enter', 'exit']
+
+            # 打印解析后的配置参数
+            config_info = {
+                'confidence': confidence,
+                'input_size': input_size,
+                'device': device,
+                'output_format': output_format,
+                'alert_behaviors': alert_behaviors,
+                'save_results': save_results
+            }
+            logger.info(f"🔧 解析后的配置参数: {config_info}")
+
             # 创建检测任务
             task = DetectionTask(
                 task_name=request.form.get('task_name', filename),
                 source_type='video',
                 source_path=file_path,
-                confidence_threshold=float(request.form.get('confidence', 0.5)),
-                input_size=int(request.form.get('input_size', 640)),
-                device=request.form.get('device', 'cpu')
+                confidence_threshold=confidence,
+                input_size=input_size,
+                device=device
             )
-            
+
             db.session.add(task)
             db.session.commit()
-            
-            logger.info(f"视频上传成功: {filename}, 任务ID: {task.id}")
-            
+
+            logger.info(f"✅ 视频上传成功: {filename}, 任务ID: {task.id}")
+
             return jsonify({
                 'success': True,
                 'taskId': task.id,  # 使用驼峰命名匹配前端
                 'task_id': task.id,  # 保持向后兼容
                 'filename': safe_filename,
                 'file_path': file_path,
+                'config': config_info,  # 返回解析后的配置信息
                 'message': '视频上传成功'
             })
-            
+
         except Exception as e:
-            logger.error(f"视频上传失败: {str(e)}")
+            logger.error(f"❌ 视频上传失败: {str(e)}")
             return jsonify({'error': f'上传失败: {str(e)}'}), 500
     
     @app.route('/api/detect/video', methods=['POST'])
@@ -156,22 +191,43 @@ def create_app(config_name='development'):
         """启动视频检测"""
         try:
             data = request.get_json()
+            logger.info(f"📥 收到检测请求: {data}")
+
             task_id = data.get('task_id')
-            
+            config = data.get('config', {})
+
+            logger.info(f"🔧 检测配置参数: {config}")
+
             if not task_id:
+                logger.error("❌ 缺少任务ID")
                 return jsonify({'error': '缺少任务ID'}), 400
-            
+
             # 获取任务信息
             task = DetectionTask.query.get(task_id)
             if not task:
+                logger.error(f"❌ 任务不存在: {task_id}")
                 return jsonify({'error': '任务不存在'}), 404
-            
+
             if task.status != 'pending':
+                logger.error(f"❌ 任务状态错误: {task.status}")
                 return jsonify({'error': f'任务状态错误: {task.status}'}), 400
-            
+
             # 检查文件是否存在
             if not os.path.exists(task.source_path):
+                logger.error(f"❌ 源文件不存在: {task.source_path}")
                 return jsonify({'error': '源文件不存在'}), 404
+
+            # 更新任务配置（如果前端传递了新的配置）
+            if config:
+                if 'confidence' in config:
+                    task.confidence_threshold = float(config['confidence'])
+                if 'input_size' in config:
+                    task.input_size = int(config['input_size'])
+                if 'device' in config:
+                    task.device = config['device']
+
+                db.session.commit()
+                logger.info(f"🔄 更新任务配置: confidence={task.confidence_threshold}, input_size={task.input_size}, device={task.device}")
             
             # 准备输出路径
             output_filename = f"result_{task.id}_{int(time.time())}.mp4"
@@ -183,17 +239,48 @@ def create_app(config_name='development'):
             task.started_at = datetime.utcnow()
             db.session.commit()
             
+            # 在主线程中提取所有需要的数据，避免在新线程中访问数据库对象
+            task_id = task.id
+            source_path = task.source_path
+            device = task.device
+            input_size = task.input_size
+            confidence_threshold = task.confidence_threshold
+
             # 启动检测线程
-            def detection_worker():
-                current_task = task  # 保存当前任务引用，避免作用域问题
+            def detection_worker(task_id, source_path, device, input_size, confidence_threshold, output_path, config):
+
                 try:
+                    logger.info(f"🚀 开始检测任务 {task_id}")
+                    logger.info(f"📁 源文件: {source_path}")
+                    logger.info(f"📁 输出文件: {output_path}")
+                    logger.info(f"🔧 检测参数: device={device}, input_size={input_size}, confidence={confidence_threshold}")
+
                     # 在检测线程中创建应用上下文
                     with app.app_context():
-                        detection_service = get_detection_service({
-                            'device': current_task.device,
-                            'input_size': current_task.input_size,
-                            'confidence_threshold': current_task.confidence_threshold
-                        })
+                        # 重新获取任务对象，避免使用已失效的引用
+                        current_task = DetectionTask.query.get(task_id)
+                        if not current_task:
+                            logger.error(f"❌ 任务 {task_id} 不存在")
+                            return
+
+                        detection_config = {
+                            'device': device,
+                            'input_size': input_size,
+                            'confidence_threshold': confidence_threshold
+                        }
+
+                        # 如果前端传递了额外的配置，添加到检测配置中
+                        if config:
+                            if 'alert_behaviors' in config:
+                                detection_config['alert_behaviors'] = config['alert_behaviors']
+                            if 'output_format' in config:
+                                detection_config['output_format'] = config['output_format']
+                            if 'save_results' in config:
+                                detection_config['save_results'] = config['save_results']
+
+                        logger.info(f"🔧 最终检测配置: {detection_config}")
+
+                        detection_service = get_detection_service(detection_config)
                         
                         def progress_callback(task_id, progress):
                             # 确保在应用上下文中更新数据库
@@ -211,15 +298,15 @@ def create_app(config_name='development'):
                         
                         # 执行检测
                         result = detection_service.detect_video(
-                            current_task.source_path,
+                            source_path,
                             output_path,
-                            progress_callback
+                            lambda tid, prog: progress_callback(task_id, prog)
                         )
-                    
+
                         if result['success']:
                             # 保存检测结果到数据库 (在应用上下文中)
                             with app.app_context():
-                                task_obj = DetectionTask.query.get(current_task.id)
+                                task_obj = DetectionTask.query.get(task_id)
                                 if task_obj:
                                     for detection in result['results']:
                                         detection_result = DetectionResult(
@@ -265,45 +352,57 @@ def create_app(config_name='development'):
                         else:
                             # 更新失败状态 (在应用上下文中)
                             with app.app_context():
-                                task_obj = DetectionTask.query.get(current_task.id)
+                                task_obj = DetectionTask.query.get(task_id)
                                 if task_obj:
                                     task_obj.status = 'failed'
                                     task_obj.error_message = result['error']
                                     db.session.commit()
                                     print(f"❌ 任务 {task_obj.id} 检测失败: {result['error']}")
-                    
+
                     # 通过WebSocket发送完成通知
-                    socketio.emit('task_completed', {
-                        'task_id': task.id,
-                        'status': task.status,
-                        'message': '检测完成' if result['success'] else f"检测失败: {result['error']}"
-                    }, namespace='/detection')
+                    with app.app_context():
+                        final_task = DetectionTask.query.get(task_id)
+                        if final_task:
+                            socketio.emit('task_completed', {
+                                'task_id': task_id,
+                                'status': final_task.status,
+                                'message': '检测完成' if result.get('success') else f"检测失败: {result.get('error', '未知错误')}"
+                            }, namespace='/detection')
                     
                 except Exception as e:
                     logger.error(f"检测任务执行失败: {str(e)}")
                     # 更新失败状态 (在应用上下文中)
-                    with app.app_context():
-                        task_obj = DetectionTask.query.get(current_task.id)
-                        if task_obj:
-                            task_obj.status = 'failed'
-                            task_obj.error_message = str(e)
-                            db.session.commit()
-                    
-                    socketio.emit('task_failed', {
-                        'task_id': current_task.id,
-                        'error': str(e)
-                    }, namespace='/detection')
-                    
-                    print(f"❌ 检测任务异常: {str(e)}")
+                    try:
+                        with app.app_context():
+                            task_obj = DetectionTask.query.get(task_id)
+                            if task_obj:
+                                task_obj.status = 'failed'
+                                task_obj.error_message = str(e)
+                                db.session.commit()
+
+                                # 发送失败通知
+                                socketio.emit('task_failed', {
+                                    'task_id': task_id,
+                                    'error': str(e)
+                                }, namespace='/detection')
+
+                                print(f"❌ 检测任务异常: {str(e)}")
+                    except Exception as ctx_error:
+                        logger.error(f"更新任务状态失败: {str(ctx_error)}")
+                        print(f"❌ 更新任务状态失败: {str(ctx_error)}")
             
-            # 启动检测线程
-            thread = threading.Thread(target=detection_worker, daemon=True)
+            # 启动检测线程，传递所有必要的参数
+            thread = threading.Thread(
+                target=detection_worker,
+                args=(task_id, source_path, device, input_size, confidence_threshold, output_path, config),
+                daemon=True
+            )
             thread.start()
-            
+
             return jsonify({
                 'success': True,
-                'taskId': task.id,  # 使用驼峰命名匹配前端
-                'task_id': task.id,  # 保持向后兼容
+                'taskId': task_id,  # 使用驼峰命名匹配前端
+                'task_id': task_id,  # 保持向后兼容
                 'message': '检测任务已启动'
             })
             
