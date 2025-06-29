@@ -294,3 +294,422 @@ WHERE detection_tasks.source_type = ? ORDER BY detection_tasks.created_at DESC
 2025-06-29 10:51:44,197 - behavior_detection - INFO - app:serve_output_file:717 - 文件大小: 13822300 bytes
 2025-06-29 10:51:44,198 - behavior_detection - INFO - app:serve_output_file:722 - Range请求: bytes=8421376-
 2025-06-29 10:51:44,205 - behavior_detection - INFO - app:serve_output_file:754 - 返回Range响应: 8421376-13822299/13822300
+2025-06-29 11:09:46,869 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:09:46,905 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.5', 'input_size': '640', 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': '["fall down","fight","enter","exit"]', 'save_results': 'true'}
+2025-06-29 11:09:46,905 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:09:46,910 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.5, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit'], 'save_results': True}
+2025-06-29 11:09:46,921 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 3
+2025-06-29 11:09:46,926 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 3, 'config': {'confidence': 0.5, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit'], 'save_results': True}}
+2025-06-29 11:09:46,926 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.5, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit'], 'save_results': True}
+2025-06-29 11:09:46,929 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.5, input_size=640, device=cpu
+2025-06-29 11:09:46,939 - behavior_detection - ERROR - app:detection_worker:357 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-29 11:14:19,631 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:14:19,686 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.65', 'input_size': '640', 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': '["fall down","fight","enter","exit","run","stand","sit","walk"]', 'save_results': 'true'}
+2025-06-29 11:14:19,687 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:14:19,688 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.65, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'stand', 'sit', 'walk'], 'save_results': True}
+2025-06-29 11:14:19,699 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 4
+2025-06-29 11:14:19,704 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 4, 'config': {'confidence': 0.65, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'stand', 'sit', 'walk'], 'save_results': True}}
+2025-06-29 11:14:19,705 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.65, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'stand', 'sit', 'walk'], 'save_results': True}
+2025-06-29 11:14:19,707 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.65, input_size=640, device=cuda
+2025-06-29 11:14:19,717 - behavior_detection - ERROR - app:detection_worker:357 - 检测任务执行失败: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-29 11:14:19,718 - behavior_detection - ERROR - app:detection_worker:375 - 更新任务状态失败: Instance '<DetectionTask at 0x235f0a77c20>' has been deleted, or its row is otherwise not present.
+2025-06-29 11:21:42,972 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:21:43,001 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.7', 'input_size': '640', 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': '["fall down","fight","enter","exit","run","sit","stand","walk"]', 'save_results': 'true'}
+2025-06-29 11:21:43,002 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:21:43,004 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:21:43,015 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 5
+2025-06-29 11:21:43,020 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 5, 'config': {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}}
+2025-06-29 11:21:43,020 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:21:43,024 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.7, input_size=640, device=cuda
+2025-06-29 11:26:25,087 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:26:25,093 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.75', 'input_size': '640', 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': '["fall down","fight","enter","exit","run","sit","stand","walk"]', 'save_results': 'true'}
+2025-06-29 11:26:25,094 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:26:25,095 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.75, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:26:25,132 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 6
+2025-06-29 11:26:25,138 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 6, 'config': {'confidence': 0.75, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}}
+2025-06-29 11:26:25,138 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.75, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:26:25,142 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.75, input_size=640, device=cuda
+2025-06-29 11:26:25,150 - behavior_detection - INFO - app:detection_worker:253 - 🚀 开始检测任务 6
+2025-06-29 11:26:25,151 - behavior_detection - INFO - app:detection_worker:254 - 📁 源文件: F:\CursorCode\behavior_identify\backend\uploads\1751167585_fall_down.mp4
+2025-06-29 11:26:25,151 - behavior_detection - INFO - app:detection_worker:255 - 📁 输出文件: F:\CursorCode\behavior_identify\backend\outputs\result_6_1751167585.mp4
+2025-06-29 11:26:25,152 - behavior_detection - INFO - app:detection_worker:256 - 🔧 检测参数: device=cuda, input_size=640, confidence=0.75
+2025-06-29 11:26:25,153 - behavior_detection - INFO - app:detection_worker:281 - 🔧 最终检测配置: {'device': 'cuda', 'input_size': 640, 'confidence_threshold': 0.75, 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'output_format': 'both', 'save_results': True}
+2025-06-29 11:30:21,868 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:30:21,897 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.5', 'input_size': '640', 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': '["fall down","fight","enter","exit"]', 'save_results': 'true'}
+2025-06-29 11:30:21,897 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:30:21,899 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.5, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit'], 'save_results': True}
+2025-06-29 11:30:21,912 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 7
+2025-06-29 11:30:21,918 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 7, 'config': {'confidence': 0.5, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit'], 'save_results': True}}
+2025-06-29 11:30:21,919 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.5, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit'], 'save_results': True}
+2025-06-29 11:30:21,925 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.5, input_size=640, device=cpu
+2025-06-29 11:30:21,939 - behavior_detection - INFO - app:detection_worker:253 - 🚀 开始检测任务 7
+2025-06-29 11:30:21,941 - behavior_detection - INFO - app:detection_worker:254 - 📁 源文件: F:\CursorCode\behavior_identify\backend\uploads\1751167821_fall_down.mp4
+2025-06-29 11:30:21,941 - behavior_detection - INFO - app:detection_worker:255 - 📁 输出文件: F:\CursorCode\behavior_identify\backend\outputs\result_7_1751167821.mp4
+2025-06-29 11:30:21,942 - behavior_detection - INFO - app:detection_worker:256 - 🔧 检测参数: device=cpu, input_size=640, confidence=0.5
+2025-06-29 11:30:21,943 - behavior_detection - INFO - app:detection_worker:281 - 🔧 最终检测配置: {'device': 'cpu', 'input_size': 640, 'confidence_threshold': 0.5, 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit'], 'output_format': 'both', 'save_results': True}
+2025-06-29 11:34:28,999 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_7_1751167821.mp4
+2025-06-29 11:34:28,999 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_7_1751167821.mp4
+2025-06-29 11:34:28,999 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:34:28,999 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:34:28,999 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:34:29,000 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14990593 bytes
+2025-06-29 11:34:29,000 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=0-
+2025-06-29 11:34:29,020 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 0-14990592/14990593
+2025-06-29 11:34:29,262 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_7_1751167821.mp4
+2025-06-29 11:34:29,262 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_7_1751167821.mp4
+2025-06-29 11:34:29,262 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:34:29,263 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:34:29,263 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:34:29,263 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14990593 bytes
+2025-06-29 11:34:29,263 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=14974976-
+2025-06-29 11:34:29,264 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 14974976-14990592/14990593
+2025-06-29 11:34:29,270 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_7_1751167821.mp4
+2025-06-29 11:34:29,270 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_7_1751167821.mp4
+2025-06-29 11:34:29,270 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:34:29,271 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:34:29,272 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:34:29,272 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14990593 bytes
+2025-06-29 11:34:29,272 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=131072-
+2025-06-29 11:34:29,276 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 131072-14990592/14990593
+2025-06-29 11:34:30,672 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_7_1751167821.mp4
+2025-06-29 11:34:30,673 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_7_1751167821.mp4
+2025-06-29 11:34:30,673 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:34:30,673 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:34:30,673 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:34:30,673 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14990593 bytes
+2025-06-29 11:34:30,674 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=9568256-
+2025-06-29 11:34:30,677 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 9568256-14990592/14990593
+2025-06-29 11:34:58,568 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:34:58,596 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.8', 'input_size': '640', 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': '["fall down","fight","enter","exit","run","sit","stand","walk"]', 'save_results': 'true'}
+2025-06-29 11:34:58,596 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:34:58,598 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.8, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:34:58,606 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 8
+2025-06-29 11:34:58,612 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 8, 'config': {'confidence': 0.8, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}}
+2025-06-29 11:34:58,612 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.8, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:34:58,614 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.8, input_size=640, device=cuda
+2025-06-29 11:34:58,624 - behavior_detection - INFO - app:detection_worker:253 - 🚀 开始检测任务 8
+2025-06-29 11:34:58,625 - behavior_detection - INFO - app:detection_worker:254 - 📁 源文件: F:\CursorCode\behavior_identify\backend\uploads\1751168098_fall_down.mp4
+2025-06-29 11:34:58,625 - behavior_detection - INFO - app:detection_worker:255 - 📁 输出文件: F:\CursorCode\behavior_identify\backend\outputs\result_8_1751168098.mp4
+2025-06-29 11:34:58,625 - behavior_detection - INFO - app:detection_worker:256 - 🔧 检测参数: device=cuda, input_size=640, confidence=0.8
+2025-06-29 11:34:58,626 - behavior_detection - INFO - app:detection_worker:281 - 🔧 最终检测配置: {'device': 'cuda', 'input_size': 640, 'confidence_threshold': 0.8, 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'output_format': 'both', 'save_results': True}
+2025-06-29 11:41:23,110 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:41:23,118 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.8', 'input_size': '640', 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': '["fall down","fight","enter","exit","run","sit","stand","walk"]', 'save_results': 'true'}
+2025-06-29 11:41:23,118 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:41:23,120 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.8, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:41:23,156 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 9
+2025-06-29 11:41:23,162 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 9, 'config': {'confidence': 0.8, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}}
+2025-06-29 11:41:23,162 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.8, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:41:23,164 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.8, input_size=640, device=cuda
+2025-06-29 11:41:23,174 - behavior_detection - INFO - app:detection_worker:253 - 🚀 开始检测任务 9
+2025-06-29 11:41:23,175 - behavior_detection - INFO - app:detection_worker:254 - 📁 源文件: F:\CursorCode\behavior_identify\backend\uploads\1751168483_fall_down.mp4
+2025-06-29 11:41:23,175 - behavior_detection - INFO - app:detection_worker:255 - 📁 输出文件: F:\CursorCode\behavior_identify\backend\outputs\result_9_1751168483.mp4
+2025-06-29 11:41:23,175 - behavior_detection - INFO - app:detection_worker:256 - 🔧 检测参数: device=cuda, input_size=640, confidence=0.8
+2025-06-29 11:41:23,176 - behavior_detection - INFO - app:detection_worker:281 - 🔧 最终检测配置: {'device': 'cuda', 'input_size': 640, 'confidence_threshold': 0.8, 'alert_behaviors': ['fall down', 'fight', 'enter', 'exit', 'run', 'sit', 'stand', 'walk'], 'output_format': 'both', 'save_results': True}
+2025-06-29 11:43:17,525 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_9_1751168483.mp4
+2025-06-29 11:43:17,525 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_9_1751168483.mp4
+2025-06-29 11:43:17,526 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:17,526 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:17,526 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:17,527 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 11:43:17,527 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=0-
+2025-06-29 11:43:17,546 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 0-15001810/15001811
+2025-06-29 11:43:17,790 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_9_1751168483.mp4
+2025-06-29 11:43:17,790 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_9_1751168483.mp4
+2025-06-29 11:43:17,790 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:17,790 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:17,791 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:17,791 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 11:43:17,791 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=14974976-
+2025-06-29 11:43:17,791 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 14974976-15001810/15001811
+2025-06-29 11:43:17,793 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_9_1751168483.mp4
+2025-06-29 11:43:17,793 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_9_1751168483.mp4
+2025-06-29 11:43:17,794 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:17,794 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:17,794 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:17,794 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 11:43:17,794 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=65536-
+2025-06-29 11:43:17,800 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 65536-15001810/15001811
+2025-06-29 11:43:17,866 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_9_1751168483.mp4
+2025-06-29 11:43:17,867 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_9_1751168483.mp4
+2025-06-29 11:43:17,867 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:17,867 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:17,867 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:17,868 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 11:43:17,868 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=6094848-
+2025-06-29 11:43:17,871 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 6094848-15001810/15001811
+2025-06-29 11:43:18,143 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_9_1751168483.mp4
+2025-06-29 11:43:18,143 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_9_1751168483.mp4
+2025-06-29 11:43:18,144 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:18,144 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:18,144 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:18,145 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 11:43:18,145 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=6881280-
+2025-06-29 11:43:18,149 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 6881280-15001810/15001811
+2025-06-29 11:43:18,189 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_9_1751168483.mp4
+2025-06-29 11:43:18,189 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_9_1751168483.mp4
+2025-06-29 11:43:18,189 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:18,190 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:18,190 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:18,190 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 11:43:18,190 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=8126464-
+2025-06-29 11:43:18,193 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 8126464-15001810/15001811
+2025-06-29 11:43:20,329 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_9_1751168483.mp4
+2025-06-29 11:43:20,329 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_9_1751168483.mp4
+2025-06-29 11:43:20,329 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:20,330 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:20,330 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:20,330 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 11:43:20,330 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=8749056-
+2025-06-29 11:43:20,332 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 8749056-15001810/15001811
+2025-06-29 11:43:28,167 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_8_1751168098.mp4
+2025-06-29 11:43:28,167 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_8_1751168098.mp4
+2025-06-29 11:43:28,167 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:28,168 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:28,168 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:28,168 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14984762 bytes
+2025-06-29 11:43:28,168 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=0-
+2025-06-29 11:43:28,190 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 0-14984761/14984762
+2025-06-29 11:43:28,500 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_8_1751168098.mp4
+2025-06-29 11:43:28,500 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_8_1751168098.mp4
+2025-06-29 11:43:28,500 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:28,500 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:28,500 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:28,500 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14984762 bytes
+2025-06-29 11:43:28,500 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=14974976-
+2025-06-29 11:43:28,501 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 14974976-14984761/14984762
+2025-06-29 11:43:28,504 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_8_1751168098.mp4
+2025-06-29 11:43:28,504 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_8_1751168098.mp4
+2025-06-29 11:43:28,504 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:28,504 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:28,504 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:28,504 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14984762 bytes
+2025-06-29 11:43:28,504 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=163840-
+2025-06-29 11:43:28,509 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 163840-14984761/14984762
+2025-06-29 11:43:28,765 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_8_1751168098.mp4
+2025-06-29 11:43:28,765 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_8_1751168098.mp4
+2025-06-29 11:43:28,765 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:28,765 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:28,766 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:28,766 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14984762 bytes
+2025-06-29 11:43:28,766 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=6455296-
+2025-06-29 11:43:28,768 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 6455296-14984761/14984762
+2025-06-29 11:43:28,842 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_8_1751168098.mp4
+2025-06-29 11:43:28,843 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_8_1751168098.mp4
+2025-06-29 11:43:28,843 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:28,843 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:28,843 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:28,843 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14984762 bytes
+2025-06-29 11:43:28,843 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=7241728-
+2025-06-29 11:43:28,845 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 7241728-14984761/14984762
+2025-06-29 11:43:29,089 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_8_1751168098.mp4
+2025-06-29 11:43:29,089 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_8_1751168098.mp4
+2025-06-29 11:43:29,090 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:43:29,090 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:43:29,090 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:43:29,090 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14984762 bytes
+2025-06-29 11:43:29,091 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=8126464-
+2025-06-29 11:43:29,093 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 8126464-14984761/14984762
+2025-06-29 11:45:27,574 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:45:27,628 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.7', 'input_size': '640', 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': '["fall down","run","sit","stand","walk"]', 'save_results': 'true'}
+2025-06-29 11:45:27,628 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:45:27,630 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:45:27,639 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 10
+2025-06-29 11:45:27,643 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 10, 'config': {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}}
+2025-06-29 11:45:27,643 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:45:27,645 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.7, input_size=640, device=cuda
+2025-06-29 11:45:27,654 - behavior_detection - INFO - app:detection_worker:253 - 🚀 开始检测任务 10
+2025-06-29 11:45:27,655 - behavior_detection - INFO - app:detection_worker:254 - 📁 源文件: F:\CursorCode\behavior_identify\backend\uploads\1751168727_fall_down.mp4
+2025-06-29 11:45:27,656 - behavior_detection - INFO - app:detection_worker:255 - 📁 输出文件: F:\CursorCode\behavior_identify\backend\outputs\result_10_1751168727.mp4
+2025-06-29 11:45:27,656 - behavior_detection - INFO - app:detection_worker:256 - 🔧 检测参数: device=cuda, input_size=640, confidence=0.7
+2025-06-29 11:45:27,657 - behavior_detection - INFO - app:detection_worker:281 - 🔧 最终检测配置: {'device': 'cuda', 'input_size': 640, 'confidence_threshold': 0.7, 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'output_format': 'both', 'save_results': True}
+2025-06-29 11:46:38,075 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_10_1751168727.mp4
+2025-06-29 11:46:38,075 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_10_1751168727.mp4
+2025-06-29 11:46:38,075 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:46:38,075 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:46:38,075 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:46:38,075 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15091395 bytes
+2025-06-29 11:46:38,075 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=0-
+2025-06-29 11:46:38,141 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 0-15091394/15091395
+2025-06-29 11:46:38,321 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_10_1751168727.mp4
+2025-06-29 11:46:38,321 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_10_1751168727.mp4
+2025-06-29 11:46:38,322 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:46:38,322 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:46:38,322 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:46:38,322 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15091395 bytes
+2025-06-29 11:46:38,322 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=15073280-
+2025-06-29 11:46:38,323 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 15073280-15091394/15091395
+2025-06-29 11:46:38,325 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_10_1751168727.mp4
+2025-06-29 11:46:38,325 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_10_1751168727.mp4
+2025-06-29 11:46:38,325 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:46:38,325 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:46:38,326 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:46:38,326 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15091395 bytes
+2025-06-29 11:46:38,326 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=131072-
+2025-06-29 11:46:38,331 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 131072-15091394/15091395
+2025-06-29 11:46:38,460 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_10_1751168727.mp4
+2025-06-29 11:46:38,461 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_10_1751168727.mp4
+2025-06-29 11:46:38,461 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:46:38,461 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:46:38,461 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:46:38,462 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15091395 bytes
+2025-06-29 11:46:38,462 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=7471104-
+2025-06-29 11:46:38,464 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 7471104-15091394/15091395
+2025-06-29 11:46:38,661 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_10_1751168727.mp4
+2025-06-29 11:46:38,661 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_10_1751168727.mp4
+2025-06-29 11:46:38,661 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 11:46:38,661 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 11:46:38,662 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 11:46:38,662 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15091395 bytes
+2025-06-29 11:46:38,662 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=8126464-
+2025-06-29 11:46:38,664 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 8126464-15091394/15091395
+2025-06-29 11:54:31,286 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 11:54:31,319 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.7', 'input_size': '640', 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': '["fall down","sit","stand","walk"]', 'save_results': 'true'}
+2025-06-29 11:54:31,319 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 11:54:31,320 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.7, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:54:31,331 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 11
+2025-06-29 11:54:31,335 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 11, 'config': {'confidence': 0.7, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'sit', 'stand', 'walk'], 'save_results': True}}
+2025-06-29 11:54:31,335 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.7, 'input_size': 640, 'device': 'cpu', 'output_format': 'both', 'alert_behaviors': ['fall down', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 11:54:31,338 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.7, input_size=640, device=cpu
+2025-06-29 11:54:31,349 - behavior_detection - INFO - app:detection_worker:253 - 🚀 开始检测任务 11
+2025-06-29 11:54:31,349 - behavior_detection - INFO - app:detection_worker:254 - 📁 源文件: F:\CursorCode\behavior_identify\backend\uploads\1751169271_fall_down.mp4
+2025-06-29 11:54:31,350 - behavior_detection - INFO - app:detection_worker:255 - 📁 输出文件: F:\CursorCode\behavior_identify\backend\outputs\result_11_1751169271.mp4
+2025-06-29 11:54:31,350 - behavior_detection - INFO - app:detection_worker:256 - 🔧 检测参数: device=cpu, input_size=640, confidence=0.7
+2025-06-29 11:54:31,351 - behavior_detection - INFO - app:detection_worker:281 - 🔧 最终检测配置: {'device': 'cpu', 'input_size': 640, 'confidence_threshold': 0.7, 'alert_behaviors': ['fall down', 'sit', 'stand', 'walk'], 'output_format': 'both', 'save_results': True}
+2025-06-29 12:00:26,575 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 12:00:26,606 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.75', 'input_size': '640', 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': '["fall down","run","sit","stand","walk"]', 'save_results': 'true'}
+2025-06-29 12:00:26,607 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 12:00:26,608 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.75, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 12:00:26,619 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 12
+2025-06-29 12:00:26,624 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 12, 'config': {'confidence': 0.75, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}}
+2025-06-29 12:00:26,625 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.75, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 12:00:26,628 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.75, input_size=640, device=cuda
+2025-06-29 12:00:26,638 - behavior_detection - INFO - app:detection_worker:253 - 🚀 开始检测任务 12
+2025-06-29 12:00:26,639 - behavior_detection - INFO - app:detection_worker:254 - 📁 源文件: F:\CursorCode\behavior_identify\backend\uploads\1751169626_fall_down.mp4
+2025-06-29 12:00:26,640 - behavior_detection - INFO - app:detection_worker:255 - 📁 输出文件: F:\CursorCode\behavior_identify\backend\outputs\result_12_1751169626.mp4
+2025-06-29 12:00:26,640 - behavior_detection - INFO - app:detection_worker:256 - 🔧 检测参数: device=cuda, input_size=640, confidence=0.75
+2025-06-29 12:00:26,641 - behavior_detection - INFO - app:detection_worker:281 - 🔧 最终检测配置: {'device': 'cuda', 'input_size': 640, 'confidence_threshold': 0.75, 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'output_format': 'both', 'save_results': True}
+2025-06-29 12:05:21,247 - behavior_detection - INFO - app:upload_video:106 - 📥 收到视频上传请求
+2025-06-29 12:05:21,278 - behavior_detection - INFO - app:upload_video:107 - 📋 Form数据: {'confidence': '0.7', 'input_size': '640', 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': '["fall down","run","sit","stand","walk"]', 'save_results': 'true'}
+2025-06-29 12:05:21,278 - behavior_detection - INFO - app:upload_video:108 - 📁 文件列表: ['video']
+2025-06-29 12:05:21,279 - behavior_detection - INFO - app:upload_video:158 - 🔧 解析后的配置参数: {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 12:05:21,290 - behavior_detection - INFO - app:upload_video:173 - ✅ 视频上传成功: fall_down.mp4, 任务ID: 13
+2025-06-29 12:05:21,295 - behavior_detection - INFO - app:start_video_detection:194 - 📥 收到检测请求: {'task_id': 13, 'config': {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}}
+2025-06-29 12:05:21,295 - behavior_detection - INFO - app:start_video_detection:199 - 🔧 检测配置参数: {'confidence': 0.7, 'input_size': 640, 'device': 'cuda', 'output_format': 'both', 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'save_results': True}
+2025-06-29 12:05:21,298 - behavior_detection - INFO - app:start_video_detection:230 - 🔄 更新任务配置: confidence=0.7, input_size=640, device=cuda
+2025-06-29 12:05:21,308 - behavior_detection - INFO - app:detection_worker:253 - 🚀 开始检测任务 13
+2025-06-29 12:05:21,309 - behavior_detection - INFO - app:detection_worker:254 - 📁 源文件: F:\CursorCode\behavior_identify\backend\uploads\1751169921_fall_down.mp4
+2025-06-29 12:05:21,309 - behavior_detection - INFO - app:detection_worker:255 - 📁 输出文件: F:\CursorCode\behavior_identify\backend\outputs\result_13_1751169921.mp4
+2025-06-29 12:05:21,310 - behavior_detection - INFO - app:detection_worker:256 - 🔧 检测参数: device=cuda, input_size=640, confidence=0.7
+2025-06-29 12:05:21,311 - behavior_detection - INFO - app:detection_worker:281 - 🔧 最终检测配置: {'device': 'cuda', 'input_size': 640, 'confidence_threshold': 0.7, 'alert_behaviors': ['fall down', 'run', 'sit', 'stand', 'walk'], 'output_format': 'both', 'save_results': True}
+2025-06-29 12:06:34,879 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_13_1751169921.mp4
+2025-06-29 12:06:34,879 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_13_1751169921.mp4
+2025-06-29 12:06:34,880 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:34,880 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:34,880 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:34,880 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14989308 bytes
+2025-06-29 12:06:34,880 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=0-
+2025-06-29 12:06:34,918 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 0-14989307/14989308
+2025-06-29 12:06:35,141 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_13_1751169921.mp4
+2025-06-29 12:06:35,141 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_13_1751169921.mp4
+2025-06-29 12:06:35,141 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:35,142 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:35,142 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:35,142 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14989308 bytes
+2025-06-29 12:06:35,142 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=14974976-
+2025-06-29 12:06:35,142 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 14974976-14989307/14989308
+2025-06-29 12:06:35,152 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_13_1751169921.mp4
+2025-06-29 12:06:35,152 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_13_1751169921.mp4
+2025-06-29 12:06:35,153 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:35,153 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:35,153 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:35,153 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14989308 bytes
+2025-06-29 12:06:35,153 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=65536-
+2025-06-29 12:06:35,159 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 65536-14989307/14989308
+2025-06-29 12:06:35,234 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_13_1751169921.mp4
+2025-06-29 12:06:35,234 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_13_1751169921.mp4
+2025-06-29 12:06:35,234 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:35,234 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:35,234 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:35,235 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14989308 bytes
+2025-06-29 12:06:35,235 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=8454144-
+2025-06-29 12:06:35,237 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 8454144-14989307/14989308
+2025-06-29 12:06:44,653 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_12_1751169626.mp4
+2025-06-29 12:06:44,654 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_12_1751169626.mp4
+2025-06-29 12:06:44,654 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:44,654 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:44,654 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:44,655 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 12:06:44,655 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=0-
+2025-06-29 12:06:44,663 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 0-15001810/15001811
+2025-06-29 12:06:44,978 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_12_1751169626.mp4
+2025-06-29 12:06:44,978 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_12_1751169626.mp4
+2025-06-29 12:06:44,978 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:44,978 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:44,978 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:44,978 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 12:06:44,978 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=14974976-
+2025-06-29 12:06:44,979 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 14974976-15001810/15001811
+2025-06-29 12:06:44,981 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_12_1751169626.mp4
+2025-06-29 12:06:44,981 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_12_1751169626.mp4
+2025-06-29 12:06:44,981 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:44,982 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:44,982 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:44,982 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 12:06:44,982 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=98304-
+2025-06-29 12:06:44,987 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 98304-15001810/15001811
+2025-06-29 12:06:45,239 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_12_1751169626.mp4
+2025-06-29 12:06:45,239 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_12_1751169626.mp4
+2025-06-29 12:06:45,240 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:45,240 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:45,240 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:45,240 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 12:06:45,241 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=7110656-
+2025-06-29 12:06:45,244 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 7110656-15001810/15001811
+2025-06-29 12:06:45,315 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_12_1751169626.mp4
+2025-06-29 12:06:45,315 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_12_1751169626.mp4
+2025-06-29 12:06:45,315 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:45,315 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:45,315 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:45,315 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 12:06:45,315 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=7700480-
+2025-06-29 12:06:45,318 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 7700480-15001810/15001811
+2025-06-29 12:06:45,563 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_12_1751169626.mp4
+2025-06-29 12:06:45,563 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_12_1751169626.mp4
+2025-06-29 12:06:45,563 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:45,563 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:45,563 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:45,563 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 15001811 bytes
+2025-06-29 12:06:45,563 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=8617984-
+2025-06-29 12:06:45,565 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 8617984-15001810/15001811
+2025-06-29 12:06:46,786 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_13_1751169921.mp4
+2025-06-29 12:06:46,787 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_13_1751169921.mp4
+2025-06-29 12:06:46,787 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:46,787 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:46,787 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:46,788 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14989308 bytes
+2025-06-29 12:06:46,788 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=14974976-
+2025-06-29 12:06:46,788 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 14974976-14989307/14989308
+2025-06-29 12:06:46,802 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_13_1751169921.mp4
+2025-06-29 12:06:46,802 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_13_1751169921.mp4
+2025-06-29 12:06:46,803 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:46,803 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:46,803 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:46,803 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14989308 bytes
+2025-06-29 12:06:46,803 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=6193152-
+2025-06-29 12:06:46,806 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 6193152-14989307/14989308
+2025-06-29 12:06:47,130 - behavior_detection - INFO - app:serve_output_file:798 - 请求静态文件: result_13_1751169921.mp4
+2025-06-29 12:06:47,130 - behavior_detection - INFO - app:serve_output_file:805 - 文件路径: F:\CursorCode\behavior_identify\backend\outputs\result_13_1751169921.mp4
+2025-06-29 12:06:47,130 - behavior_detection - INFO - app:serve_output_file:806 - 当前工作目录: F:\CursorCode\behavior_identify
+2025-06-29 12:06:47,131 - behavior_detection - INFO - app:serve_output_file:807 - outputs目录: F:\CursorCode\behavior_identify\backend\outputs
+2025-06-29 12:06:47,131 - behavior_detection - INFO - app:serve_output_file:808 - 文件存在: True
+2025-06-29 12:06:47,131 - behavior_detection - INFO - app:serve_output_file:816 - 文件大小: 14989308 bytes
+2025-06-29 12:06:47,131 - behavior_detection - INFO - app:serve_output_file:821 - Range请求: bytes=8290304-
+2025-06-29 12:06:47,134 - behavior_detection - INFO - app:serve_output_file:853 - 返回Range响应: 8290304-14989307/14989308

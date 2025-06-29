@@ -66,27 +66,52 @@ class BehaviorDetectionService:
         
         self.input_size = config.get('input_size', 640)
         self.confidence_threshold = config.get('confidence_threshold', 0.5)
-        
+
+        # 打印接收到的配置信息
+        print(f"🔧 检测服务配置:")
+        print(f"   - 设备: {self.device}")
+        print(f"   - 输入尺寸: {self.input_size}")
+        print(f"   - 置信度阈值: {self.confidence_threshold}")
+
         # 初始化标志
         self.models_initialized = False
         self.task_lock = threading.Lock()
         self.stopped_tasks = set()
         self.current_tasks = {}  # 当前运行的任务，保持兼容性
-        
+
         # 模型相关路径
         self.yolo_model_path = 'yolov8n.pt'
         self.slowfast_weights_path = 'SLOWFAST_8x8_R50_DETECTION.pyth'
         self.deepsort_weights_path = 'ckpt.t7'
         self.ava_labels_path = 'temp.pbtxt'
-        
+
         # 模型对象
         self.yolo_model = None
         self.video_model = None
         self.deepsort_tracker = None
         self.ava_labelnames = None
-        
-        # 报警配置
-        self.alert_behaviors = config.get('alert_behaviors', ['fall down', 'fight', 'enter', 'exit'])
+
+        # 报警配置 - 默认只对最重要的三种异常行为报警
+        self.alert_behaviors = config.get('alert_behaviors', ['fall down', 'fight', 'enter'])
+        self.output_format = config.get('output_format', 'both')
+        self.save_results = config.get('save_results', True)
+
+        # 创建前端选项与AVA标签的映射关系
+        self.behavior_mapping = {
+            'fall down': ['fall down'],
+            'fight': ['fight/hit (a person)', 'martial art', 'kick (a person)', 'grab (a person)'],
+            'enter': ['enter'],
+            'exit': ['exit'],
+            'run': ['run'],
+            'sit': ['sit'],  # 注意：AVA中有两个sit标签(id:11和id:49)
+            'stand': ['stand'],  # 注意：AVA中有两个stand标签(id:12和id:80)
+            'walk': ['walk']
+        }
+
+        print(f"   - 报警行为: {self.alert_behaviors}")
+        print(f"   - 输出格式: {self.output_format}")
+        print(f"   - 保存结果: {self.save_results}")
+        print(f"   - 行为映射: {self.behavior_mapping}")
         
     def initialize_models(self) -> bool:
         """
@@ -159,40 +184,62 @@ class BehaviorDetectionService:
                 pass
             return False
     
-    def detect_video(self, video_path: str, output_path: str = None, 
+    def detect_video(self, video_path: str, output_path: str = None,
                     progress_callback: callable = None) -> Dict[str, Any]:
         """
         检测视频文件
-        
+
         Args:
             video_path: 视频文件路径
             output_path: 输出视频路径
             progress_callback: 进度回调函数
-            
+
         Returns:
             Dict: 检测结果
         """
+        print(f"🎬 开始视频检测")
+        print(f"📁 输入视频: {video_path}")
+        print(f"📁 输出视频: {output_path}")
+        print(f"🔧 检测参数: 设备={self.device}, 尺寸={self.input_size}, 置信度={self.confidence_threshold}")
+        print(f"🚨 报警行为: {self.alert_behaviors}")
+        print(f"💾 输出格式: {self.output_format}")
+        print(f"💾 保存结果: {self.save_results}")
+
         if not self.models_initialized:
+            print("🔄 模型未初始化，开始初始化...")
             if not self.initialize_models():
+                print("❌ 模型初始化失败")
                 return {'success': False, 'error': '模型初始化失败'}
-        
+            print("✅ 模型初始化成功")
+
         try:
             # 创建任务ID
             task_id = f"video_{int(time.time())}"
-            
+            print(f"🆔 任务ID: {task_id}")
+
             # 转换为绝对路径（在切换目录前）
             video_path = os.path.abspath(video_path)
             if output_path:
                 output_path = os.path.abspath(output_path)
-            
+
+            print(f"📁 绝对路径 - 输入: {video_path}")
+            print(f"📁 绝对路径 - 输出: {output_path}")
+
             # 检查视频文件是否存在
             if not os.path.exists(video_path):
+                print(f"❌ 视频文件不存在: {video_path}")
                 return {'success': False, 'error': f'视频文件不存在: {video_path}'}
-            
+
+            # 获取视频文件信息
+            file_size = os.path.getsize(video_path)
+            print(f"📊 视频文件大小: {file_size} bytes ({file_size/1024/1024:.2f} MB)")
+
             # 切换到算法目录
             original_cwd = os.getcwd()
+            print(f"📂 当前目录: {original_cwd}")
             os.chdir(yolo_slowfast_path)
-            
+            print(f"📂 切换到算法目录: {yolo_slowfast_path}")
+
             # 准备检测参数
             config = type('Config', (), {})()
             config.input = video_path
@@ -203,6 +250,14 @@ class BehaviorDetectionService:
             config.conf = self.confidence_threshold
             config.iou = 0.4
             config.classes = None
+
+            print(f"⚙️ 算法配置:")
+            print(f"   - input: {config.input}")
+            print(f"   - output: {config.output}")
+            print(f"   - imsize: {config.imsize}")
+            print(f"   - device: {config.device}")
+            print(f"   - conf: {config.conf}")
+            print(f"   - iou: {config.iou}")
             
             # 存储任务信息
             with self.task_lock:
@@ -699,19 +754,50 @@ class BehaviorDetectionService:
     
     def _is_anomaly_behavior(self, behavior: str) -> bool:
         """
-        判断是否为异常行为
-        
+        判断是否为异常行为（使用精确映射，排除正常行为）
+
         Args:
-            behavior: 行为名称
-            
+            behavior: 行为名称（来自AVA数据集）
+
         Returns:
             bool: 是否为异常行为
         """
         if not behavior:
             return False
-        
-        behavior_lower = behavior.lower()
-        return any(alert_behavior.lower() in behavior_lower for alert_behavior in self.alert_behaviors)
+
+        behavior_lower = behavior.lower().strip()
+
+        # 强制排除的正常行为（即使用户选择了也不报警）
+        normal_behaviors = ['walk', 'sit', 'stand', 'run']
+        if behavior_lower in normal_behaviors:
+            print(f"ℹ️ 行为 '{behavior}' 是正常行为，不触发报警")
+            return False
+
+        print(f"🔍 当前报警行为配置: {self.alert_behaviors}")
+        print(f"🔍 检测到的行为: '{behavior}'")
+
+        # 遍历用户选择的报警行为
+        for alert_behavior in self.alert_behaviors:
+            alert_behavior_lower = alert_behavior.lower().strip()
+
+            # 再次检查是否为正常行为
+            if alert_behavior_lower in normal_behaviors:
+                print(f"⚠️ 跳过正常行为配置: '{alert_behavior}'")
+                continue
+
+            # 获取该报警行为对应的AVA标签列表
+            mapped_behaviors = self.behavior_mapping.get(alert_behavior_lower, [alert_behavior_lower])
+
+            # 检查当前检测到的行为是否匹配任何映射的AVA标签
+            for mapped_behavior in mapped_behaviors:
+                mapped_behavior_lower = mapped_behavior.lower().strip()
+                if behavior_lower == mapped_behavior_lower or mapped_behavior_lower in behavior_lower:
+                    print(f"🚨 检测到报警行为: '{behavior}' 匹配用户设置的 '{alert_behavior}'")
+                    return True
+
+        # 如果没有匹配，记录调试信息
+        print(f"ℹ️ 行为 '{behavior}' 不在报警列表中")
+        return False
     
     def get_supported_behaviors(self) -> List[str]:
         """
@@ -749,15 +835,49 @@ detection_service = None
 
 def get_detection_service(config: Dict[str, Any] = None) -> BehaviorDetectionService:
     """
-    获取检测服务实例（单例模式）
-    
+    获取检测服务实例（支持配置更新）
+
     Args:
         config: 配置参数
-        
+
     Returns:
         BehaviorDetectionService: 检测服务实例
     """
     global detection_service
+
+    # 如果没有配置参数，使用默认配置
+    if config is None:
+        config = {
+            'device': 'cpu',
+            'input_size': 640,
+            'confidence_threshold': 0.5,
+            'alert_behaviors': ['fall down', 'fight', 'enter'],  # 默认只对最重要的三种异常行为报警
+            'output_format': 'both',
+            'save_results': True
+        }
+
+    print(f"🔧 get_detection_service 接收到的配置: {config}")
+
+    # 如果服务不存在，创建新实例
     if detection_service is None:
+        print("🆕 创建新的检测服务实例")
         detection_service = BehaviorDetectionService(config)
-    return detection_service 
+    else:
+        # 如果服务已存在，更新配置
+        print("🔄 更新现有检测服务配置")
+        detection_service.device = config.get('device', detection_service.device)
+        detection_service.input_size = config.get('input_size', detection_service.input_size)
+        detection_service.confidence_threshold = config.get('confidence_threshold', detection_service.confidence_threshold)
+        detection_service.alert_behaviors = config.get('alert_behaviors', detection_service.alert_behaviors)
+        detection_service.output_format = config.get('output_format', detection_service.output_format)
+        detection_service.save_results = config.get('save_results', detection_service.save_results)
+
+        print(f"🔧 更新后的检测服务配置:")
+        print(f"   - 设备: {detection_service.device}")
+        print(f"   - 输入尺寸: {detection_service.input_size}")
+        print(f"   - 置信度阈值: {detection_service.confidence_threshold}")
+        print(f"   - 报警行为: {detection_service.alert_behaviors}")
+        print(f"   - 输出格式: {detection_service.output_format}")
+        print(f"   - 保存结果: {detection_service.save_results}")
+
+    return detection_service
