@@ -1,0 +1,3 @@
+2025-07-02 16:45:11,727 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall_1.mp4, 任务ID: 1
+2025-07-02 16:49:51,715 - behavior_detection - INFO - app:delete_task:641 - 删除输出文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751445911.mp4
+2025-07-02 16:49:51,720 - behavior_detection - INFO - app:delete_task:649 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751445911_fall_1.mp4

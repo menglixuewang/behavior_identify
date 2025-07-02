@@ -1,0 +1,17 @@
+Flask
+Flask-CORS
+Flask-SocketIO
+SQLAlchemy
+Flask-SQLAlchemy
+Werkzeug
+opencv-python==4.8.1.78
+torch
+torchvision
+ultralytics
+numpy==1.24.3
+Pillow
+python-socketio
+eventlet
+pytorchvideo==0.1.5
+python-dateutil
+requests
