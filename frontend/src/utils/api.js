@@ -1,5 +1,5 @@
 // API配置和工具函数
-const API_BASE_URL = 'http://localhost:5000'
+const API_BASE_URL = 'http://localhost:5001'
 
 // 创建API请求函数
 export const apiRequest = async (endpoint, options = {}) => {
@@ -17,6 +17,11 @@ export const apiRequest = async (endpoint, options = {}) => {
       ...defaultOptions.headers,
       ...options.headers,
     },
+  }
+  
+  // 如果body是对象，自动序列化
+  if (finalOptions.body && typeof finalOptions.body === 'object' && !(finalOptions.body instanceof FormData)) {
+    finalOptions.body = JSON.stringify(finalOptions.body);
   }
   
   try {

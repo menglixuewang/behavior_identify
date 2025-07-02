@@ -87,7 +87,7 @@
       <!-- 搜索和筛选 -->
       <div class="filter-section">
         <el-row :gutter="20">
-          <el-col :span="8">
+          <el-col :span="7">
             <el-input
               v-model="searchKeyword"
               placeholder="搜索任务名称或文件名"
@@ -101,13 +101,13 @@
           </el-col>
           
           <el-col :span="4">
-            <el-select v-model="typeFilter" placeholder="任务类型" clearable>
+            <el-select v-model="typeFilter" placeholder="任务类型" clearable style="width: 100%">
               <el-option label="视频检测" value="video" />
               <el-option label="实时监控" value="realtime" />
             </el-select>
           </el-col>
           
-          <el-col :span="6">
+          <el-col :span="7">
             <el-date-picker
               v-model="dateRange"
               type="daterange"
@@ -115,11 +115,12 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               size="default"
+              style="width: 100%"
               @change="handleDateChange"
             />
           </el-col>
           
-          <el-col :span="6">
+          <el-col :span="6" style="text-align: right;">
             <el-button type="danger" :disabled="selectedTasks.length === 0" @click="batchDelete">
               批量删除 ({{ selectedTasks.length }})
             </el-button>
@@ -130,15 +131,17 @@
       <!-- 任务表格 -->
       <el-table
         :data="filteredTasks"
-        style="width: 100%"
+        style="width: 100%; min-width: 1200px;"
         @selection-change="handleSelectionChange"
         v-loading="loading"
+        stripe
+        border
       >
         <el-table-column type="selection" width="55" />
         
-        <el-table-column prop="id" label="任务ID" width="80" />
+        <el-table-column prop="id" label="任务ID" width="80" align="center" />
         
-        <el-table-column prop="name" label="任务名称" min-width="200">
+        <el-table-column prop="name" label="任务名称" min-width="220">
           <template #default="scope">
             <div class="task-name">
               <el-icon v-if="scope.row.type === 'video'"><VideoPlay /></el-icon>
@@ -148,7 +151,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="type" label="类型" width="100">
+        <el-table-column prop="type" label="类型" width="110" align="center">
           <template #default="scope">
             <el-tag :type="scope.row.type === 'video' ? 'primary' : 'success'" size="small">
               {{ scope.row.type === 'video' ? '视频检测' : '实时监控' }}
@@ -156,7 +159,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="110" align="center">
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.status)" size="small">
               {{ getStatusText(scope.row.status) }}
@@ -164,7 +167,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="progress" label="进度" width="120">
+        <el-table-column prop="progress" label="进度" width="130" align="center">
           <template #default="scope">
             <el-progress 
               v-if="scope.row.status === 'processing'"
@@ -177,9 +180,9 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="detections" label="检测数" width="80" />
+        <el-table-column prop="detections" label="检测数" width="90" align="center" />
         
-        <el-table-column prop="alerts" label="报警数" width="80">
+        <el-table-column prop="alerts" label="报警数" width="90" align="center">
           <template #default="scope">
             <span :class="{ 'alert-count': scope.row.alerts > 0 }">
               {{ scope.row.alerts }}
@@ -187,15 +190,15 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="createTime" label="创建时间" width="160">
+        <el-table-column prop="createTime" label="创建时间" width="180">
           <template #default="scope">
             {{ formatDateTime(scope.row.createTime) }}
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="280" align="center">
           <template #default="scope">
-            <el-button-group>
+            <div class="action-buttons">
               <el-button 
                 v-if="scope.row.status === 'completed'"
                 type="primary" 
@@ -232,14 +235,20 @@
                 停止
               </el-button>
               
-              <el-button 
-                type="danger" 
-                size="small"
-                @click="deleteTask(scope.row)"
+              <el-popconfirm
+                title="确定要删除这个任务吗？"
+                @confirm="deleteTask(scope.row)"
               >
-                删除
-              </el-button>
-            </el-button-group>
+                <template #reference>
+                  <el-button 
+                    type="danger" 
+                    size="small"
+                  >
+                    删除
+                  </el-button>
+                </template>
+              </el-popconfirm>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -369,6 +378,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   List, Loading, Check, Close, Refresh, Search, VideoPlay, VideoCamera 
 } from '@element-plus/icons-vue'
+import { getTasks, getTask, apiRequest, API_BASE_URL } from '@/utils/api'
 
 export default {
   name: 'TaskManager',
@@ -446,19 +456,34 @@ export default {
       return filtered
     })
 
-    // 获取任务列表
+    // 获取任务列表 - 使用统一API方法
     const fetchTasks = async () => {
       loading.value = true
       try {
-        const response = await fetch(`/api/tasks?page=${currentPage.value}&size=${pageSize.value}`)
-        if (response.ok) {
-          const data = await response.json()
-          tasks.value = data.tasks || []
-          totalTasks.value = data.total || 0
-          
-          // 更新统计数据
-          updateStats()
+        const params = {
+          page: currentPage.value,
+          per_page: pageSize.value
         }
+        
+        const data = await getTasks(params)
+        // 映射后端数据格式到前端期望格式
+        tasks.value = (data.tasks || []).map(task => ({
+          id: task.id,
+          name: task.filename,
+          type: task.source_type || 'video',
+          status: task.status,
+          progress: task.progress,
+          detections: task.detections,
+          alerts: 0, // 暂时设为0，后续可从单独API获取
+          createTime: task.uploadTime,
+          size: task.size
+        }))
+        totalTasks.value = data.total || 0
+        
+        // 更新统计数据
+        updateStats()
+        
+        console.log('✓ 任务列表获取成功:', data)
       } catch (error) {
         console.error('获取任务列表失败:', error)
         ElMessage.error('获取任务列表失败')
@@ -506,108 +531,128 @@ export default {
       fetchTasks()
     }
 
-    // 查看任务结果
+    // 查看任务结果 - 使用统一API方法
     const viewResults = async (task) => {
       try {
-        const response = await fetch(`/api/tasks/${task.id}/logs`)
-        if (response.ok) {
-          const data = await response.json()
-          taskLogs.value = data.logs || '暂无日志信息'
-        }
+        // 获取任务详细结果
+        const data = await apiRequest(`/api/tasks/${task.id}/results`)
         
-        currentTask.value = task
-        showTaskDialog.value = true
+        if (data.success) {
+          // 更新当前任务信息，合并API返回的数据
+          currentTask.value = {
+            ...task,
+            totalFrames: data.totalFrames,
+            detections: data.totalDetections,
+            alerts: data.alertCount,
+            behaviors: data.behaviors,
+            videoUrl: data.videoUrl,
+            downloadUrl: data.downloadUrl
+          }
+          
+          // 生成日志信息显示
+          const logLines = [
+            `任务 ${task.id} 处理完成`,
+            `文件名: ${data.filename}`,
+            `总帧数: ${data.totalFrames}`,
+            `检测帧数: ${data.detectedFrames}`,
+            `检测总数: ${data.totalDetections}`,
+            `报警次数: ${data.alertCount}`,
+            ''
+          ]
+          
+          if (data.behaviors && data.behaviors.length > 0) {
+            logLines.push('检测到的行为:')
+            data.behaviors.forEach(behavior => {
+              logLines.push(`- ${behavior.behavior}: ${behavior.count}次 (置信度: ${behavior.confidence}, 持续: ${behavior.duration})`)
+            })
+          } else {
+            logLines.push('未检测到特定行为')
+          }
+          
+          taskLogs.value = logLines.join('\n')
+          showTaskDialog.value = true
+        } else {
+          ElMessage.error(data.error || '获取任务结果失败')
+        }
       } catch (error) {
         console.error('获取任务详情失败:', error)
         ElMessage.error('获取任务详情失败')
       }
     }
 
-    // 暂停任务
+    // 暂停任务 - 使用统一API方法
     const pauseTask = async (task) => {
       try {
-        const response = await fetch(`/api/tasks/${task.id}/pause`, {
+        await apiRequest(`/api/tasks/${task.id}/pause`, {
           method: 'POST'
         })
         
-        if (response.ok) {
-          ElMessage.success('任务已暂停')
-          fetchTasks()
-        } else {
-          ElMessage.error('暂停任务失败')
-        }
+        ElMessage.success('任务已暂停')
+        fetchTasks()
       } catch (error) {
+        console.error('暂停任务失败:', error)
         ElMessage.error('暂停任务失败')
       }
     }
 
-    // 继续任务
+    // 继续任务 - 使用统一API方法
     const resumeTask = async (task) => {
       try {
-        const response = await fetch(`/api/tasks/${task.id}/resume`, {
+        await apiRequest(`/api/tasks/${task.id}/resume`, {
           method: 'POST'
         })
         
-        if (response.ok) {
-          ElMessage.success('任务已继续')
-          fetchTasks()
-        } else {
-          ElMessage.error('继续任务失败')
-        }
+        ElMessage.success('任务已继续')
+        fetchTasks()
       } catch (error) {
+        console.error('继续任务失败:', error)
         ElMessage.error('继续任务失败')
       }
     }
 
-    // 停止任务
+    // 停止任务 - 使用统一API方法
     const stopTask = async (task) => {
       try {
         await ElMessageBox.confirm('确定要停止这个任务吗？', '确认停止', {
           type: 'warning'
         })
         
-        const response = await fetch(`/api/tasks/${task.id}/stop`, {
+        await apiRequest(`/api/tasks/${task.id}/stop`, {
           method: 'POST'
         })
         
-        if (response.ok) {
-          ElMessage.success('任务已停止')
-          fetchTasks()
-        } else {
-          ElMessage.error('停止任务失败')
-        }
+        ElMessage.success('任务已停止')
+        fetchTasks()
       } catch (error) {
         if (error !== 'cancel') {
+          console.error('停止任务失败:', error)
           ElMessage.error('停止任务失败')
         }
       }
     }
 
-    // 删除任务
+    // 删除任务 - 使用统一API方法
     const deleteTask = async (task) => {
       try {
         await ElMessageBox.confirm('确定要删除这个任务吗？', '确认删除', {
           type: 'warning'
         })
         
-        const response = await fetch(`/api/tasks/${task.id}`, {
+        await apiRequest(`/api/tasks/${task.id}`, {
           method: 'DELETE'
         })
         
-        if (response.ok) {
-          ElMessage.success('任务已删除')
-          fetchTasks()
-        } else {
-          ElMessage.error('删除任务失败')
-        }
+        ElMessage.success('任务已删除')
+        fetchTasks()
       } catch (error) {
         if (error !== 'cancel') {
+          console.error('删除任务失败:', error)
           ElMessage.error('删除任务失败')
         }
       }
     }
 
-    // 批量删除
+    // 批量删除 - 使用统一API方法
     const batchDelete = async () => {
       try {
         await ElMessageBox.confirm(`确定要删除选中的 ${selectedTasks.value.length} 个任务吗？`, '确认批量删除', {
@@ -615,70 +660,79 @@ export default {
         })
         
         const taskIds = selectedTasks.value.map(task => task.id)
-        const response = await fetch('/api/tasks/batch-delete', {
+        await apiRequest('/api/tasks/batch-delete', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({ taskIds })
         })
         
-        if (response.ok) {
-          ElMessage.success('批量删除成功')
-          selectedTasks.value = []
-          fetchTasks()
-        } else {
-          ElMessage.error('批量删除失败')
-        }
+        ElMessage.success('批量删除成功')
+        selectedTasks.value = []
+        fetchTasks()
       } catch (error) {
         if (error !== 'cancel') {
+          console.error('批量删除失败:', error)
           ElMessage.error('批量删除失败')
         }
       }
     }
 
-    // 下载结果
+    // 下载结果 - 使用统一API配置
     const downloadResults = () => {
       if (currentTask.value) {
         const link = document.createElement('a')
-        link.href = `/api/tasks/${currentTask.value.id}/download`
+        link.href = `${API_BASE_URL}/api/download/result/${currentTask.value.id}`
         link.download = `results_${currentTask.value.name}`
         link.click()
       }
     }
 
-    // 关闭任务详情对话框
+    // 关闭任务对话框
     const handleTaskDialogClose = () => {
       showTaskDialog.value = false
       currentTask.value = null
       taskLogs.value = ''
     }
 
-    // 工具函数
+    // 获取状态类型
     const getStatusType = (status) => {
       const typeMap = {
         'pending': 'info',
-        'processing': 'warning',
+        'processing': 'warning', 
+        'running': 'warning',
         'completed': 'success',
         'failed': 'danger',
-        'paused': 'info'
+        'stopped': 'info',
+        'paused': 'warning'
       }
       return typeMap[status] || 'info'
     }
 
+    // 获取状态文本
     const getStatusText = (status) => {
       const textMap = {
-        'pending': '等待中',
+        'pending': '待处理',
         'processing': '处理中',
+        'running': '运行中', 
         'completed': '已完成',
         'failed': '失败',
+        'stopped': '已停止',
         'paused': '已暂停'
       }
-      return textMap[status] || '未知'
+      return textMap[status] || status
     }
 
-    const formatDateTime = (timestamp) => {
-      return new Date(timestamp).toLocaleString()
+    // 格式化日期时间
+    const formatDateTime = (dateStr) => {
+      if (!dateStr) return '-'
+      const date = new Date(dateStr)
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
     }
 
     const formatDuration = (seconds) => {
@@ -751,11 +805,13 @@ export default {
 
 <style scoped>
 .task-manager {
-  padding: 0;
+  padding: 20px;
+  background: #f8f9fa;
+  min-height: 100vh;
 }
 
 .stats-row {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
@@ -816,12 +872,28 @@ export default {
 
 .task-list-card {
   margin-bottom: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.task-list-card .el-card__body {
+  padding: 20px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.card-header span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
 }
 
 .header-actions {
@@ -832,9 +904,39 @@ export default {
 
 .filter-section {
   margin-bottom: 20px;
-  padding: 16px;
+  padding: 20px;
   background: #f5f7fa;
-  border-radius: 4px;
+  border-radius: 8px;
+  border: 1px solid #dcdfe6;
+}
+
+.filter-section .el-input,
+.filter-section .el-select,
+.filter-section .el-date-picker {
+  height: 36px;
+  line-height: 36px;
+}
+
+.filter-section .el-input__wrapper,
+.filter-section .el-select__wrapper {
+  min-height: 36px;
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 32px;
+}
+
+.action-buttons .el-button {
+  margin: 0;
+  min-width: auto;
+  padding: 4px 8px;
+  white-space: nowrap;
 }
 
 .task-name {
@@ -851,6 +953,8 @@ export default {
 .pagination-container {
   margin-top: 20px;
   text-align: right;
+  padding-top: 16px;
+  border-top: 1px solid #ebeef5;
 }
 
 .task-detail {
@@ -887,5 +991,55 @@ export default {
 .task-logs h4 {
   margin: 0 0 12px 0;
   color: #303133;
+}
+
+/* 表格滚动容器 */
+.task-list-card .el-table {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.task-list-card .el-table__header-wrapper {
+  border-radius: 6px 6px 0 0;
+}
+
+.task-list-card .el-table__body-wrapper {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* 确保表格在小屏幕上的表现 */
+@media (max-width: 1400px) {
+  .task-list-card {
+    overflow-x: auto;
+  }
+  
+  .task-list-card .el-table {
+    min-width: 1200px;
+  }
+}
+
+/* 操作按钮优化 */
+.action-buttons .el-button + .el-button {
+  margin-left: 0;
+}
+
+.action-buttons .el-popconfirm {
+  display: inline-block;
+}
+
+/* 防止搜索框重叠的样式 */
+.filter-section {
+  position: relative;
+  z-index: 1;
+  clear: both;
+}
+
+.filter-section .el-row {
+  align-items: center;
+}
+
+.filter-section .el-col {
+  margin-bottom: 0;
 }
 </style> 

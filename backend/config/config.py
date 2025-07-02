@@ -41,7 +41,8 @@ class Config:
             pass
         return 'cpu'
     
-    DEVICE = get_default_device()  # 自动选择最佳设备
+    # 在类外部设置设备
+    DEVICE = 'cpu'  # 默认CPU，稍后会动态设置
     
     # 报警配置
     ALERT_BEHAVIORS = [
@@ -77,6 +78,9 @@ class Config:
         os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
         os.makedirs(Config.OUTPUT_FOLDER, exist_ok=True)
         os.makedirs(os.path.dirname(Config.LOG_FILE), exist_ok=True)
+        
+        # 动态设置设备
+        Config.DEVICE = Config.get_default_device()
 
 
 class DevelopmentConfig(Config):

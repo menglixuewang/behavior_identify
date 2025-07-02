@@ -9,6 +9,7 @@ import json
 import threading
 import queue
 from datetime import datetime
+import base64
 from typing import Dict, List, Optional, Tuple, Any
 
 # 添加算法模块路径
@@ -40,7 +41,7 @@ class BehaviorDetectionService:
         Args:
             config: 配置字典，包含设备、输入尺寸、置信度阈值等参数
         """
-        # 设备配置 - 修复GPU检测
+        # 设备配置 - GPU检测
         if config.get('device', 'cpu').lower() == 'cuda':
             if torch.cuda.is_available():
                 self.device = 'cuda'
@@ -71,7 +72,8 @@ class BehaviorDetectionService:
         self.models_initialized = False
         self.task_lock = threading.Lock()
         self.stopped_tasks = set()
-        self.current_tasks = {}  # 当前运行的任务，保持兼容性
+        self.current_tasks = {}
+        self.should_stop_realtime = False  # 添加停止实时监控的标志
         
         # 模型相关路径
         self.yolo_model_path = 'yolov8n.pt'
@@ -316,14 +318,223 @@ class BehaviorDetectionService:
         thread.start()
         
         return task_id
-    
+
+    def generate_realtime_frames(self, source: Any):
+        """
+        生成实时视频帧流，用于HTTP视频流传输
+        这是从 behavior_identify 项目迁移的功能
+
+        Args:
+            source: 视频源（摄像头ID或视频文件路径）
+
+        Yields:
+            bytes: JPEG格式的视频帧数据
+        """
+        print(f"开始生成实时视频帧流，视频源: {source}")
+
+        # 重置停止标志
+        self.should_stop_realtime = False
+
+        if not self.models_initialized:
+            print("模型未初始化，尝试初始化...")
+            if not self.initialize_models():
+                print("模型初始化失败，无法生成视频帧")
+                return
+
+        try:
+            # 切换到算法目录
+            original_cwd = os.getcwd()
+            os.chdir(yolo_slowfast_path)
+
+            # 确保导入必要的模块
+            from yolo_slowfast import MyVideoCapture, ava_inference_transform, deepsort_update, plot_one_box
+
+            # 处理视频源参数
+            if source == '0' or source == 0:
+                source = 0  # 摄像头
+            elif isinstance(source, str) and source.isdigit():
+                source = int(source)  # 摄像头ID
+
+            print(f"处理后的视频源: {source}, 类型: {type(source)}")
+
+            # 初始化视频捕获
+            cap = MyVideoCapture(source)
+            id_to_ava_labels = {}
+
+            # 颜色映射
+            import random
+            coco_color_map = [[random.randint(0, 255) for _ in range(3)] for _ in range(80)]
+
+            # clip 队列和动作识别线程
+            clip_queue = queue.Queue()
+            result_queue = queue.Queue()
+
+            def slowfast_worker():
+                # 仅当使用GPU时才创建独立的CUDA流
+                import contextlib
+                stream = torch.cuda.Stream() if 'cuda' in str(self.device) else None
+                context_manager = torch.cuda.stream(stream) if stream else contextlib.nullcontext()
+
+                while True:
+                    # 检查停止信号
+                    if self.should_stop_realtime:
+                        print("SlowFast worker收到停止信号，退出...")
+                        break
+
+                    try:
+                        # 使用超时获取任务，避免无限等待
+                        item = clip_queue.get(timeout=1.0)
+                        if item is None:
+                            break
+                    except:
+                        # 超时或其他异常，继续检查停止信号
+                        continue
+
+                    idx, clip, pred_result = item
+
+                    # 再次检查停止信号
+                    if self.should_stop_realtime:
+                        print("SlowFast worker在处理前收到停止信号，退出...")
+                        clip_queue.task_done()
+                        break
+
+                    with context_manager:
+                        if pred_result.pred[0].shape[0]:
+                            inputs, inp_boxes, _ = ava_inference_transform(clip, pred_result.pred[0][:, 0:4], crop_size=self.input_size)
+                            inp_boxes = torch.cat([torch.zeros(inp_boxes.shape[0], 1), inp_boxes], dim=1)
+                            if isinstance(inputs, list):
+                                inputs = [inp.unsqueeze(0).to(self.device, non_blocking=True) for inp in inputs]
+                            else:
+                                inputs = inputs.unsqueeze(0).to(self.device, non_blocking=True)
+
+                            inp_boxes_gpu = inp_boxes.to(self.device, non_blocking=True)
+
+                            with torch.no_grad():
+                                slowfaster_preds = self.video_model(inputs, inp_boxes_gpu)
+
+                            # 修复数据类型转换问题 - 确保正确的数据类型转换
+                            slowfaster_preds_cpu = slowfaster_preds.cpu().float()  # 确保为float类型
+                            pred_labels = torch.argmax(slowfaster_preds_cpu, dim=1).numpy().astype(np.int32)
+                            track_ids = pred_result.pred[0][:, 5].astype(np.int32)
+
+                            result_queue.put((idx, track_ids.tolist(), pred_labels.tolist()))
+                    clip_queue.task_done()
+
+                print("SlowFast worker线程已退出")
+
+            # 启动动作识别工作线程
+            threading.Thread(target=slowfast_worker, daemon=True).start()
+
+            # 主处理循环
+            while not cap.end and not self.should_stop_realtime:
+                ret, img = cap.read()
+                if not ret:
+                    continue
+
+                # 检查是否需要停止
+                if self.should_stop_realtime:
+                    print("收到停止信号，正在退出实时监控...")
+                    break
+
+                # YOLO检测
+                results = self.yolo_model.predict(source=img, imgsz=self.input_size, device=self.device, verbose=False)
+                boxes = results[0].boxes  # YOLOv8 Results object
+
+                # 处理YOLO检测结果
+                if boxes is not None and len(boxes) > 0:
+                    # 再次检查停止信号
+                    if self.should_stop_realtime:
+                        print("在YOLO处理阶段收到停止信号，退出...")
+                        break
+
+                    pred_xyxy = boxes.xyxy.cpu().numpy()
+                    pred_conf = boxes.conf.cpu().numpy().reshape(-1, 1)
+                    pred_cls = boxes.cls.cpu().numpy().reshape(-1, 1)
+
+                    pred = np.hstack((pred_xyxy, pred_conf, pred_cls))
+                    xywh = np.hstack(((pred[:, 0:2] + pred[:, 2:4]) / 2, pred[:, 2:4] - pred[:, 0:2]))
+
+                    # DeepSort跟踪
+                    temp = deepsort_update(self.deepsort_tracker, pred, xywh, img)
+                    temp = temp if len(temp) else np.ones((0, 8)).astype(np.float32)
+
+                    # 再次检查停止信号
+                    if self.should_stop_realtime:
+                        print("在DeepSort处理阶段收到停止信号，退出...")
+                        break
+
+                    # 格式化检测结果
+                    pred_result = type("YoloPred", (), {})()
+                    pred_result.ims = [img]
+                    pred_result.pred = [temp.astype(np.float32)]
+                    pred_result.names = self.yolo_model.names
+
+                    # 行为识别（SlowFast） - 当积累了25帧时
+                    if len(cap.stack) == 25:
+                        clip = cap.get_video_clip()
+                        clip_queue.put((cap.idx, clip, pred_result))
+
+                    # 处理动作识别结果
+                    while not result_queue.empty():
+                        try:
+                            _, tids, avalabels = result_queue.get_nowait()
+                            for tid, avalabel in zip(tids, avalabels):
+                                id_to_ava_labels[tid] = self.ava_labelnames[avalabel + 1]
+                        except queue.Empty:
+                            break
+
+                    # 再次检查停止信号
+                    if self.should_stop_realtime:
+                        print("在结果处理阶段收到停止信号，退出...")
+                        break
+
+                    # 绘制检测结果 - 使用与behavior_identify相同的逻辑
+                    annotated_frame = img.copy()
+                    for _, pred in enumerate(pred_result.pred):
+                        if pred.shape[0]:
+                            for _, (*box, cls, trackid, _, _) in enumerate(pred):
+                                if int(cls) != 0:
+                                    ava_label = ''
+                                elif trackid in id_to_ava_labels.keys():
+                                    ava_label = id_to_ava_labels[trackid].split(' ')[0]
+                                else:
+                                    ava_label = 'Unknown'
+                                text = '{} {} {}'.format(int(trackid), pred_result.names[int(cls)], ava_label)
+                                color = coco_color_map[int(cls)]
+                                annotated_frame = plot_one_box(box, annotated_frame, color, text)
+
+                    # 使用绘制后的帧
+                    img = annotated_frame
+
+                # 编码为JPEG
+                ret, buffer = cv2.imencode('.jpg', img)
+                if ret:
+                    frame = buffer.tobytes()
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+                # 控制帧率
+                time.sleep(0.033)  # 约30FPS
+
+        except Exception as e:
+            print(f"生成视频帧时出错: {e}")
+        finally:
+            # 清理资源
+            try:
+                clip_queue.put(None)  # 停止工作线程
+                cap.release()
+                os.chdir(original_cwd)
+            except:
+                pass
+            print("视频帧生成结束")
+
     def stop_realtime_detection(self, task_id: str) -> bool:
         """
         停止实时检测
-        
+
         Args:
             task_id: 任务ID
-            
+
         Returns:
             bool: 是否成功停止
         """
@@ -332,6 +543,20 @@ class BehaviorDetectionService:
                 self.current_tasks[task_id]['status'] = 'stopped'
                 return True
         return False
+
+    def stop_realtime_monitoring(self):
+        """停止所有实时监控"""
+        print("收到停止实时监控请求")
+        self.should_stop_realtime = True
+
+        # 停止所有当前任务
+        with self.task_lock:
+            for task_id in list(self.current_tasks.keys()):
+                if self.current_tasks[task_id]['status'] == 'running':
+                    self.current_tasks[task_id]['status'] = 'stopped'
+                    print(f"停止任务: {task_id}")
+
+        print("实时监控已停止")
     
     def get_task_status(self, task_id: str) -> Dict[str, Any]:
         """
@@ -571,7 +796,24 @@ class BehaviorDetectionService:
             
         except Exception as e:
             print(f"检测过程错误: {e}")
-            raise e
+            import traceback
+            print(f"错误堆栈: {traceback.format_exc()}")
+            
+            # 确保资源清理
+            try:
+                if 'cap' in locals() and cap:
+                    cap.release()
+            except:
+                pass
+            
+            try:
+                if 'outputvideo' in locals() and outputvideo:
+                    outputvideo.release()
+            except:
+                pass
+            
+            # 返回错误信息而不是重新抛出异常
+            return []
         
         return results
     

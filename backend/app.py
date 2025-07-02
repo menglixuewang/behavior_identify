@@ -407,8 +407,81 @@ def create_app(config_name='development'):
             logger.error(f"停止检测失败: {str(e)}")
             return jsonify({'error': f'停止失败: {str(e)}'}), 500
     
+    # ========================= 实时视频流API =========================
+
+    @app.route('/api/realtime_feed')
+    def realtime_feed():
+        """提供实时检测视频流（从behavior_identify迁移）"""
+        source = request.args.get('source', '0')
+        logger.info(f"收到实时视频流请求，视频源: {source}")
+
+        try:
+            # 获取检测服务实例
+            detection_service = get_detection_service({
+                'device': 'cuda' if request.args.get('device') == 'cuda' else 'cpu',
+                'input_size': int(request.args.get('input_size', 640)),
+                'confidence_threshold': float(request.args.get('confidence', 0.5))
+            })
+
+            if not detection_service.models_initialized:
+                if not detection_service.initialize_models():
+                    return Response("模型初始化失败", status=503)
+
+            logger.info("开始返回视频流响应")
+            return Response(
+                detection_service.generate_realtime_frames(source),
+                mimetype='multipart/x-mixed-replace; boundary=frame'
+            )
+        except Exception as e:
+            logger.error(f"实时视频流错误: {e}")
+            return Response(f"服务器错误: {e}", status=500)
+
+    @app.route('/video_feed')
+    def video_feed():
+        """提供实时检测视频流（前端兼容路由）"""
+        source = request.args.get('source', '0')
+        logger.info(f"收到video_feed请求，视频源: {source}")
+
+        try:
+            # 获取检测服务实例
+            detection_service = get_detection_service({
+                'device': 'cuda' if request.args.get('device') == 'cuda' else 'cpu',
+                'input_size': int(request.args.get('input_size', 640)),
+                'confidence_threshold': float(request.args.get('confidence', 0.5))
+            })
+
+            if not detection_service.models_initialized:
+                if not detection_service.initialize_models():
+                    return Response("模型初始化失败", status=503)
+
+            logger.info("开始返回video_feed流响应")
+            return Response(
+                detection_service.generate_realtime_frames(source),
+                mimetype='multipart/x-mixed-replace; boundary=frame'
+            )
+        except Exception as e:
+            logger.error(f"video_feed错误: {e}")
+            return Response(f"服务器错误: {e}", status=500)
+
+    @app.route('/api/stop_monitoring', methods=['POST'])
+    def stop_monitoring():
+        """停止实时监控"""
+        try:
+            detection_service = get_detection_service()
+            # 调用停止实时监控方法
+            detection_service.stop_realtime_monitoring()
+            logger.info("实时监控已停止")
+            return jsonify({
+                'success': True,
+                'message': '监控已停止'
+            })
+
+        except Exception as e:
+            logger.error(f"停止监控失败: {str(e)}")
+            return jsonify({'error': f'停止失败: {str(e)}'}), 500
+
     # ========================= 数据查询API =========================
-    
+
     @app.route('/api/tasks', methods=['GET'])
     def get_tasks():
         """获取任务列表"""
@@ -526,14 +599,14 @@ def create_app(config_name='development'):
             video_url = None
             if task.output_path and os.path.exists(task.output_path):
                 filename = os.path.basename(task.output_path)
-                video_url = f"http://localhost:5000/api/outputs/{filename}"
+                video_url = f"http://localhost:5001/api/outputs/{filename}"
             
             # 返回完整结果
             return jsonify({
                 'success': True,
                 'filename': task.task_name,
                 'videoUrl': video_url,
-                'downloadUrl': f"http://localhost:5000/api/download/result/{task_id}",
+                'downloadUrl': f"http://localhost:5001/api/download/result/{task_id}",
                 'totalFrames': task.total_frames or 0,
                 'detectedFrames': detected_frames,
                 'totalDetections': total_detections,
@@ -621,6 +694,62 @@ def create_app(config_name='development'):
             logger.error(f"获取报警记录失败: {str(e)}")
             return jsonify({'error': f'获取失败: {str(e)}'}), 500
     
+    @app.route('/api/alerts/<int:alert_id>/status', methods=['POST'])
+    def update_alert_status(alert_id):
+        """更新报警状态"""
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({'error': '缺少请求数据'}), 400
+            
+            new_status = data.get('status')
+            if not new_status:
+                return jsonify({'error': '缺少状态参数'}), 400
+            
+            # 验证状态值
+            valid_statuses = ['active', 'acknowledged', 'resolved']
+            if new_status not in valid_statuses:
+                return jsonify({'error': f'无效的状态值，支持的状态: {valid_statuses}'}), 400
+            
+            # 获取报警记录
+            alert = AlertRecord.query.get(alert_id)
+            if not alert:
+                return jsonify({'error': '报警记录不存在'}), 404
+            
+            # 更新状态
+            old_status = alert.status
+            alert.status = new_status
+            
+            # 根据状态更新相应的时间戳
+            if new_status == 'acknowledged':
+                alert.acknowledged_at = datetime.utcnow()
+                alert.acknowledged_by = data.get('acknowledged_by', 'system')
+            elif new_status == 'resolved':
+                alert.resolved_at = datetime.utcnow()
+                # 如果之前没有被确认，同时设置确认时间
+                if not alert.acknowledged_at:
+                    alert.acknowledged_at = datetime.utcnow()
+                    alert.acknowledged_by = data.get('acknowledged_by', 'system')
+            
+            # 添加备注
+            if data.get('note'):
+                alert.note = data.get('note')
+            
+            db.session.commit()
+            
+            logger.info(f"报警 {alert_id} 状态从 {old_status} 更新为 {new_status}")
+            
+            return jsonify({
+                'success': True,
+                'message': '报警状态更新成功',
+                'alert': alert.to_dict()
+            })
+            
+        except Exception as e:
+            logger.error(f"更新报警状态失败: {str(e)}")
+            db.session.rollback()
+            return jsonify({'error': f'更新失败: {str(e)}'}), 500
+    
     @app.route('/api/statistics')
     def get_statistics():
         """获取系统统计信息"""
@@ -665,6 +794,292 @@ def create_app(config_name='development'):
         except Exception as e:
             logger.error(f"获取统计信息失败: {str(e)}")
             return jsonify({'error': f'获取失败: {str(e)}'}), 500
+    
+    @app.route('/api/statistics/overview')
+    def get_statistics_overview():
+        """获取统计概览信息（Dashboard专用）"""
+        try:
+            # 基础统计
+            total_tasks = DetectionTask.query.count()
+            active_tasks = DetectionTask.query.filter_by(status='running').count()
+            
+            # 今日统计
+            today = datetime.now().date()
+            today_alerts = AlertRecord.query.filter(
+                AlertRecord.created_at >= today
+            ).count()
+            
+            # 总检测数（从检测结果表统计）
+            total_detections = DetectionResult.query.count()
+            
+            return jsonify({
+                'success': True,
+                'activeTasks': active_tasks,
+                'todayAlerts': today_alerts,
+                'totalDetections': total_detections
+            })
+            
+        except Exception as e:
+            logger.error(f"获取统计概览失败: {str(e)}")
+            return jsonify({'error': f'获取失败: {str(e)}'}), 500
+    
+    @app.route('/api/statistics/charts')
+    def get_statistics_charts():
+        """获取图表数据"""
+        try:
+            # 获取查询参数
+            period = request.args.get('period', '24h')
+            start_time = request.args.get('startTime')
+            end_time = request.args.get('endTime')
+            
+            # 设置时间范围
+            end_dt = datetime.now()
+            if period == '24h':
+                start_dt = end_dt - timedelta(hours=24)
+            elif period == '7d':
+                start_dt = end_dt - timedelta(days=7)
+            elif period == '30d':
+                start_dt = end_dt - timedelta(days=30)
+            elif period == '90d':
+                start_dt = end_dt - timedelta(days=90)
+            else:
+                start_dt = end_dt - timedelta(hours=24)
+            
+            # 如果有自定义时间范围
+            if start_time and end_time:
+                try:
+                    start_dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+                    end_dt = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+                except ValueError:
+                    pass
+            
+            # --- 行为分布数据 (全局统计) ---
+            behavior_query = db.session.query(
+                DetectionResult.behavior_type,
+                db.func.count(DetectionResult.id).label('count')
+            ).filter(
+                DetectionResult.behavior_type.isnot(None)
+            ).group_by(DetectionResult.behavior_type).all()
+            
+            behavior_data = []
+            behavior_names = {
+                'fall down': '跌倒检测', 'fight': '打斗行为', 'enter': '区域闯入',
+                'exit': '区域离开', 'run': '快速奔跑', 'sit': '坐下行为',
+                'stand': '站立行为', 'walk': '正常行走'
+            }
+            for behavior, count in behavior_query:
+                behavior_data.append({
+                    'name': behavior_names.get(behavior, behavior),
+                    'value': count,
+                    'behavior_type': behavior
+                })
+            
+            # --- 时间趋势数据 (基于任务创建时间) ---
+            if period == '24h':
+                # 24小时趋势，按小时分组
+                trend_query = db.session.query(
+                    db.func.strftime('%H', DetectionTask.created_at).label('hour'),
+                    db.func.count(DetectionResult.id).label('count')
+                ).join(DetectionTask, DetectionResult.task_id == DetectionTask.id).filter(
+                    DetectionTask.created_at >= start_dt,
+                    DetectionTask.created_at <= end_dt
+                ).group_by(db.func.strftime('%H', DetectionTask.created_at)).all()
+                
+                trend_data = []
+                hours_data = {item.hour: item.count for item in trend_query}
+                for hour in range(24):
+                    hour_str = f"{hour:02d}"
+                    trend_data.append({
+                        'time': f"{hour_str}:00",
+                        'value': hours_data.get(hour_str, 0)
+                    })
+            else:
+                # 多日趋势，按日分组
+                trend_query = db.session.query(
+                    db.func.strftime('%Y-%m-%d', DetectionTask.created_at).label('date'),
+                    db.func.count(DetectionResult.id).label('count')
+                ).join(DetectionTask, DetectionResult.task_id == DetectionTask.id).filter(
+                    DetectionTask.created_at >= start_dt,
+                    DetectionTask.created_at <= end_dt
+                ).group_by(db.func.strftime('%Y-%m-%d', DetectionTask.created_at)).all()
+                
+                trend_data = []
+                day_counts = {item.date: item.count for item in trend_query}
+                current_day = start_dt.date()
+                while current_day <= end_dt.date():
+                    date_str = current_day.strftime('%Y-%m-%d')
+                    trend_data.append({
+                        'time': date_str,
+                        'value': day_counts.get(date_str, 0)
+                    })
+                    current_day += timedelta(days=1)
+            
+            # --- 报警级别分布 (基于报警创建时间) ---
+            alert_levels = [
+                {'name': '高级别报警', 'value': 0, 'level': 'high'},
+                {'name': '中级别报警', 'value': 0, 'level': 'medium'}, 
+                {'name': '低级别报警', 'value': 0, 'level': 'low'}
+            ]
+            high_risk_behaviors = ['fall down', 'fight', 'enter']
+            medium_risk_behaviors = ['run', 'exit']
+            
+            for alert in alert_levels:
+                query = AlertRecord.query.filter(
+                    AlertRecord.created_at >= start_dt,
+                    AlertRecord.created_at <= end_dt
+                )
+                if alert['level'] == 'high':
+                    alert['value'] = query.filter(AlertRecord.alert_type.in_(high_risk_behaviors)).count()
+                elif alert['level'] == 'medium':
+                    alert['value'] = query.filter(AlertRecord.alert_type.in_(medium_risk_behaviors)).count()
+                else:
+                    alert['value'] = query.filter(~AlertRecord.alert_type.in_(high_risk_behaviors + medium_risk_behaviors)).count()
+            
+            # --- 24小时时段分析 (基于任务创建时间) ---
+            hourly_query = db.session.query(
+                db.func.strftime('%H', DetectionTask.created_at).label('hour'),
+                db.func.count(DetectionResult.id).label('detections'),
+                db.func.count(
+                    db.case((DetectionResult.is_anomaly == True, 1), else_=None)
+                ).label('alerts')
+            ).join(DetectionTask, DetectionResult.task_id == DetectionTask.id).filter(
+                DetectionTask.created_at >= start_dt,
+                DetectionTask.created_at <= end_dt
+            ).group_by(db.func.strftime('%H', DetectionTask.created_at)).all()
+            
+            hourly_data = []
+            hour_stats = {item.hour: {'detections': item.detections, 'alerts': item.alerts} for item in hourly_query}
+            for hour in range(24):
+                hour_str = f"{hour:02d}"
+                stats = hour_stats.get(hour_str, {'detections': 0, 'alerts': 0})
+                detections = stats['detections']
+                alerts = stats['alerts']
+                hourly_data.append({
+                    'hour': hour,
+                    'time': f"{hour_str}:00",
+                    'detections': detections,
+                    'alerts': alerts,
+                    'alertRate': round(alerts / detections * 100, 1) if detections > 0 else 0
+                })
+            
+            return jsonify({
+                'success': True,
+                'period': period,
+                'timeRange': {
+                    'start': start_dt.isoformat(),
+                    'end': end_dt.isoformat()
+                },
+                'charts': {
+                    'behaviorDistribution': behavior_data,
+                    'trendAnalysis': trend_data,
+                    'alertLevels': alert_levels,
+                    'hourlyAnalysis': hourly_data
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"获取图表数据失败: {str(e)}")
+            return jsonify({'error': f'获取失败: {str(e)}'}), 500
+    
+    @app.route('/api/system/uptime')
+    def get_system_uptime():
+        """获取系统运行时间"""
+        try:
+            # 简单的运行时间计算（基于第一个任务的创建时间）
+            first_task = DetectionTask.query.order_by(DetectionTask.created_at.asc()).first()
+            if first_task:
+                start_time = first_task.created_at
+                now = datetime.utcnow()
+                uptime_delta = now - start_time
+                
+                days = uptime_delta.days
+                hours = uptime_delta.seconds // 3600
+                uptime = f"{days}天{hours}小时"
+            else:
+                uptime = "0天0小时"
+            
+            return jsonify({
+                'success': True,
+                'uptime': uptime
+            })
+            
+        except Exception as e:
+            logger.error(f"获取系统运行时间失败: {str(e)}")
+            return jsonify({'error': f'获取失败: {str(e)}'}), 500
+    
+    @app.route('/api/statistics/export')
+    def export_statistics():
+        """导出统计数据"""
+        try:
+            # 获取查询参数
+            start_time = request.args.get('startTime')
+            end_time = request.args.get('endTime')
+            
+            # 设置默认时间范围（最近30天）
+            end_dt = datetime.now()
+            start_dt = end_dt - timedelta(days=30)
+            
+            if start_time and end_time:
+                try:
+                    start_dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+                    end_dt = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+                except ValueError:
+                    pass
+            
+            # 生成CSV数据
+            csv_data = []
+            csv_data.append(['统计类型', '项目', '数值', '时间范围'])
+            
+            # 任务统计
+            total_tasks = DetectionTask.query.filter(
+                DetectionTask.created_at >= start_dt,
+                DetectionTask.created_at <= end_dt
+            ).count()
+            csv_data.append(['任务统计', '总任务数', total_tasks, f"{start_dt.date()} - {end_dt.date()}"])
+            
+            # 报警统计
+            total_alerts = AlertRecord.query.filter(
+                AlertRecord.created_at >= start_dt,
+                AlertRecord.created_at <= end_dt
+            ).count()
+            csv_data.append(['报警统计', '总报警数', total_alerts, f"{start_dt.date()} - {end_dt.date()}"])
+            
+            # 行为统计
+            behavior_query = db.session.query(
+                DetectionResult.behavior_type,
+                db.func.count(DetectionResult.id).label('count')
+            ).filter(
+                DetectionResult.timestamp >= start_dt,
+                DetectionResult.timestamp <= end_dt,
+                DetectionResult.behavior_type.isnot(None)
+            ).group_by(DetectionResult.behavior_type).all()
+            
+            for behavior, count in behavior_query:
+                csv_data.append(['行为统计', behavior, count, f"{start_dt.date()} - {end_dt.date()}"])
+            
+            # 生成CSV字符串
+            import io
+            output = io.StringIO()
+            for row in csv_data:
+                output.write(','.join(str(cell) for cell in row) + '\n')
+            
+            csv_content = output.getvalue()
+            output.close()
+            
+            # 返回CSV文件
+            response = Response(
+                csv_content,
+                mimetype='text/csv',
+                headers={
+                    'Content-Disposition': f'attachment; filename=statistics_{start_dt.date()}_{end_dt.date()}.csv',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            )
+            return response
+            
+        except Exception as e:
+            logger.error(f"导出统计数据失败: {str(e)}")
+            return jsonify({'error': f'导出失败: {str(e)}'}), 500
     
     # ========================= 文件下载API =========================
     
@@ -851,6 +1266,9 @@ def create_app(config_name='development'):
 
 
 if __name__ == '__main__':
+    # 设置环境变量禁用GUI显示，避免服务器环境中的OpenCV GUI异常
+    os.environ['ENABLE_GUI'] = 'false'
+    
     # 创建应用实例
     app = create_app('development')
     
@@ -858,12 +1276,12 @@ if __name__ == '__main__':
     print("=" * 50)
     print("智能行为检测系统 - 后端服务")
     print("=" * 50)
-    print(f"服务地址: http://localhost:5000")
-    print(f"API文档: http://localhost:5000/api/health")
+    print(f"服务地址: http://localhost:5001")
+    print(f"API文档: http://localhost:5001/api/health")
     print("=" * 50)
     
     app.socketio.run(app, 
                     host='0.0.0.0', 
-                    port=5000, 
+                    port=5001, 
                     debug=True, 
                     use_reloader=False)

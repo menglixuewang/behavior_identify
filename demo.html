@@ -3,427 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能行为检测系统 - 演示</title>
+    <title>智能行为检测系统 - 测试页面</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #333;
         }
-
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            padding: 40px 0;
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .demo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .demo-card {
             background: white;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
-
-        .demo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
         }
-
-        .demo-card h3 {
-            color: #667eea;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .demo-card p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .feature-list {
-            list-style: none;
-            margin-bottom: 20px;
-        }
-
-        .feature-list li {
-            padding: 8px 0;
-            color: #555;
-            position: relative;
-            padding-left: 25px;
-        }
-
-        .feature-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #4CAF50;
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
             font-weight: bold;
         }
-
-        .btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            background: #007bff;
             color: white;
-            text-decoration: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-            font-weight: 500;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        button:hover {
+            background: #0056b3;
         }
-
-        .status-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .status-item {
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
             text-align: center;
-            padding: 20px;
+            margin: 20px 0;
             background: #f8f9fa;
-            border-radius: 10px;
         }
-
-        .status-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
+        input[type="file"] {
+            margin: 10px 0;
         }
-
-        .status-label {
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .tech-stack {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .tech-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
+        #results {
             margin-top: 20px;
-        }
-
-        .tech-item {
-            text-align: center;
-            padding: 20px;
-            border: 2px solid #f0f0f0;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .tech-item:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-
-        .footer {
-            text-align: center;
-            color: white;
-            padding: 40px 0;
-            margin-top: 50px;
-        }
-
-        .icon {
-            font-size: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .demo-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .demo-card {
-                padding: 20px;
-            }
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 头部 -->
-        <div class="header">
-            <h1>🎯 智能行为检测系统</h1>
-            <p>基于YOLOv8+SlowFast算法的实时视频行为识别平台</p>
+        <h1>🤖 智能行为检测系统</h1>
+        
+        <div id="status" class="status">正在检查系统状态...</div>
+        
+        <div class="upload-area">
+            <h3>📹 视频检测</h3>
+            <input type="file" id="videoFile" accept="video/*">
+            <br>
+            <button onclick="uploadVideo()">上传并检测视频</button>
         </div>
-
-        <!-- 功能演示 -->
-        <div class="demo-grid">
-            <div class="demo-card">
-                <h3>
-                    <span class="icon">📹</span>
-                    实时监控
-                </h3>
-                <p>支持多路摄像头接入，实时检测人员行为，自动识别异常情况并及时报警。</p>
-                <ul class="feature-list">
-                    <li>多摄像头同时监控</li>
-                    <li>实时行为识别</li>
-                    <li>异常行为自动报警</li>
-                    <li>目标跟踪与轨迹分析</li>
-                </ul>
-                <a href="#" class="btn" onclick="alert('实时监控功能演示\n\n当系统启动后，您可以：\n1. 选择摄像头设备\n2. 开始实时检测\n3. 查看检测结果\n4. 接收异常报警')">查看演示</a>
-            </div>
-
-            <div class="demo-card">
-                <h3>
-                    <span class="icon">🎥</span>
-                    视频分析
-                </h3>
-                <p>上传视频文件进行离线分析，生成详细的行为检测报告和标注视频。</p>
-                <ul class="feature-list">
-                    <li>支持多种视频格式</li>
-                    <li>批量视频处理</li>
-                    <li>生成标注视频</li>
-                    <li>导出检测报告</li>
-                </ul>
-                <a href="#" class="btn" onclick="alert('视频分析功能演示\n\n功能包括：\n1. 拖拽上传视频文件\n2. 设置检测参数\n3. 查看处理进度\n4. 下载结果视频')">查看演示</a>
-            </div>
-
-            <div class="demo-card">
-                <h3>
-                    <span class="icon">🚨</span>
-                    智能报警
-                </h3>
-                <p>基于深度学习算法，精准识别跌倒、打斗、闯入等异常行为，及时触发报警。</p>
-                <ul class="feature-list">
-                    <li>跌倒检测</li>
-                    <li>暴力行为识别</li>
-                    <li>区域闯入检测</li>
-                    <li>徘徊行为分析</li>
-                </ul>
-                <a href="#" class="btn" onclick="alert('智能报警功能演示\n\n报警类型：\n1. 跌倒 - 检测人员摔倒\n2. 打斗 - 识别暴力行为\n3. 闯入 - 监控禁入区域\n4. 徘徊 - 发现可疑徘徊')">查看演示</a>
-            </div>
-
-            <div class="demo-card">
-                <h3>
-                    <span class="icon">📊</span>
-                    数据分析
-                </h3>
-                <p>提供丰富的数据统计和可视化图表，帮助用户了解行为模式和趋势。</p>
-                <ul class="feature-list">
-                    <li>行为统计图表</li>
-                    <li>时间趋势分析</li>
-                    <li>区域热力图</li>
-                    <li>报告导出功能</li>
-                </ul>
-                <a href="#" class="btn" onclick="alert('数据分析功能演示\n\n分析内容：\n1. 检测任务统计\n2. 行为类型分布\n3. 时间段分析\n4. 异常事件记录')">查看演示</a>
-            </div>
+        
+        <div>
+            <h3>📊 系统功能测试</h3>
+            <button onclick="checkHealth()">检查健康状态</button>
+            <button onclick="getTasks()">获取任务列表</button>
+            <button onclick="getStatistics()">获取统计信息</button>
+            <button onclick="getAlerts()">获取报警记录</button>
         </div>
-
-        <!-- 系统状态 -->
-        <div class="status-section">
-            <h3 style="color: #667eea; margin-bottom: 10px;">📈 系统状态概览</h3>
-            <p style="color: #666; margin-bottom: 20px;">实时显示系统运行状态和统计信息</p>
-            
-            <div class="status-grid">
-                <div class="status-item">
-                    <div class="status-value" id="active-tasks">0</div>
-                    <div class="status-label">活跃任务</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-value" id="total-detections">0</div>
-                    <div class="status-label">总检测次数</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-value" id="alerts-today">0</div>
-                    <div class="status-label">今日报警</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-value" id="system-uptime">0天</div>
-                    <div class="status-label">系统运行时间</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 技术栈 -->
-        <div class="tech-stack">
-            <h3 style="color: #667eea; margin-bottom: 10px;">🛠️ 技术架构</h3>
-            <p style="color: #666; margin-bottom: 20px;">采用现代化技术栈，确保系统高性能和可扩展性</p>
-            
-            <div class="tech-grid">
-                <div class="tech-item">
-                    <div style="font-size: 2rem; margin-bottom: 10px;">🧠</div>
-                    <div><strong>YOLOv8</strong></div>
-                    <div style="font-size: 0.9rem; color: #666;">目标检测</div>
-                </div>
-                <div class="tech-item">
-                    <div style="font-size: 2rem; margin-bottom: 10px;">🎬</div>
-                    <div><strong>SlowFast</strong></div>
-                    <div style="font-size: 0.9rem; color: #666;">行为识别</div>
-                </div>
-                <div class="tech-item">
-                    <div style="font-size: 2rem; margin-bottom: 10px;">🔗</div>
-                    <div><strong>DeepSort</strong></div>
-                    <div style="font-size: 0.9rem; color: #666;">目标跟踪</div>
-                </div>
-                <div class="tech-item">
-                    <div style="font-size: 2rem; margin-bottom: 10px;">⚡</div>
-                    <div><strong>Flask</strong></div>
-                    <div style="font-size: 0.9rem; color: #666;">后端框架</div>
-                </div>
-                <div class="tech-item">
-                    <div style="font-size: 2rem; margin-bottom: 10px;">💚</div>
-                    <div><strong>Vue.js</strong></div>
-                    <div style="font-size: 0.9rem; color: #666;">前端框架</div>
-                </div>
-                <div class="tech-item">
-                    <div style="font-size: 2rem; margin-bottom: 10px;">🗄️</div>
-                    <div><strong>SQLite</strong></div>
-                    <div style="font-size: 0.9rem; color: #666;">数据存储</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 页脚 -->
-        <div class="footer">
-            <h3 style="margin-bottom: 20px;">🚀 立即开始</h3>
-            <p style="margin-bottom: 20px;">准备好体验智能行为检测的强大功能了吗？</p>
-            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-                <a href="#" class="btn" onclick="showStartGuide()">启动系统</a>
-                <a href="#" class="btn" onclick="showDocumentation()" style="background: rgba(255,255,255,0.2);">查看文档</a>
-            </div>
-            
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
-                <p>© 2023 智能行为检测系统 | 基于深度学习的实时视频分析平台</p>
-            </div>
-        </div>
+        
+        <div id="results"></div>
     </div>
 
     <script>
-        // 模拟动态数据更新
-        function updateStats() {
-            document.getElementById('active-tasks').textContent = Math.floor(Math.random() * 5) + 1;
-            document.getElementById('total-detections').textContent = Math.floor(Math.random() * 10000) + 5000;
-            document.getElementById('alerts-today').textContent = Math.floor(Math.random() * 20) + 1;
+        const API_BASE = 'http://localhost:5001';
+        
+        // 页面加载时自动检查系统状态
+        window.onload = function() {
+            checkHealth();
+        };
+        
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API调用失败:', error);
+                throw error;
+            }
+        }
+        
+        async function checkHealth() {
+            const statusDiv = document.getElementById('status');
+            try {
+                const result = await apiCall('/api/health');
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = `✅ 系统正常运行<br>数据库状态: ${result.database}<br>时间: ${result.timestamp}`;
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ 系统连接失败: ${error.message}`;
+            }
+        }
+        
+        async function getTasks() {
+            try {
+                const result = await apiCall('/api/tasks');
+                showResults('任务列表', result);
+            } catch (error) {
+                showResults('任务列表错误', {error: error.message});
+            }
+        }
+        
+        async function getStatistics() {
+            try {
+                const result = await apiCall('/api/statistics');
+                showResults('系统统计', result);
+            } catch (error) {
+                showResults('统计信息错误', {error: error.message});
+            }
+        }
+        
+        async function getAlerts() {
+            try {
+                const result = await apiCall('/api/alerts');
+                showResults('报警记录', result);
+            } catch (error) {
+                showResults('报警记录错误', {error: error.message});
+            }
+        }
+        
+        async function uploadVideo() {
+            const fileInput = document.getElementById('videoFile');
+            const file = fileInput.files[0];
             
-            // 更新运行时间
-            const startTime = new Date('2023-01-01');
-            const now = new Date();
-            const diffTime = Math.abs(now - startTime);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            document.getElementById('system-uptime').textContent = diffDays + '天';
-        }
-
-        // 启动指南
-        function showStartGuide() {
-            alert(`🚀 系统启动指南
-
-📋 启动步骤：
-1. 确保已安装Python 3.8+和Node.js 16+
-2. 在终端中运行：chmod +x start.sh
-3. 执行启动脚本：./start.sh
-4. 等待服务启动完成
-5. 访问 http://localhost:8080
-
-📝 详细说明：
-- 后端服务：http://localhost:5000
-- 前端界面：http://localhost:8080
-- 健康检查：http://localhost:5000/api/health
-
-💡 提示：
-首次启动可能需要下载模型文件，请耐心等待。
-如遇问题，请查看 DEPLOYMENT_GUIDE.md 文档。`);
-        }
-
-        // 文档说明
-        function showDocumentation() {
-            alert(`📚 系统文档
-
-📖 可用文档：
-1. README.md - 项目概述和快速入门
-2. DEPLOYMENT_GUIDE.md - 详细部署指南
-3. backend/requirements.txt - Python依赖列表
-4. frontend/package.json - Node.js依赖配置
-
-🔧 配置文件：
-- backend/config/config.py - 后端配置
-- frontend/src/config/ - 前端配置
-
-📊 API文档：
-启动后端服务后访问：
-http://localhost:5000/api/health
-
-🛠️ 故障排除：
-详见 DEPLOYMENT_GUIDE.md 中的故障排除章节`);
-        }
-
-        // 页面加载完成后开始更新统计数据
-        document.addEventListener('DOMContentLoaded', function() {
-            updateStats();
-            setInterval(updateStats, 5000); // 每5秒更新一次
-        });
-
-        // 添加一些交互效果
-        document.querySelectorAll('.demo-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.background = '#f8f9ff';
-            });
+            if (!file) {
+                alert('请选择视频文件');
+                return;
+            }
             
-            card.addEventListener('mouseleave', function() {
-                this.style.background = 'white';
-            });
-        });
+            const formData = new FormData();
+            formData.append('video', file);
+            formData.append('task_name', file.name);
+            formData.append('confidence', '0.5');
+            formData.append('input_size', '640');
+            formData.append('device', 'cpu');
+            
+            try {
+                showResults('上传状态', {message: '正在上传视频...'});
+                
+                const uploadResponse = await fetch(`${API_BASE}/api/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!uploadResponse.ok) {
+                    throw new Error(`上传失败: ${uploadResponse.statusText}`);
+                }
+                
+                const uploadResult = await uploadResponse.json();
+                showResults('上传结果', uploadResult);
+                
+                if (uploadResult.success) {
+                    // 启动检测
+                    const detectResponse = await apiCall('/api/detect/video', {
+                        method: 'POST',
+                        body: JSON.stringify({task_id: uploadResult.taskId})
+                    });
+                    
+                    showResults('检测启动结果', detectResponse);
+                }
+                
+            } catch (error) {
+                showResults('上传错误', {error: error.message});
+            }
+        }
+        
+        function showResults(title, data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h4>${title}</h4>
+                <pre style="background: white; padding: 15px; border-radius: 5px; overflow-x: auto; border: 1px solid #ddd;">${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
     </script>
 </body>
 </html> 

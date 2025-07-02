@@ -294,3 +294,122 @@ WHERE detection_tasks.source_type = ? ORDER BY detection_tasks.created_at DESC
 2025-06-29 10:51:44,197 - behavior_detection - INFO - app:serve_output_file:717 - 文件大小: 13822300 bytes
 2025-06-29 10:51:44,198 - behavior_detection - INFO - app:serve_output_file:722 - Range请求: bytes=8421376-
 2025-06-29 10:51:44,205 - behavior_detection - INFO - app:serve_output_file:754 - 返回Range响应: 8421376-13822299/13822300
+2025-07-02 10:11:07,980 - behavior_detection - INFO - app:handle_connect:1210 - WebSocket客户端连接: 5c99da26-1906-4828-bf5a-38c810f3f0ab
+2025-07-02 10:11:31,631 - behavior_detection - INFO - app:handle_disconnect:1216 - WebSocket客户端断开: 5c99da26-1906-4828-bf5a-38c810f3f0ab
+2025-07-02 10:41:06,750 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 10:41:07,750 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 10:45:41,050 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 10:45:42,036 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 10:55:29,949 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 10:55:30,680 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 10:57:49,028 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 10:57:49,613 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 11:00:20,163 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:00:20,872 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 11:11:37,021 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:16:05,893 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:25:51,028 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:25:52,918 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:31:48,649 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:31:51,358 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 11:34:20,958 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:34:23,901 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 11:48:58,960 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:49:03,167 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 11:51:31,040 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall_down.mp4, 任务ID: 5
+2025-07-02 11:53:39,825 - behavior_detection - INFO - app:delete_task:649 - 删除源文件: F:\CursorCode\behavior\behavior_identify_frontend\backend\uploads\1751428291_fall_down.mp4
+2025-07-02 11:53:48,836 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall_down.mp4, 任务ID: 5
+2025-07-02 11:55:38,039 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall_down.mp4, 任务ID: 6
+2025-07-02 11:55:54,065 - behavior_detection - ERROR - app:detection_worker:283 - 检测任务执行失败: 'frame_number'
+2025-07-02 11:56:21,192 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 11:56:21,192 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 11:59:35,498 - behavior_detection - INFO - app:delete_task:624 - 删除输出文件: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs\result_6_1751428538.mp4
+2025-07-02 11:59:35,498 - behavior_detection - INFO - app:delete_task:632 - 删除源文件: F:\CursorCode\behavior\behavior_identify_frontend\backend\uploads\1751428538_fall_down.mp4
+2025-07-02 11:59:41,722 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall_down.mp4, 任务ID: 6
+2025-07-02 12:00:57,163 - behavior_detection - INFO - app:serve_output_file:1097 - 请求静态文件: result_6_1751428781.mp4
+2025-07-02 12:00:57,163 - behavior_detection - INFO - app:serve_output_file:1104 - 文件路径: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs\result_6_1751428781.mp4
+2025-07-02 12:00:57,163 - behavior_detection - INFO - app:serve_output_file:1105 - 当前工作目录: F:\CursorCode\behavior\behavior_identify_frontend
+2025-07-02 12:00:57,163 - behavior_detection - INFO - app:serve_output_file:1106 - outputs目录: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs
+2025-07-02 12:00:57,163 - behavior_detection - INFO - app:serve_output_file:1107 - 文件存在: True
+2025-07-02 12:00:57,163 - behavior_detection - INFO - app:serve_output_file:1115 - 文件大小: 14990593 bytes
+2025-07-02 12:00:57,163 - behavior_detection - INFO - app:serve_output_file:1120 - Range请求: bytes=0-
+2025-07-02 12:00:57,177 - behavior_detection - INFO - app:serve_output_file:1152 - 返回Range响应: 0-14990592/14990593
+2025-07-02 12:00:57,430 - behavior_detection - INFO - app:serve_output_file:1097 - 请求静态文件: result_6_1751428781.mp4
+2025-07-02 12:00:57,430 - behavior_detection - INFO - app:serve_output_file:1104 - 文件路径: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs\result_6_1751428781.mp4
+2025-07-02 12:00:57,430 - behavior_detection - INFO - app:serve_output_file:1105 - 当前工作目录: F:\CursorCode\behavior\behavior_identify_frontend
+2025-07-02 12:00:57,430 - behavior_detection - INFO - app:serve_output_file:1106 - outputs目录: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs
+2025-07-02 12:00:57,430 - behavior_detection - INFO - app:serve_output_file:1107 - 文件存在: True
+2025-07-02 12:00:57,430 - behavior_detection - INFO - app:serve_output_file:1115 - 文件大小: 14990593 bytes
+2025-07-02 12:00:57,430 - behavior_detection - INFO - app:serve_output_file:1120 - Range请求: bytes=14974976-
+2025-07-02 12:00:57,430 - behavior_detection - INFO - app:serve_output_file:1152 - 返回Range响应: 14974976-14990592/14990593
+2025-07-02 12:00:57,436 - behavior_detection - INFO - app:serve_output_file:1097 - 请求静态文件: result_6_1751428781.mp4
+2025-07-02 12:00:57,436 - behavior_detection - INFO - app:serve_output_file:1104 - 文件路径: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs\result_6_1751428781.mp4
+2025-07-02 12:00:57,436 - behavior_detection - INFO - app:serve_output_file:1105 - 当前工作目录: F:\CursorCode\behavior\behavior_identify_frontend
+2025-07-02 12:00:57,436 - behavior_detection - INFO - app:serve_output_file:1106 - outputs目录: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs
+2025-07-02 12:00:57,436 - behavior_detection - INFO - app:serve_output_file:1107 - 文件存在: True
+2025-07-02 12:00:57,436 - behavior_detection - INFO - app:serve_output_file:1115 - 文件大小: 14990593 bytes
+2025-07-02 12:00:57,436 - behavior_detection - INFO - app:serve_output_file:1120 - Range请求: bytes=196608-
+2025-07-02 12:00:57,448 - behavior_detection - INFO - app:serve_output_file:1152 - 返回Range响应: 196608-14990592/14990593
+2025-07-02 12:01:04,406 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 12:01:04,407 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 14:13:32,584 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 14:13:33,402 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 14:14:59,510 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 14:15:00,388 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 14:32:01,124 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 14:32:02,121 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 14:46:20,494 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 14:46:21,388 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 14:48:45,506 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 14:48:46,079 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 14:50:24,520 - behavior_detection - INFO - app:serve_output_file:1114 - 请求静态文件: result_6_1751428781.mp4
+2025-07-02 14:50:24,520 - behavior_detection - INFO - app:serve_output_file:1121 - 文件路径: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs\result_6_1751428781.mp4
+2025-07-02 14:50:24,520 - behavior_detection - INFO - app:serve_output_file:1122 - 当前工作目录: F:\CursorCode\behavior\behavior_identify_frontend
+2025-07-02 14:50:24,520 - behavior_detection - INFO - app:serve_output_file:1123 - outputs目录: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs
+2025-07-02 14:50:24,520 - behavior_detection - INFO - app:serve_output_file:1124 - 文件存在: True
+2025-07-02 14:50:24,520 - behavior_detection - INFO - app:serve_output_file:1132 - 文件大小: 14990593 bytes
+2025-07-02 14:50:24,520 - behavior_detection - INFO - app:serve_output_file:1137 - Range请求: bytes=0-
+2025-07-02 14:50:24,562 - behavior_detection - INFO - app:serve_output_file:1169 - 返回Range响应: 0-14990592/14990593
+2025-07-02 14:50:24,786 - behavior_detection - INFO - app:serve_output_file:1114 - 请求静态文件: result_6_1751428781.mp4
+2025-07-02 14:50:24,786 - behavior_detection - INFO - app:serve_output_file:1121 - 文件路径: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs\result_6_1751428781.mp4
+2025-07-02 14:50:24,787 - behavior_detection - INFO - app:serve_output_file:1122 - 当前工作目录: F:\CursorCode\behavior\behavior_identify_frontend
+2025-07-02 14:50:24,787 - behavior_detection - INFO - app:serve_output_file:1123 - outputs目录: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs
+2025-07-02 14:50:24,787 - behavior_detection - INFO - app:serve_output_file:1124 - 文件存在: True
+2025-07-02 14:50:24,787 - behavior_detection - INFO - app:serve_output_file:1132 - 文件大小: 14990593 bytes
+2025-07-02 14:50:24,787 - behavior_detection - INFO - app:serve_output_file:1137 - Range请求: bytes=14974976-
+2025-07-02 14:50:24,787 - behavior_detection - INFO - app:serve_output_file:1169 - 返回Range响应: 14974976-14990592/14990593
+2025-07-02 14:50:24,793 - behavior_detection - INFO - app:serve_output_file:1114 - 请求静态文件: result_6_1751428781.mp4
+2025-07-02 14:50:24,793 - behavior_detection - INFO - app:serve_output_file:1121 - 文件路径: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs\result_6_1751428781.mp4
+2025-07-02 14:50:24,793 - behavior_detection - INFO - app:serve_output_file:1122 - 当前工作目录: F:\CursorCode\behavior\behavior_identify_frontend
+2025-07-02 14:50:24,793 - behavior_detection - INFO - app:serve_output_file:1123 - outputs目录: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs
+2025-07-02 14:50:24,793 - behavior_detection - INFO - app:serve_output_file:1124 - 文件存在: True
+2025-07-02 14:50:24,793 - behavior_detection - INFO - app:serve_output_file:1132 - 文件大小: 14990593 bytes
+2025-07-02 14:50:24,793 - behavior_detection - INFO - app:serve_output_file:1137 - Range请求: bytes=65536-
+2025-07-02 14:50:24,799 - behavior_detection - INFO - app:serve_output_file:1169 - 返回Range响应: 65536-14990592/14990593
+2025-07-02 14:50:24,890 - behavior_detection - INFO - app:serve_output_file:1114 - 请求静态文件: result_6_1751428781.mp4
+2025-07-02 14:50:24,890 - behavior_detection - INFO - app:serve_output_file:1121 - 文件路径: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs\result_6_1751428781.mp4
+2025-07-02 14:50:24,892 - behavior_detection - INFO - app:serve_output_file:1122 - 当前工作目录: F:\CursorCode\behavior\behavior_identify_frontend
+2025-07-02 14:50:24,892 - behavior_detection - INFO - app:serve_output_file:1123 - outputs目录: F:\CursorCode\behavior\behavior_identify_frontend\backend\outputs
+2025-07-02 14:50:24,898 - behavior_detection - INFO - app:serve_output_file:1124 - 文件存在: True
+2025-07-02 14:50:24,898 - behavior_detection - INFO - app:serve_output_file:1132 - 文件大小: 14990593 bytes
+2025-07-02 14:50:24,901 - behavior_detection - INFO - app:serve_output_file:1137 - Range请求: bytes=8454144-
+2025-07-02 14:50:24,901 - behavior_detection - INFO - app:serve_output_file:1169 - 返回Range响应: 8454144-14990592/14990593
+2025-07-02 14:59:04,848 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 14:59:05,524 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 15:00:56,700 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 15:00:57,427 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 15:05:56,545 - behavior_detection - ERROR - app:stop_monitoring:480 - 停止监控失败: 'NoneType' object has no attribute 'get'
+2025-07-02 15:06:15,645 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 15:06:16,459 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 15:07:45,237 - behavior_detection - INFO - app:stop_monitoring:473 - 实时监控已停止
+2025-07-02 15:07:45,237 - behavior_detection - INFO - app:stop_monitoring:473 - 实时监控已停止
+2025-07-02 15:07:45,247 - behavior_detection - INFO - app:stop_monitoring:473 - 实时监控已停止
+2025-07-02 15:07:45,247 - behavior_detection - INFO - app:stop_monitoring:473 - 实时监控已停止
+2025-07-02 15:08:20,586 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 15:08:20,587 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应
+2025-07-02 15:09:08,189 - behavior_detection - INFO - app:stop_monitoring:473 - 实时监控已停止
+2025-07-02 15:09:08,189 - behavior_detection - INFO - app:stop_monitoring:473 - 实时监控已停止
+2025-07-02 15:09:08,189 - behavior_detection - INFO - app:stop_monitoring:473 - 实时监控已停止
+2025-07-02 15:09:08,193 - behavior_detection - INFO - app:stop_monitoring:473 - 实时监控已停止
+2025-07-02 15:14:23,378 - behavior_detection - INFO - app:video_feed:443 - 收到video_feed请求，视频源: 0
+2025-07-02 15:14:24,020 - behavior_detection - INFO - app:video_feed:457 - 开始返回video_feed流响应

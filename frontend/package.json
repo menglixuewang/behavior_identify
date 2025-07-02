@@ -39,6 +39,7 @@
     "typescript": "^5.2.2",
     "unplugin-auto-import": "^0.17.2",
     "unplugin-vue-components": "^0.25.2",
+    "vue-template-compiler": "^2.7.16",
     "webpack": "^5.89.0"
   },
   "browserslist": [

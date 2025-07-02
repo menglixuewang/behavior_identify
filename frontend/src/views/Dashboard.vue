@@ -161,9 +161,12 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { VideoCamera, Warning, DataAnalysis, Clock, Check } from '@element-plus/icons-vue'
+import * as echarts from 'echarts'
+import { apiRequest, API_BASE_URL } from '@/utils/api'
+import io from 'socket.io-client'
 
 export default {
   name: 'Dashboard',
@@ -185,14 +188,18 @@ export default {
     
     let updateTimer = null
     let websocket = null
+    let behaviorChart = null
+    let trendChart = null
+    let currentTaskId = null
 
     // 获取系统统计信息
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/statistics/overview')
-        if (response.ok) {
-          const data = await response.json()
-          Object.assign(stats, data)
+        const response = await apiRequest('/api/statistics/overview')
+        if (response.success) {
+          stats.activeTasks = response.activeTasks || 0
+          stats.todayAlerts = response.todayAlerts || 0
+          stats.totalDetections = response.totalDetections || 0
         }
       } catch (error) {
         console.error('获取统计信息失败:', error)
@@ -202,10 +209,9 @@ export default {
     // 获取系统运行时间
     const fetchUptime = async () => {
       try {
-        const response = await fetch('/api/system/uptime')
-        if (response.ok) {
-          const data = await response.json()
-          systemUptime.value = data.uptime
+        const response = await apiRequest('/api/system/uptime')
+        if (response.success) {
+          systemUptime.value = response.uptime || '0天0小时'
         }
       } catch (error) {
         console.error('获取系统运行时间失败:', error)
@@ -215,61 +221,272 @@ export default {
     // 获取最近报警
     const fetchRecentAlerts = async () => {
       try {
-        const response = await fetch('/api/alerts?limit=5&recent=true')
-        if (response.ok) {
-          const data = await response.json()
-          recentAlerts.value = data.alerts || []
+        const response = await apiRequest('/api/alerts?per_page=5')
+        if (response.success && response.alerts) {
+          recentAlerts.value = response.alerts.slice(0, 5).map(alert => ({
+            id: alert.id,
+            behavior: alert.trigger_behavior || alert.alert_type,
+            timestamp: alert.created_at,
+            location: `任务 ${alert.task_id}`,
+            level: getLevelByBehavior(alert.alert_type)
+          }))
         }
       } catch (error) {
         console.error('获取最近报警失败:', error)
       }
     }
 
+    // 获取图表数据
+    const fetchChartsData = async () => {
+      try {
+        const response = await apiRequest('/api/statistics/charts?period=24h')
+        if (response.success && response.charts) {
+          updateBehaviorChart(response.charts.behaviorDistribution || [])
+          updateTrendChart(response.charts.trendAnalysis || [])
+        }
+      } catch (error) {
+        console.error('获取图表数据失败:', error)
+        // 如果API失败，使用空数据初始化图表
+        updateBehaviorChart([])
+        updateTrendChart([])
+      }
+    }
+
+    // 根据行为类型获取报警级别
+    const getLevelByBehavior = (behavior) => {
+      const highRisk = ['fall down', 'fight', 'enter']
+      const mediumRisk = ['run', 'exit']
+      
+      if (highRisk.includes(behavior)) return 'high'
+      if (mediumRisk.includes(behavior)) return 'medium'
+      return 'low'
+    }
+
+    // 更新行为分布饼图
+    const updateBehaviorChart = (data) => {
+      if (!behaviorChart) return
+      
+      const option = {
+        title: {
+          text: data.length > 0 ? '检测行为分布' : '暂无数据',
+          left: 'center',
+          textStyle: {
+            fontSize: 14,
+            color: '#333'
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          textStyle: {
+            fontSize: 12
+          }
+        },
+        series: [
+          {
+            name: '检测次数',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['60%', '50%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: data.length > 0 ? data.map(item => ({
+              value: item.value,
+              name: item.name,
+              itemStyle: {
+                color: getColorByBehavior(item.behavior_type)
+              }
+            })) : [{
+              value: 1,
+              name: '暂无数据',
+              itemStyle: { color: '#e5e5e5' },
+              label: { show: true, formatter: '暂无数据' }
+            }]
+          }
+        ]
+      }
+      
+      behaviorChart.setOption(option)
+    }
+
+    // 更新趋势折线图
+    const updateTrendChart = (data) => {
+      if (!trendChart) return
+      
+      const option = {
+        title: {
+          text: '24小时检测趋势',
+          left: 'center',
+          textStyle: {
+            fontSize: 14,
+            color: '#333'
+          }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: '#6a7985'
+            }
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: [
+          {
+            type: 'category',
+            boundaryGap: false,
+            data: data.length > 0 ? data.map(item => item.time) : Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`)
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value',
+            name: '检测次数',
+            min: 0,
+            minInterval: 1,
+            max: (value) => (value.max > 4 ? value.max : 5)
+          }
+        ],
+        series: [
+          {
+            name: '检测次数',
+            type: 'line',
+            stack: 'Total',
+            smooth: true,
+            lineStyle: {
+              width: 3
+            },
+            areaStyle: {
+              opacity: 0.3,
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                {
+                  offset: 0,
+                  color: 'rgba(58, 77, 233, 0.8)'
+                },
+                {
+                  offset: 1,
+                  color: 'rgba(58, 77, 233, 0.1)'
+                }
+              ])
+            },
+            emphasis: {
+              focus: 'series'
+            },
+            data: data.length > 0 ? data.map(item => item.value) : Array(24).fill(0)
+          }
+        ]
+      }
+      
+      trendChart.setOption(option)
+    }
+
+    // 根据行为类型获取颜色
+    const getColorByBehavior = (behavior) => {
+      const colorMap = {
+        'fall down': '#ff4757',  // 红色 - 跌倒
+        'fight': '#ff6b7a',      // 粉红 - 打斗
+        'enter': '#1e90ff',      // 蓝色 - 闯入
+        'exit': '#54a0ff',       // 浅蓝 - 离开
+        'run': '#ffa502',        // 橙色 - 奔跑
+        'sit': '#2ed573',        // 绿色 - 坐下
+        'stand': '#7bed9f',      // 浅绿 - 站立
+        'walk': '#70a1ff'        // 紫色 - 行走
+      }
+      return colorMap[behavior] || '#a4b0be'
+    }
+
     // 开始监控
     const startMonitoring = async () => {
       try {
-        const response = await fetch('/api/detect/realtime', {
+        // 使用我们统一的apiRequest，它会自动处理body的序列化
+        const response = await apiRequest('/api/detect/realtime', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            source: 'camera',
+          body: {
+            source: 0,
+            confidence: 0.4, // 使用一个合理的默认值
             preview: true
-          })
+          }
         })
         
-        if (response.ok) {
+        if (response.success) {
           isMonitoring.value = true
-          ElMessage.success('监控已启动')
+          currentTaskId = response.task_id
+          ElMessage.success('监控预览已启动')
           connectWebSocket()
         } else {
-          ElMessage.error('启动监控失败')
+          ElMessage.error(response.error || '启动监控失败')
         }
       } catch (error) {
-        ElMessage.error('启动监控失败')
+        ElMessage.error(`启动监控失败: ${error.message}`)
         console.error('启动监控错误:', error)
       }
     }
 
     // WebSocket连接
     const connectWebSocket = () => {
-      const wsUrl = `ws://${window.location.host}/ws/realtime`
-      websocket = new WebSocket(wsUrl)
-      
-      websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        if (data.type === 'frame_info') {
-          currentFPS.value = data.fps
-        } else if (data.type === 'alert') {
-          // 新报警，更新报警列表
-          fetchRecentAlerts()
+      // 确保URL正确指向后端的SocketIO服务
+      const wsUrl = `ws://localhost:5001/detection`
+      const socket = io(wsUrl, {
+        transports: ['websocket'],
+        path: '/socket.io/'
+      });
+
+      socket.on('connect', () => {
+        console.log('Dashboard WebSocket 连接成功');
+        if (currentTaskId) {
+          socket.emit('join_task', { task_id: currentTaskId });
         }
-      }
+      });
       
-      websocket.onerror = (error) => {
-        console.error('WebSocket错误:', error)
-      }
+      socket.on('realtime_result', (data) => {
+        // Dashboard 预览只关心FPS和报警信息
+        if (data.fps) {
+          currentFPS.value = data.fps;
+        }
+        if (data.type === 'alert') {
+          // 收到新报警，可以触发相关数据刷新
+          fetchRecentAlerts()
+          // 也可以考虑只在前端列表加一个，减少API请求
+        }
+      });
+      
+      socket.on('disconnect', () => {
+        console.log('Dashboard WebSocket 断开连接');
+      });
+
+      socket.on('connect_error', (error) => {
+        console.error('Dashboard WebSocket 连接错误:', error);
+      });
+
+      websocket = socket;
     }
 
     // 格式化时间
@@ -295,9 +512,33 @@ export default {
     }
 
     // 初始化图表
-    const initCharts = () => {
-      // 这里可以集成ECharts或其他图表库
-      // 暂时用占位符
+    const initCharts = async () => {
+      await nextTick()
+      
+      // 初始化行为分布图
+      const behaviorChartDom = document.getElementById('behaviorChart')
+      if (behaviorChartDom) {
+        behaviorChart = echarts.init(behaviorChartDom)
+        
+        // 窗口大小改变时重新调整图表
+        window.addEventListener('resize', () => {
+          behaviorChart?.resize()
+        })
+      }
+      
+      // 初始化趋势图
+      const trendChartDom = document.getElementById('trendChart')
+      if (trendChartDom) {
+        trendChart = echarts.init(trendChartDom)
+        
+        // 窗口大小改变时重新调整图表
+        window.addEventListener('resize', () => {
+          trendChart?.resize()
+        })
+      }
+      
+      // 获取图表数据
+      fetchChartsData()
     }
 
     onMounted(() => {
@@ -311,7 +552,8 @@ export default {
         fetchStats()
         fetchUptime()
         fetchRecentAlerts()
-      }, 30000)
+        fetchChartsData()
+      }, 30000) // 每30秒更新一次
     })
 
     onUnmounted(() => {
@@ -321,6 +563,16 @@ export default {
       if (websocket) {
         websocket.close()
       }
+      
+      // 销毁图表实例
+      behaviorChart?.dispose()
+      trendChart?.dispose()
+      
+      // 移除resize监听器
+      window.removeEventListener('resize', () => {
+        behaviorChart?.resize()
+        trendChart?.resize()
+      })
     })
 
     return {
@@ -558,17 +810,7 @@ export default {
 }
 
 .chart-container {
-  height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fafafa;
-  border-radius: 4px;
-  color: #909399;
-  font-size: 14px;
-}
-
-.chart-container::before {
-  content: "图表加载中...";
+  height: 350px;
+  width: 100%;
 }
 </style> 

@@ -42,3 +42,92 @@ with app.app_context(). See the documentation for more information.
 2025-06-28 16:50:29,902 - behavior_detection - INFO - app:serve_output_file:728 - 返回Range响应: 4620288-4621757/4621758
 2025-06-28 16:51:17,376 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751095944_fall.mp4
 2025-06-28 16:51:19,503 - behavior_detection - INFO - app:delete_task:552 - 删除源文件: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751096576_fall.mp4
+2025-06-29 11:46:50,510 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: 1751161726_fall.mp4, 任务ID: 1
+2025-06-29 11:47:12,951 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: cf2eb096f9d83d6135525d40dfba9b82.mp4, 任务ID: 2
+2025-06-29 11:48:17,009 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: cf2eb096f9d83d6135525d40dfba9b82.mp4, 任务ID: 3
+2025-06-29 11:49:39,063 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: cf2eb096f9d83d6135525d40dfba9b82.mp4, 任务ID: 4
+2025-06-29 14:45:29,336 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: cf2eb096f9d83d6135525d40dfba9b82.mp4, 任务ID: 5
+2025-06-29 14:52:17,477 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: cf2eb096f9d83d6135525d40dfba9b82.mp4, 任务ID: 6
+2025-06-29 15:12:37,226 - behavior_detection - INFO - app:delete_task:568 - 删除输出文件: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs/result_2_1751168832.mp4
+2025-06-29 15:12:37,226 - behavior_detection - INFO - app:delete_task:576 - 删除源文件: /Users/a1/Documents/GitHub/behavior_identify/backend/uploads/1751168832_cf2eb096f9d83d6135525d40dfba9b82.mp4
+2025-06-29 16:46:47,086 - behavior_detection - ERROR - app:get_statistics_charts:930 - 获取图表数据失败: (sqlite3.OperationalError) no such function: date_format
+[SQL: SELECT date_format(detection_results.timestamp, ?) AS hour, count(detection_results.id) AS count 
+FROM detection_results 
+WHERE detection_results.timestamp >= ? AND detection_results.timestamp <= ? GROUP BY date_format(detection_results.timestamp, ?)]
+[parameters: ('%H', '2025-06-28 16:46:47.084270', '2025-06-29 16:46:47.084270', '%H')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-06-29 16:47:24,756 - behavior_detection - ERROR - app:get_statistics_charts:930 - 获取图表数据失败: (sqlite3.OperationalError) no such function: date_format
+[SQL: SELECT date_format(detection_results.timestamp, ?) AS hour, count(detection_results.id) AS count 
+FROM detection_results 
+WHERE detection_results.timestamp >= ? AND detection_results.timestamp <= ? GROUP BY date_format(detection_results.timestamp, ?)]
+[parameters: ('%H', '2025-06-28 16:47:24.755694', '2025-06-29 16:47:24.755694', '%H')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-06-29 16:48:19,886 - behavior_detection - ERROR - app:get_statistics_charts:930 - 获取图表数据失败: The "whens" argument to case(), when referring to a sequence of items, is now passed as a series of positional elements, rather than as a list. 
+2025-06-29 17:11:47,064 - behavior_detection - INFO - app:update_alert_status:667 - 报警 20 状态从 active 更新为 acknowledged
+2025-06-29 17:11:47,574 - behavior_detection - INFO - app:update_alert_status:667 - 报警 20 状态从 acknowledged 更新为 resolved
+2025-06-29 17:11:48,410 - behavior_detection - INFO - app:update_alert_status:667 - 报警 21 状态从 active 更新为 acknowledged
+2025-06-29 17:11:48,813 - behavior_detection - INFO - app:update_alert_status:667 - 报警 21 状态从 acknowledged 更新为 resolved
+2025-06-29 17:29:23,302 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: cf2eb096f9d83d6135525d40dfba9b82.mp4, 任务ID: 7
+2025-06-29 17:32:15,692 - behavior_detection - INFO - app:serve_output_file:1068 - 请求静态文件: result_7_1751189363.mp4
+2025-06-29 17:32:15,695 - behavior_detection - INFO - app:serve_output_file:1075 - 文件路径: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs/result_7_1751189363.mp4
+2025-06-29 17:32:15,695 - behavior_detection - INFO - app:serve_output_file:1076 - 当前工作目录: /Users/a1/Documents/GitHub/behavior_identify/backend
+2025-06-29 17:32:15,695 - behavior_detection - INFO - app:serve_output_file:1077 - outputs目录: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs
+2025-06-29 17:32:15,695 - behavior_detection - INFO - app:serve_output_file:1078 - 文件存在: True
+2025-06-29 17:32:15,695 - behavior_detection - INFO - app:serve_output_file:1086 - 文件大小: 2302285 bytes
+2025-06-29 17:32:15,695 - behavior_detection - INFO - app:serve_output_file:1091 - Range请求: bytes=0-1
+2025-06-29 17:32:15,695 - behavior_detection - INFO - app:serve_output_file:1123 - 返回Range响应: 0-1/2302285
+2025-06-29 17:32:15,699 - behavior_detection - INFO - app:serve_output_file:1068 - 请求静态文件: result_7_1751189363.mp4
+2025-06-29 17:32:15,699 - behavior_detection - INFO - app:serve_output_file:1075 - 文件路径: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs/result_7_1751189363.mp4
+2025-06-29 17:32:15,699 - behavior_detection - INFO - app:serve_output_file:1076 - 当前工作目录: /Users/a1/Documents/GitHub/behavior_identify/backend
+2025-06-29 17:32:15,699 - behavior_detection - INFO - app:serve_output_file:1077 - outputs目录: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs
+2025-06-29 17:32:15,699 - behavior_detection - INFO - app:serve_output_file:1078 - 文件存在: True
+2025-06-29 17:32:15,699 - behavior_detection - INFO - app:serve_output_file:1086 - 文件大小: 2302285 bytes
+2025-06-29 17:32:15,699 - behavior_detection - INFO - app:serve_output_file:1091 - Range请求: bytes=0-2302284
+2025-06-29 17:32:15,700 - behavior_detection - INFO - app:serve_output_file:1123 - 返回Range响应: 0-2302284/2302285
+2025-06-30 09:19:03,704 - behavior_detection - INFO - app:serve_output_file:1068 - 请求静态文件: result_7_1751189363.mp4
+2025-06-30 09:19:03,705 - behavior_detection - INFO - app:serve_output_file:1075 - 文件路径: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs/result_7_1751189363.mp4
+2025-06-30 09:19:03,705 - behavior_detection - INFO - app:serve_output_file:1076 - 当前工作目录: /Users/a1/Documents/GitHub/behavior_identify/backend
+2025-06-30 09:19:03,705 - behavior_detection - INFO - app:serve_output_file:1077 - outputs目录: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs
+2025-06-30 09:19:03,705 - behavior_detection - INFO - app:serve_output_file:1078 - 文件存在: True
+2025-06-30 09:19:03,705 - behavior_detection - INFO - app:serve_output_file:1086 - 文件大小: 2302285 bytes
+2025-06-30 09:19:03,705 - behavior_detection - INFO - app:serve_output_file:1091 - Range请求: bytes=0-1
+2025-06-30 09:19:03,705 - behavior_detection - INFO - app:serve_output_file:1123 - 返回Range响应: 0-1/2302285
+2025-06-30 09:19:03,708 - behavior_detection - INFO - app:serve_output_file:1068 - 请求静态文件: result_7_1751189363.mp4
+2025-06-30 09:19:03,708 - behavior_detection - INFO - app:serve_output_file:1075 - 文件路径: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs/result_7_1751189363.mp4
+2025-06-30 09:19:03,708 - behavior_detection - INFO - app:serve_output_file:1076 - 当前工作目录: /Users/a1/Documents/GitHub/behavior_identify/backend
+2025-06-30 09:19:03,708 - behavior_detection - INFO - app:serve_output_file:1077 - outputs目录: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs
+2025-06-30 09:19:03,709 - behavior_detection - INFO - app:serve_output_file:1078 - 文件存在: True
+2025-06-30 09:19:03,709 - behavior_detection - INFO - app:serve_output_file:1086 - 文件大小: 2302285 bytes
+2025-06-30 09:19:03,709 - behavior_detection - INFO - app:serve_output_file:1091 - Range请求: bytes=0-2302284
+2025-06-30 09:19:03,710 - behavior_detection - INFO - app:serve_output_file:1123 - 返回Range响应: 0-2302284/2302285
+2025-06-30 09:24:08,400 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: demo.mp4, 任务ID: 9
+2025-06-30 09:33:58,334 - behavior_detection - INFO - app:serve_output_file:1041 - 请求静态文件: result_9_1751246648.mp4
+2025-06-30 09:33:58,334 - behavior_detection - INFO - app:serve_output_file:1048 - 文件路径: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs/result_9_1751246648.mp4
+2025-06-30 09:33:58,334 - behavior_detection - INFO - app:serve_output_file:1049 - 当前工作目录: /Users/a1/Documents/GitHub/behavior_identify/backend
+2025-06-30 09:33:58,334 - behavior_detection - INFO - app:serve_output_file:1050 - outputs目录: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs
+2025-06-30 09:33:58,334 - behavior_detection - INFO - app:serve_output_file:1051 - 文件存在: True
+2025-06-30 09:33:58,334 - behavior_detection - INFO - app:serve_output_file:1059 - 文件大小: 14386609 bytes
+2025-06-30 09:33:58,334 - behavior_detection - INFO - app:serve_output_file:1064 - Range请求: bytes=0-1
+2025-06-30 09:33:58,334 - behavior_detection - INFO - app:serve_output_file:1096 - 返回Range响应: 0-1/14386609
+2025-06-30 09:33:58,338 - behavior_detection - INFO - app:serve_output_file:1041 - 请求静态文件: result_9_1751246648.mp4
+2025-06-30 09:33:58,338 - behavior_detection - INFO - app:serve_output_file:1048 - 文件路径: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs/result_9_1751246648.mp4
+2025-06-30 09:33:58,338 - behavior_detection - INFO - app:serve_output_file:1049 - 当前工作目录: /Users/a1/Documents/GitHub/behavior_identify/backend
+2025-06-30 09:33:58,338 - behavior_detection - INFO - app:serve_output_file:1050 - outputs目录: /Users/a1/Documents/GitHub/behavior_identify/backend/outputs
+2025-06-30 09:33:58,338 - behavior_detection - INFO - app:serve_output_file:1051 - 文件存在: True
+2025-06-30 09:33:58,338 - behavior_detection - INFO - app:serve_output_file:1059 - 文件大小: 14386609 bytes
+2025-06-30 09:33:58,338 - behavior_detection - INFO - app:serve_output_file:1064 - Range请求: bytes=0-14386608
+2025-06-30 09:33:58,341 - behavior_detection - INFO - app:serve_output_file:1096 - 返回Range响应: 0-14386608/14386609
+2025-06-30 09:46:40,303 - behavior_detection - ERROR - app:start_realtime_detection:376 - 启动实时检测失败: 400 Bad Request: Failed to decode JSON object: Expecting value: line 1 column 2 (char 1)
+2025-06-30 09:52:14,092 - behavior_detection - ERROR - app:start_realtime_detection:376 - 启动实时检测失败: 400 Bad Request: Failed to decode JSON object: Expecting value: line 1 column 2 (char 1)
+2025-06-30 09:52:28,378 - behavior_detection - ERROR - app:start_realtime_detection:376 - 启动实时检测失败: 400 Bad Request: Failed to decode JSON object: Expecting value: line 1 column 2 (char 1)
+2025-06-30 09:53:21,418 - behavior_detection - ERROR - app:start_realtime_detection:376 - 启动实时检测失败: 400 Bad Request: Failed to decode JSON object: Expecting value: line 1 column 2 (char 1)
+2025-06-30 09:53:53,983 - behavior_detection - ERROR - app:start_realtime_detection:376 - 启动实时检测失败: 400 Bad Request: Failed to decode JSON object: Expecting value: line 1 column 2 (char 1)
+2025-06-30 09:58:42,326 - behavior_detection - INFO - app:handle_connect:1154 - WebSocket客户端连接: 76c548c5-83cc-4c26-b7db-d75a8928b246
+2025-06-30 09:59:04,029 - behavior_detection - INFO - app:handle_disconnect:1160 - WebSocket客户端断开: 76c548c5-83cc-4c26-b7db-d75a8928b246
+2025-06-30 09:59:12,152 - behavior_detection - INFO - app:handle_connect:1154 - WebSocket客户端连接: f181b78d-e197-42ee-9f5f-ba49f9f35731
+2025-06-30 09:59:31,730 - behavior_detection - INFO - app:handle_disconnect:1160 - WebSocket客户端断开: f181b78d-e197-42ee-9f5f-ba49f9f35731
+2025-06-30 10:06:04,004 - behavior_detection - INFO - app:handle_connect:1154 - WebSocket客户端连接: 016660d9-647f-4fbb-b56d-b7fdae9ca477
+2025-06-30 10:06:11,613 - behavior_detection - INFO - app:handle_disconnect:1160 - WebSocket客户端断开: 016660d9-647f-4fbb-b56d-b7fdae9ca477
+2025-06-30 10:06:19,530 - behavior_detection - INFO - app:handle_connect:1154 - WebSocket客户端连接: ece10abe-34d6-4c17-bf74-12ee15c3e55d
+2025-06-30 10:06:22,791 - behavior_detection - INFO - app:handle_disconnect:1160 - WebSocket客户端断开: ece10abe-34d6-4c17-bf74-12ee15c3e55d
+2025-06-30 10:06:27,629 - behavior_detection - INFO - app:handle_connect:1154 - WebSocket客户端连接: b67c29ac-67a6-4adc-80a6-a48aa34bc7b4

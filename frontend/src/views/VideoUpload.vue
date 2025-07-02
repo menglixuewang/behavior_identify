@@ -412,7 +412,7 @@ export default {
           throw new Error('网络错误')
         }
 
-        xhr.open('POST', 'http://localhost:5000/api/upload')
+        xhr.open('POST', 'http://localhost:5001/api/upload')
         xhr.send(formData)
 
       } catch (error) {
@@ -428,7 +428,7 @@ export default {
       try {
         uploadStatusText.value = '检测处理中...'
         
-        const response = await fetch('http://localhost:5000/api/detect/video', {
+        const response = await fetch('http://localhost:5001/api/detect/video', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -468,7 +468,7 @@ export default {
     // 刷新历史记录
     const refreshHistory = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/tasks?type=video')
+        const response = await fetch('http://localhost:5001/api/tasks?type=video')
         if (response.ok) {
           const data = await response.json()
           uploadHistory.value = data.tasks || []
@@ -481,7 +481,7 @@ export default {
     // 查看结果
     const viewResults = async (record) => {
       try {
-        const response = await fetch(`http://localhost:5000/api/tasks/${record.id}/results`)
+        const response = await fetch(`http://localhost:5001/api/tasks/${record.id}/results`)
         if (response.ok) {
           const data = await response.json()
           currentResult.value = data
@@ -502,7 +502,7 @@ export default {
           type: 'warning'
         })
         
-        const response = await fetch(`http://localhost:5000/api/tasks/${record.id}`, {
+        const response = await fetch(`http://localhost:5001/api/tasks/${record.id}`, {
           method: 'DELETE'
         })
         

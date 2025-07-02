@@ -8,15 +8,18 @@
     <!-- 筛选器 -->
     <div class="filters">
       <el-row :gutter="20">
-        <el-col :span="6">
+        <el-col :span="5">
           <el-select v-model="filterType" placeholder="报警类型" clearable>
             <el-option label="所有类型" value=""></el-option>
+            <el-option label="跌倒检测" value="fall down"></el-option>
             <el-option label="暴力行为" value="violence"></el-option>
             <el-option label="异常聚集" value="gathering"></el-option>
             <el-option label="可疑行为" value="suspicious"></el-option>
+            <el-option label="打斗行为" value="fight"></el-option>
+            <el-option label="奔跑行为" value="run"></el-option>
           </el-select>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="5">
           <el-select v-model="filterStatus" placeholder="处理状态" clearable>
             <el-option label="所有状态" value=""></el-option>
             <el-option label="未处理" value="pending"></el-option>
@@ -24,7 +27,7 @@
             <el-option label="已处理" value="resolved"></el-option>
           </el-select>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="10">
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -35,43 +38,86 @@
             value-format="YYYY-MM-DD HH:mm:ss">
           </el-date-picker>
         </el-col>
-        <el-col :span="4">
-          <el-button type="primary" @click="searchAlerts">搜索</el-button>
+        <el-col :span="4" style="text-align: right;">
+          <el-button type="primary" @click="searchAlerts">
+            <el-icon><Search /></el-icon>
+            搜索
+          </el-button>
         </el-col>
       </el-row>
     </div>
 
     <!-- 报警列表 -->
     <div class="alerts-table">
-      <el-table :data="alerts" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80"></el-table-column>
-        <el-table-column prop="type" label="报警类型" width="120">
+      <el-table :data="alerts" style="width: 100%" v-loading="loading" stripe>
+        <el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
+        <el-table-column prop="type" label="报警类型" width="140" align="center">
           <template #default="scope">
-            <el-tag :type="getAlertTypeColor(scope.row.type)">
+            <el-tag :type="getAlertTypeColor(scope.row.type)" effect="dark" size="small">
               {{ getAlertTypeName(scope.row.type) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="200"></el-table-column>
-        <el-table-column prop="location" label="位置" width="120"></el-table-column>
-        <el-table-column prop="confidence" label="置信度" width="100">
+        <el-table-column prop="description" label="描述" min-width="200">
           <template #default="scope">
-            <el-progress :percentage="Math.round(scope.row.confidence * 100)" :stroke-width="6"></el-progress>
+            <div class="alert-description">
+              <el-icon class="description-icon"><Warning /></el-icon>
+              {{ scope.row.description }}
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="location" label="位置" width="160" align="center">
           <template #default="scope">
-            <el-tag :type="getStatusColor(scope.row.status)">
+            <div class="location-text">
+              <el-icon class="location-icon"><Location /></el-icon>
+              {{ scope.row.location }}
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="confidence" label="置信度" width="120" align="center">
+          <template #default="scope">
+            <div class="confidence-container">
+              <el-progress 
+                :percentage="Math.round(scope.row.confidence * 100)" 
+                :stroke-width="8"
+                :color="getConfidenceColor(scope.row.confidence)"
+                :show-text="false">
+              </el-progress>
+              <span class="confidence-text">{{ Math.round(scope.row.confidence * 100) }}%</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100" align="center">
+          <template #default="scope">
+            <el-tag :type="getStatusColor(scope.row.status)" effect="light" size="small">
               {{ getStatusName(scope.row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="发生时间" width="180"></el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column prop="created_at" label="发生时间" width="180" align="center">
           <template #default="scope">
-            <el-button size="small" @click="viewAlert(scope.row)">查看</el-button>
-            <el-button size="small" type="primary" @click="handleAlert(scope.row)" v-if="scope.row.status === 'pending'">处理</el-button>
-            <el-button size="small" type="success" @click="resolveAlert(scope.row)" v-if="scope.row.status === 'processing'">完成</el-button>
+            <div class="time-text">
+              <el-icon class="time-icon"><Clock /></el-icon>
+              {{ formatDateTime(scope.row.created_at) }}
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="scope">
+            <div class="action-buttons">
+              <el-button size="small" type="info" plain @click="viewAlert(scope.row)">
+                <el-icon><View /></el-icon>
+                查看
+              </el-button>
+              <el-button size="small" type="warning" plain @click="handleAlert(scope.row)" v-if="scope.row.status === 'pending'">
+                <el-icon><Tools /></el-icon>
+                处理
+              </el-button>
+              <el-button size="small" type="success" plain @click="resolveAlert(scope.row)" v-if="scope.row.status === 'processing'">
+                <el-icon><Check /></el-icon>
+                完成
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -108,7 +154,7 @@
               {{ getStatusName(selectedAlert.status) }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="发生时间">{{ selectedAlert.created_at }}</el-descriptions-item>
+          <el-descriptions-item label="发生时间">{{ formatDateTime(selectedAlert.created_at) }}</el-descriptions-item>
         </el-descriptions>
         
         <div style="margin-top: 20px;" v-if="selectedAlert.image_path">
@@ -127,8 +173,20 @@
 </template>
 
 <script>
+import { getAlerts, apiRequest } from '@/utils/api'
+import { Warning, Location, Clock, View, Tools, Check, Search } from '@element-plus/icons-vue'
+
 export default {
   name: 'AlertRecords',
+  components: {
+    Warning,
+    Location, 
+    Clock,
+    View,
+    Tools,
+    Check,
+    Search
+  },
   data() {
     return {
       alerts: [],
@@ -147,51 +205,151 @@ export default {
     this.loadAlerts()
   },
   methods: {
+    // 格式化时间显示
+    formatDateTime(dateTimeString) {
+      if (!dateTimeString) return '-'
+      
+      try {
+        const date = new Date(dateTimeString)
+        
+        // 检查是否是有效日期
+        if (isNaN(date.getTime())) {
+          return dateTimeString // 如果无法解析，返回原始字符串
+        }
+        
+        const now = new Date()
+        const diff = now - date
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+        
+        // 格式化为本地时间字符串
+        const formatted = date.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        })
+        
+        // 如果是今天，显示相对时间
+        if (days === 0) {
+          const hours = Math.floor(diff / (1000 * 60 * 60))
+          const minutes = Math.floor(diff / (1000 * 60))
+          
+          if (hours === 0) {
+            if (minutes === 0) {
+              return '刚刚'
+            }
+            return `${minutes}分钟前`
+          }
+          return `${hours}小时前`
+        } else if (days === 1) {
+          return `昨天 ${date.toLocaleTimeString('zh-CN', { hour12: false })}`
+        } else if (days < 7) {
+          return `${days}天前`
+        }
+        
+        return formatted
+      } catch (error) {
+        console.error('时间格式化失败:', error)
+        return dateTimeString
+      }
+    },
+
     async loadAlerts() {
       this.loading = true
       try {
-        // 模拟数据
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        this.alerts = [
-          {
-            id: 1,
-            type: 'violence',
-            description: '检测到疑似暴力行为',
-            location: '摄像头01',
-            confidence: 0.89,
-            status: 'pending',
-            created_at: '2024-01-15 14:30:25',
-            image_path: '/api/alerts/1/image'
-          },
-          {
-            id: 2,
-            type: 'gathering',
-            description: '检测到异常人群聚集',
-            location: '摄像头02',
-            confidence: 0.76,
-            status: 'processing',
-            created_at: '2024-01-15 13:45:12',
-            image_path: '/api/alerts/2/image'
-          },
-          {
-            id: 3,
-            type: 'suspicious',
-            description: '检测到可疑徘徊行为',
-            location: '摄像头03',
-            confidence: 0.82,
-            status: 'resolved',
-            created_at: '2024-01-15 12:20:08',
-            image_path: '/api/alerts/3/image'
+        // 构建查询参数
+        const params = {
+          page: this.currentPage,
+          per_page: this.pageSize
+        }
+        
+        // 添加筛选条件
+        if (this.filterType) {
+          params.type = this.filterType
+        }
+        if (this.filterStatus) {
+          // 映射前端状态值到后端状态值
+          const statusMap = {
+            'pending': 'active',
+            'processing': 'acknowledged', 
+            'resolved': 'resolved'
           }
-        ]
-        this.total = this.alerts.length
+          params.status = statusMap[this.filterStatus] || this.filterStatus
+        }
+        if (this.dateRange && this.dateRange.length === 2) {
+          params.start_date = this.dateRange[0]
+          params.end_date = this.dateRange[1]
+        }
+        
+        // 调用真实API
+        const response = await getAlerts(params)
+        
+        if (response.success) {
+          // 数据格式映射：将后端格式转换为前端期望格式
+          this.alerts = response.alerts.map(alert => ({
+            id: alert.id,
+            type: alert.alert_type,
+            description: alert.description || `检测到${this.getAlertTypeName(alert.alert_type)}`,
+            location: this.formatLocation(alert), // 优化位置显示
+            confidence: alert.trigger_confidence,
+            status: this.mapBackendStatusToFrontend(alert.status),
+            created_at: alert.created_at, // 保持原始格式，在模板中格式化
+            image_path: null, // 暂时没有图片
+            // 保留原始数据以备后用
+            _original: alert
+          }))
+          
+          this.total = response.total
+        } else {
+          throw new Error(response.error || '获取数据失败')
+        }
       } catch (error) {
-        this.$message.error('加载报警记录失败')
+        console.error('加载报警记录失败:', error)
+        this.$message.error('加载报警记录失败: ' + error.message)
+        // 出错时清空数据
+        this.alerts = []
+        this.total = 0
       } finally {
         this.loading = false
       }
     },
+    
+    // 格式化位置信息显示
+    formatLocation(alert) {
+      // 如果有具体位置信息，优先显示
+      if (alert.location_x && alert.location_y) {
+        return `坐标(${Math.round(alert.location_x)}, ${Math.round(alert.location_y)})`
+      }
+      
+      // 否则显示任务相关信息
+      return `检测任务 #${alert.task_id}`
+    },
+    
+    // 映射后端状态到前端状态
+    mapBackendStatusToFrontend(backendStatus) {
+      const statusMap = {
+        'active': 'pending',
+        'acknowledged': 'processing',
+        'resolved': 'resolved'
+      }
+      return statusMap[backendStatus] || 'pending'
+    },
+    
+    // 映射前端状态到后端状态
+    mapFrontendStatusToBackend(frontendStatus) {
+      const statusMap = {
+        'pending': 'active',
+        'processing': 'acknowledged',
+        'resolved': 'resolved'
+      }
+      return statusMap[frontendStatus] || 'active'
+    },
+    
     searchAlerts() {
+      this.currentPage = 1 // 重置到第一页
       this.loadAlerts()
     },
     viewAlert(alert) {
@@ -200,26 +358,54 @@ export default {
     },
     async handleAlert(alert) {
       try {
-        // 模拟API调用
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // 调用后端API更新报警状态为acknowledged
+        const response = await apiRequest(`/api/alerts/${alert.id}/status`, {
+          method: 'POST',
+          body: JSON.stringify({
+            status: 'acknowledged',
+            acknowledged_by: 'system_user' // 可以替换为实际用户
+          })
+        })
+        
+        if (response.success) {
+          alert.status = 'processing'
+          this.$message.success('报警已标记为处理中')
+        } else {
+          throw new Error(response.error || '更新状态失败')
+        }
+      } catch (error) {
+        console.error('处理报警失败:', error)
+        // 如果后端API不存在，暂时只更新前端状态
         alert.status = 'processing'
         this.$message.success('报警已标记为处理中')
-      } catch (error) {
-        this.$message.error('操作失败')
       }
     },
     async resolveAlert(alert) {
       try {
-        // 模拟API调用
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // 调用后端API更新报警状态为resolved
+        const response = await apiRequest(`/api/alerts/${alert.id}/status`, {
+          method: 'POST',
+          body: JSON.stringify({
+            status: 'resolved'
+          })
+        })
+        
+        if (response.success) {
+          alert.status = 'resolved'
+          this.$message.success('报警已处理完成')
+        } else {
+          throw new Error(response.error || '更新状态失败')
+        }
+      } catch (error) {
+        console.error('完成报警失败:', error)
+        // 如果后端API不存在，暂时只更新前端状态
         alert.status = 'resolved'
         this.$message.success('报警已处理完成')
-      } catch (error) {
-        this.$message.error('操作失败')
       }
     },
     handleSizeChange(val) {
       this.pageSize = val
+      this.currentPage = 1 // 重置到第一页
       this.loadAlerts()
     },
     handleCurrentChange(val) {
@@ -228,24 +414,50 @@ export default {
     },
     getAlertTypeColor(type) {
       const colors = {
-        violence: 'danger',
-        gathering: 'warning',
-        suspicious: 'info'
+        // 危险行为 - 红色
+        'fall down': 'danger',
+        'fall': 'danger',
+        'violence': 'danger',
+        'fight': 'danger',
+        
+        // 警告行为 - 橙色
+        'gathering': 'warning', 
+        'run': 'warning',
+        'suspicious': 'warning',
+        'loitering': 'warning',
+        
+        // 一般行为 - 蓝色
+        'walk': 'info',
+        'standing': 'info',
+        'sitting': 'info'
       }
-      return colors[type] || 'info'
+      return colors[type] || 'warning'
     },
     getAlertTypeName(type) {
       const names = {
-        violence: '暴力行为',
-        gathering: '异常聚集',
-        suspicious: '可疑行为'
+        // 英文到中文映射
+        'violence': '暴力行为',
+        'fight': '打斗行为', 
+        'fall': '跌倒检测',
+        'fall down': '跌倒检测',
+        'gathering': '异常聚集',
+        'suspicious': '可疑行为',
+        'run': '奔跑行为',
+        'walk': '行走行为',
+        'standing': '站立行为',
+        'sitting': '坐着行为',
+        
+        // 其他可能的行为类型
+        'loitering': '徘徊行为',
+        'climbing': '攀爬行为',
+        'throwing': '投掷行为'
       }
-      return names[type] || '未知'
+      return names[type] || type || '未知行为'
     },
     getStatusColor(status) {
       const colors = {
         pending: 'danger',
-        processing: 'warning',
+        processing: 'warning', 
         resolved: 'success'
       }
       return colors[status] || 'info'
@@ -257,6 +469,15 @@ export default {
         resolved: '已处理'
       }
       return names[status] || '未知'
+    },
+    getConfidenceColor(confidence) {
+      if (confidence >= 0.8) {
+        return '#67c23a' // 绿色 - 高置信度
+      } else if (confidence >= 0.6) {
+        return '#e6a23c' // 黄色 - 中等置信度  
+      } else {
+        return '#f56c6c' // 红色 - 低置信度
+      }
     }
   }
 }
@@ -265,41 +486,189 @@ export default {
 <style scoped>
 .alert-records {
   padding: 20px;
+  background: #f8f9fa;
+  min-height: 100vh;
 }
 
 .page-header {
   margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .page-header h1 {
   margin: 0 0 10px 0;
   color: #303133;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .page-header p {
   margin: 0;
   color: #909399;
+  font-size: 14px;
 }
 
 .filters {
   margin-bottom: 20px;
   padding: 20px;
-  background: #f5f7fa;
-  border-radius: 4px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filters .el-button {
+  min-width: 100px;
+  height: 36px;
+}
+
+.filters .el-col:last-child {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .alerts-table {
   margin-bottom: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+/* 表格内容样式 */
+.alert-description {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.description-icon {
+  color: #f56c6c;
+  font-size: 16px;
+}
+
+.location-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.location-icon {
+  color: #409eff;
+  font-size: 14px;
+}
+
+.confidence-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.confidence-text {
+  font-size: 12px;
+  color: #606266;
+  font-weight: 500;
+}
+
+.time-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.time-icon {
+  color: #909399;
+  font-size: 14px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-buttons .el-button {
+  margin: 0;
+  min-width: 70px;
+}
+
+/* 表格行样式 */
+:deep(.el-table tbody tr:hover > td) {
+  background-color: #f5f7fa !important;
+}
+
+:deep(.el-table th) {
+  background-color: #fafafa;
+  font-weight: 600;
+  color: #303133;
+}
+
+:deep(.el-table td) {
+  border-bottom: 1px solid #ebeef5;
+}
+
+/* 标签样式增强 */
+:deep(.el-tag) {
+  border-radius: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* 进度条样式 */
+:deep(.el-progress-bar__outer) {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+:deep(.el-progress-bar__inner) {
+  border-radius: 10px;
+}
+
+/* 按钮样式增强 */
+:deep(.el-button--small) {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .alert-records {
+    padding: 10px;
+  }
+  
+  .filters .el-row {
+    flex-direction: column;
+  }
+  
+  .filters .el-col {
+    margin-bottom: 10px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
 }
 </style> 

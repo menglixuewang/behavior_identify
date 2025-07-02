@@ -82,7 +82,7 @@
             <div class="video-header">
               <span>实时画面</span>
               <div class="video-controls">
-                <el-tag 
+                <el-tag
                   :type="isMonitoring ? 'success' : 'info'"
                   size="small"
                 >
@@ -102,12 +102,13 @@
             </div>
             
             <div v-else class="video-display">
-              <canvas 
-                ref="videoCanvas" 
-                class="video-canvas"
-                @click="handleCanvasClick"
+              <img
+                :src="videoStreamUrl"
+                class="video-stream"
+                alt="Real-time video stream"
+                @error="handleStreamError"
               />
-              
+
               <!-- 检测信息覆盖层 -->
               <div class="detection-overlay">
                 <div class="detection-info">
@@ -254,6 +255,8 @@ import { ElMessage } from 'element-plus'
 import { 
   VideoCamera, VideoPause, Setting, Warning, User, Search, Check 
 } from '@element-plus/icons-vue'
+import io from 'socket.io-client'
+import { apiRequest } from '@/utils/api'
 
 export default {
   name: 'RealtimeMonitor',
@@ -270,6 +273,9 @@ export default {
     const realtimeAlerts = ref([])
     const monitoringDuration = ref('00:00:00')
     const totalDetections = ref(0)
+
+    // 视频流URL
+    const videoStreamUrl = ref('')
     
     const monitorConfig = reactive({
       source: 'camera',
@@ -286,103 +292,130 @@ export default {
     let websocket = null
     let monitoringStartTime = null
     let durationTimer = null
+    let currentTaskId = null
 
-    // 开始监控
     const startMonitoring = async () => {
+      const source = monitorConfig.source === 'camera' ? 0 : monitorConfig.source;
+
+      isMonitoring.value = true
+      videoStreamUrl.value = `/video_feed?source=${source}&confidence=${settings.confidence}&_t=${new Date().getTime()}`
+      monitoringStartTime = new Date()
+      ElMessage.success('监控已启动')
+
+      startDurationTimer()
+    }
+
+    const stopMonitoring = async () => {
       try {
-        const response = await fetch('/api/detect/realtime', {
+        // 调用后端停止监控API
+        const response = await fetch('/api/stop_monitoring', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            source: monitorConfig.source,
-            mode: monitorConfig.mode,
-            config: settings
-          })
+          }
         })
-        
-        if (response.ok) {
-          isMonitoring.value = true
-          monitoringStartTime = new Date()
-          ElMessage.success('监控已启动')
-          
-          // 连接WebSocket
-          connectWebSocket()
-          
-          // 开始计时
-          startDurationTimer()
-          
-        } else {
-          ElMessage.error('启动监控失败')
-        }
-      } catch (error) {
-        ElMessage.error('启动监控失败: ' + error.message)
-      }
-    }
 
-    // 停止监控
-    const stopMonitoring = async () => {
-      try {
-        const response = await fetch('/api/detect/realtime', {
-          method: 'DELETE'
-        })
-        
-        if (response.ok) {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const result = await response.json()
+
+        if (result.success) {
+          // 更新前端状态
           isMonitoring.value = false
           currentDetections.value = []
+          videoStreamUrl.value = ''
           ElMessage.success('监控已停止')
-          
-          // 断开WebSocket
+
+          // 清理WebSocket连接
           if (websocket) {
             websocket.close()
+            websocket = null
           }
-          
-          // 停止计时
+
+          // 清理定时器
           if (durationTimer) {
             clearInterval(durationTimer)
+            durationTimer = null
           }
-          
         } else {
-          ElMessage.error('停止监控失败')
+          throw new Error(result.error || '停止监控失败')
         }
       } catch (error) {
-        ElMessage.error('停止监控失败: ' + error.message)
+        console.error('停止监控失败:', error)
+        ElMessage.error(`停止监控失败: ${error.message}`)
+
+        // 即使后端调用失败，也要清理前端状态
+        isMonitoring.value = false
+        currentDetections.value = []
+        videoStreamUrl.value = ''
+
+        if (websocket) {
+          websocket.close()
+          websocket = null
+        }
+        if (durationTimer) {
+          clearInterval(durationTimer)
+          durationTimer = null
+        }
       }
     }
 
-    // WebSocket连接
     const connectWebSocket = () => {
-      const wsUrl = `ws://${window.location.host}/ws/realtime`
-      websocket = new WebSocket(wsUrl)
-      
-      websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
+      const wsUrl = `ws://localhost:5001/detection`
+      const socket = io(wsUrl, {
+        transports: ['websocket'],
+        path: '/socket.io/'
+      });
+
+      socket.on('connect', () => {
+        console.log('WebSocket连接成功');
+        socket.emit('join_task', { task_id: currentTaskId });
+      });
+
+      socket.on('realtime_result', (data) => {
         handleWebSocketMessage(data)
-      }
+      });
       
-      websocket.onerror = (error) => {
-        console.error('WebSocket错误:', error)
-      }
+      socket.on('disconnect', () => {
+        console.log('WebSocket断开连接');
+      });
+
+      socket.on('connect_error', (error) => {
+        console.error('WebSocket连接错误:', error);
+      });
+
+      websocket = socket;
     }
 
-    // 处理WebSocket消息
     const handleWebSocketMessage = (data) => {
-      switch (data.type) {
-        case 'detection':
-          currentDetections.value = data.detections || []
-          currentFPS.value = data.fps || 0
-          processingTime.value = data.processingTime || 0
-          totalDetections.value += data.detections?.length || 0
-          break
-          
-        case 'alert':
-          handleAlert(data.alert)
-          break
+      if (data.image) {
+        const canvas = videoCanvas.value
+        if (canvas) {
+          const ctx = canvas.getContext('2d')
+          const img = new Image()
+          img.src = `data:image/jpeg;base64,${data.image}`
+          img.onload = () => {
+            if (!canvas.width || !canvas.height) {
+              canvas.width = img.width;
+              canvas.height = img.height;
+            }
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+          }
+        }
+      }
+
+      currentDetections.value = data.detections || []
+      currentFPS.value = data.fps || 0
+      processingTime.value = data.processingTime || 0
+      totalDetections.value += data.detections?.length || 0
+
+      if (data.type === 'alert') {
+        handleAlert(data.alert)
       }
     }
 
-    // 处理报警
     const handleAlert = (alert) => {
       realtimeAlerts.value.unshift({
         ...alert,
@@ -391,13 +424,11 @@ export default {
         level: 'high'
       })
       
-      // 限制报警记录数量
       if (realtimeAlerts.value.length > 50) {
         realtimeAlerts.value = realtimeAlerts.value.slice(0, 50)
       }
     }
 
-    // 开始计时
     const startDurationTimer = () => {
       durationTimer = setInterval(() => {
         const now = new Date()
@@ -410,21 +441,23 @@ export default {
       }, 1000)
     }
 
-    // 画布点击处理
     const handleCanvasClick = () => {
-      // 处理画布点击事件
     }
 
-    // 保存设置
     const saveSettings = () => {
       localStorage.setItem('realtimeMonitorSettings', JSON.stringify(settings))
       ElMessage.success('设置已保存')
       showSettings.value = false
     }
 
-    // 格式化时间
     const formatTime = (timestamp) => {
       return new Date(timestamp).toLocaleTimeString()
+    }
+
+    // 处理视频流错误
+    const handleStreamError = (event) => {
+      console.error('视频流加载错误:', event)
+      ElMessage.error('视频流连接失败，请检查网络连接或切换到Canvas模式')
     }
 
     onUnmounted(() => {
@@ -448,9 +481,11 @@ export default {
       totalDetections,
       monitorConfig,
       settings,
+      videoStreamUrl,
       startMonitoring,
       stopMonitoring,
       handleCanvasClick,
+      handleStreamError,
       saveSettings,
       formatTime
     }
@@ -535,7 +570,7 @@ export default {
   position: relative;
 }
 
-.video-canvas {
+.video-stream {
   width: 100%;
   height: 100%;
   object-fit: contain;

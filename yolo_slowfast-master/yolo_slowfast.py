@@ -8,6 +8,10 @@ import contextlib
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 warnings.filterwarnings("ignore", category=UserWarning)
 
+# 添加环境变量控制GUI显示，用于服务器环境
+# Windows组员可以忽略这个，默认启用GUI显示
+ENABLE_GUI = os.environ.get('ENABLE_GUI', 'true').lower() in ('true', '1', 'yes')
+
 from pytorchvideo.transforms.functional import (
     uniform_temporal_subsample,
     short_side_scale_with_boxes,
@@ -55,9 +59,13 @@ class MyVideoCapture:
             print(f"警告: 读取到空图像 {self.idx}")
             self.stack.append(np.zeros((480, 640, 3), dtype=np.uint8))  # 返回黑色占位图像
             return ret, img
-        # 显示原始摄像头帧用于调试
-        cv2.imshow("原始摄像头画面", img)
-        cv2.waitKey(1)
+        # 显示原始摄像头帧用于调试 (仅在GUI模式下)
+        if ENABLE_GUI:
+            try:
+                cv2.imshow("原始摄像头画面", img)
+                cv2.waitKey(1)
+            except cv2.error as e:
+                print(f"GUI显示失败 (这在服务器环境中是正常的): {e}")
         print(f"原始图像尺寸: {img.shape}, 数据类型: {img.dtype}, 数据范围: [{img.min()}, {img.max()}]")
         self.stack.append(img)
         return ret, img
@@ -171,11 +179,15 @@ def save_yolopreds_tovideo(yolo_preds, id_to_ava_labels, color_map, output_video
             # 添加详细调试信息
             print(
                 f"显示前图像尺寸: {im_bgr.shape}, 数据类型: {im_bgr.dtype}, 数据范围: [{im_bgr.min()}, {im_bgr.max()}]")
-            cv2.imshow("实时检测", im_bgr)
-            key = cv2.waitKey(1)
-            if key & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
-                exit()
+            if ENABLE_GUI:
+                try:
+                    cv2.imshow("实时检测", im_bgr)
+                    key = cv2.waitKey(1)
+                    if key & 0xFF == ord('q'):
+                        cv2.destroyAllWindows()
+                        exit()
+                except cv2.error as e:
+                    print(f"GUI显示失败 (这在服务器环境中是正常的): {e}")
 
 
 def main(config):
