@@ -454,9 +454,13 @@ def create_app(config_name='development'):
                 if not detection_service.initialize_models():
                     return Response("模型初始化失败", status=503)
 
-            logger.info("开始返回video_feed流响应")
+            # 检查是否为预览模式
+            preview_only = request.args.get('preview_only', 'false').lower() == 'true'
+            mode_text = "预览模式" if preview_only else "实时检测模式"
+            logger.info(f"开始返回video_feed流响应 - {mode_text}")
+
             return Response(
-                detection_service.generate_realtime_frames(source),
+                detection_service.generate_realtime_frames(source, preview_only=preview_only),
                 mimetype='multipart/x-mixed-replace; boundary=frame'
             )
         except Exception as e:
@@ -465,11 +469,16 @@ def create_app(config_name='development'):
 
     @app.route('/api/stop_monitoring', methods=['POST'])
     def stop_monitoring():
-        """停止实时监控"""
+        """停止实时监控 - 使用标准接口"""
         try:
+            print("🛑 收到停止监控API请求")
             detection_service = get_detection_service()
-            # 调用停止实时监控方法
-            detection_service.stop_realtime_monitoring()
+            print(f"🛑 获取到检测服务实例: {detection_service is not None}")
+
+            # 调用标准的停止监控方法（按照分析文档的标准实现）
+            detection_service.stop_monitoring()
+
+            print("🛑 停止监控API调用完成")
             logger.info("实时监控已停止")
             return jsonify({
                 'success': True,
@@ -477,6 +486,7 @@ def create_app(config_name='development'):
             })
 
         except Exception as e:
+            print(f"🛑 停止监控API异常: {e}")
             logger.error(f"停止监控失败: {str(e)}")
             return jsonify({'error': f'停止失败: {str(e)}'}), 500
 

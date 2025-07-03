@@ -83,7 +83,27 @@ class MyVideoCapture:
         return clip
 
     def release(self):
-        self.cap.release()
+        """释放摄像头资源，确保完全关闭"""
+        try:
+            if hasattr(self, 'cap') and self.cap is not None:
+                print("🎥 MyVideoCapture: 正在释放摄像头...")
+                self.cap.release()
+                print("🎥 MyVideoCapture: 摄像头已释放")
+
+                # 强制等待确保资源完全释放
+                import time
+                time.sleep(0.1)
+
+                # 设置为None，避免重复释放
+                self.cap = None
+                print("🎥 MyVideoCapture: 摄像头对象已清空")
+            else:
+                print("🎥 MyVideoCapture: 摄像头对象不存在或已释放")
+        except Exception as e:
+            print(f"🎥 MyVideoCapture: 释放摄像头时出错: {e}")
+        finally:
+            # 确保对象被标记为已释放
+            self.end = True
 
 
 def tensor_to_numpy(tensor):

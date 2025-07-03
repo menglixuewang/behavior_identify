@@ -276,6 +276,9 @@ export default {
 
     // 视频流URL
     const videoStreamUrl = ref('')
+
+    // 停止监控状态标志，用于忽略主动断开连接时的错误
+    const isStopping = ref(false)
     
     const monitorConfig = reactive({
       source: 'camera',
@@ -298,16 +301,41 @@ export default {
       const source = monitorConfig.source === 'camera' ? 0 : monitorConfig.source;
 
       isMonitoring.value = true
-      videoStreamUrl.value = `/video_feed?source=${source}&confidence=${settings.confidence}&_t=${new Date().getTime()}`
+
+      // 🔧 修复：根据检测模式传递不同的参数
+      const modeParam = monitorConfig.mode === 'preview' ? 'preview_only=true' : ''
+      const baseUrl = `/video_feed?source=${source}&confidence=${settings.confidence}&_t=${new Date().getTime()}`
+      videoStreamUrl.value = modeParam ? `${baseUrl}&${modeParam}` : baseUrl
+
       monitoringStartTime = new Date()
-      ElMessage.success('监控已启动')
+
+      // 根据模式显示不同的成功消息
+      if (monitorConfig.mode === 'preview') {
+        ElMessage.success('预览模式已启动')
+      } else {
+        ElMessage.success('实时检测已启动')
+      }
 
       startDurationTimer()
     }
 
     const stopMonitoring = async () => {
       try {
-        // 调用后端停止监控API
+        console.log('🛑 前端：开始停止监控流程')
+
+        // 设置停止状态标志，用于忽略主动断开连接的错误
+        isStopping.value = true
+
+        // 🔧 关键修复：先断开视频流连接，再调用停止API
+        // 1. 立即断开视频流连接，模拟页面关闭的效果
+        console.log('🛑 前端：断开视频流连接')
+        videoStreamUrl.value = ''  // 清空视频流URL，断开img标签的连接
+
+        // 2. 等待一小段时间，确保连接断开
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+        // 3. 调用后端停止监控API
+        console.log('🛑 前端：调用停止监控API')
         const response = await fetch('/api/stop_monitoring', {
           method: 'POST',
           headers: {
@@ -320,12 +348,12 @@ export default {
         }
 
         const result = await response.json()
+        console.log('🛑 前端：收到API响应', result)
 
         if (result.success) {
           // 更新前端状态
           isMonitoring.value = false
           currentDetections.value = []
-          videoStreamUrl.value = ''
           ElMessage.success('监控已停止')
 
           // 清理WebSocket连接
@@ -339,11 +367,13 @@ export default {
             clearInterval(durationTimer)
             durationTimer = null
           }
+
+          console.log('🛑 前端：停止监控完成')
         } else {
           throw new Error(result.error || '停止监控失败')
         }
       } catch (error) {
-        console.error('停止监控失败:', error)
+        console.error('🛑 前端：停止监控失败:', error)
         ElMessage.error(`停止监控失败: ${error.message}`)
 
         // 即使后端调用失败，也要清理前端状态
@@ -359,6 +389,9 @@ export default {
           clearInterval(durationTimer)
           durationTimer = null
         }
+      } finally {
+        // 重置停止状态标志
+        isStopping.value = false
       }
     }
 
@@ -457,6 +490,13 @@ export default {
     // 处理视频流错误
     const handleStreamError = (event) => {
       console.error('视频流加载错误:', event)
+
+      // 如果正在停止监控，忽略错误消息（这是主动断开连接导致的）
+      if (isStopping.value) {
+        console.log('🛑 前端：忽略停止监控时的连接错误')
+        return
+      }
+
       ElMessage.error('视频流连接失败，请检查网络连接或切换到Canvas模式')
     }
 
@@ -482,6 +522,7 @@ export default {
       monitorConfig,
       settings,
       videoStreamUrl,
+      isStopping,
       startMonitoring,
       stopMonitoring,
       handleCanvasClick,
