@@ -67,9 +67,20 @@
           <template #header>
             <div class="card-header">
               <span>实时监控预览</span>
-              <el-button type="primary" size="small" @click="$router.push('/realtime')">
-                查看详情
-              </el-button>
+              <div class="header-buttons">
+                <el-button
+                  v-if="isMonitoring"
+                  type="danger"
+                  size="small"
+                  @click="stopMonitoring"
+                >
+                  <el-icon><VideoPause /></el-icon>
+                  停止监控
+                </el-button>
+                <el-button type="primary" size="small" @click="$router.push('/realtime')">
+                  查看详情
+                </el-button>
+              </div>
             </div>
           </template>
           
@@ -81,12 +92,11 @@
             </div>
             
             <div v-else class="monitor-active">
-              <video 
-                ref="videoPreview" 
-                class="video-preview" 
-                autoplay 
-                muted
-                @loadedmetadata="onVideoLoaded"
+              <img
+                :src="videoStreamUrl"
+                class="video-preview"
+                alt="实时监控视频流"
+                @error="handleStreamError"
               />
               <div class="monitor-overlay">
                 <div class="monitor-info">
@@ -163,7 +173,7 @@
 <script>
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { VideoCamera, Warning, DataAnalysis, Clock, Check } from '@element-plus/icons-vue'
+import { VideoCamera, VideoPause, Warning, DataAnalysis, Clock, Check } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { apiRequest, API_BASE_URL } from '@/utils/api'
 import io from 'socket.io-client'
@@ -171,7 +181,7 @@ import io from 'socket.io-client'
 export default {
   name: 'Dashboard',
   components: {
-    VideoCamera, Warning, DataAnalysis, Clock, Check
+    VideoCamera, VideoPause, Warning, DataAnalysis, Clock, Check
   },
   setup() {
     const stats = reactive({
@@ -185,6 +195,7 @@ export default {
     const currentFPS = ref(0)
     const recentAlerts = ref([])
     const videoPreview = ref(null)
+    const videoStreamUrl = ref('')
     
     let updateTimer = null
     let websocket = null
@@ -439,6 +450,8 @@ export default {
         if (response.success) {
           isMonitoring.value = true
           currentTaskId = response.task_id
+          // 设置视频流URL
+          videoStreamUrl.value = `${API_BASE_URL}/video_feed?source=0&confidence=0.4&_t=${new Date().getTime()}`
           ElMessage.success('监控预览已启动')
           connectWebSocket()
         } else {
@@ -448,6 +461,55 @@ export default {
         ElMessage.error(`启动监控失败: ${error.message}`)
         console.error('启动监控错误:', error)
       }
+    }
+
+    // 停止监控
+    const stopMonitoring = async () => {
+      console.log('停止监控按钮被点击')
+      try {
+        console.log('发送停止监控请求...')
+        const response = await apiRequest('/api/stop_monitoring', {
+          method: 'POST'
+        })
+
+        console.log('停止监控响应:', response)
+        if (response.success) {
+          // 更新前端状态
+          isMonitoring.value = false
+          videoStreamUrl.value = ''
+          currentFPS.value = 0
+          currentTaskId = null
+          ElMessage.success('监控已停止')
+
+          // 清理WebSocket连接
+          if (websocket) {
+            websocket.close()
+            websocket = null
+          }
+        } else {
+          ElMessage.error(response.error || '停止监控失败')
+        }
+      } catch (error) {
+        ElMessage.error(`停止监控失败: ${error.message}`)
+        console.error('停止监控错误:', error)
+
+        // 即使后端调用失败，也要清理前端状态
+        isMonitoring.value = false
+        videoStreamUrl.value = ''
+        currentFPS.value = 0
+        currentTaskId = null
+
+        if (websocket) {
+          websocket.close()
+          websocket = null
+        }
+      }
+    }
+
+    // 处理视频流错误
+    const handleStreamError = (event) => {
+      console.error('视频流加载错误:', event)
+      ElMessage.error('视频流连接失败，请检查网络连接')
     }
 
     // WebSocket连接
@@ -582,7 +644,10 @@ export default {
       currentFPS,
       recentAlerts,
       videoPreview,
+      videoStreamUrl,
       startMonitoring,
+      stopMonitoring,
+      handleStreamError,
       formatTime,
       onVideoLoaded
     }
@@ -662,12 +727,18 @@ export default {
   align-items: center;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .preview-card {
-  height: 400px;
+  height: 480px;
 }
 
 .monitor-preview {
-  height: 320px;
+  height: 400px;
   position: relative;
 }
 
@@ -696,7 +767,8 @@ export default {
 .video-preview {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #000;
 }
 
 .monitor-overlay {
