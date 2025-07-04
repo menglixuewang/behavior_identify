@@ -487,7 +487,8 @@ def create_app(config_name='development'):
     def video_feed():
         """提供实时检测视频流（前端兼容路由）"""
         source = request.args.get('source', '0')
-        logger.info(f"收到video_feed请求，视频源: {source}")
+        preview_only = request.args.get('preview_only', 'false').lower() == 'true'
+        logger.info(f"收到video_feed请求，视频源: {source}, 预览模式: {preview_only}")
 
         try:
             # 🔧 新增：支持统一配置格式

@@ -102,8 +102,10 @@
           
           <el-col :span="12">
             <el-form-item label="输入尺寸">
-              <el-select v-model="detectConfig.inputSize" placeholder="选择输入尺寸" disabled>
+              <el-select v-model="detectConfig.inputSize" placeholder="选择输入尺寸">
+                <el-option label="416x416" :value="416" />
                 <el-option label="640x640" :value="640" />
+                <el-option label="832x832" :value="832" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -121,8 +123,10 @@
           
           <el-col :span="12">
             <el-form-item label="输出格式">
-              <el-select v-model="detectConfig.outputFormat" placeholder="选择输出格式" disabled>
+              <el-select v-model="detectConfig.outputFormat" placeholder="选择输出格式">
                 <el-option label="视频文件" value="video" />
+                <el-option label="JSON数据" value="json" />
+                <el-option label="视频+JSON" value="both" />
               </el-select>
             </el-form-item>
           </el-col>
