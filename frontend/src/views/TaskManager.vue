@@ -573,7 +573,7 @@ export default {
               confidence: taskDetail.confidence_threshold,
               inputSize: taskDetail.input_size,
               device: taskDetail.device,
-              alertBehaviors: ['fall down', 'fight', 'enter', 'exit'] // 默认报警行为，后续可扩展
+              alertBehaviors: taskDetail.alert_behaviors || ['fall down', 'fight', 'enter', 'exit'] // 使用实际配置，如果为空则使用默认值
             },
 
             // 统计结果

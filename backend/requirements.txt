@@ -4,14 +4,15 @@ Flask-SocketIO
 SQLAlchemy
 Flask-SQLAlchemy
 Werkzeug
-opencv-python==4.8.1.78
+opencv-python
 torch
 torchvision
 ultralytics
-numpy==1.24.3
+numpy
 Pillow
 python-socketio
 eventlet
 pytorchvideo==0.1.5
 python-dateutil
+pytz
 requests

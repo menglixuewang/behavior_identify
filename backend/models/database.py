@@ -1,10 +1,17 @@
 """
 数据库模型定义
 """
+import json
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Text, ForeignKey
 from sqlalchemy.orm import relationship
+
+# 导入时间工具
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from utils.time_utils import get_beijing_datetime, datetime_to_iso_beijing
 
 db = SQLAlchemy()
 
@@ -20,7 +27,7 @@ class DetectionTask(db.Model):
     output_path = Column(String(500), nullable=True)  # 输出文件路径
     status = Column(String(50), default='pending')  # pending, running, completed, failed
     progress = Column(Float, default=0.0)  # 处理进度 0-100
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=get_beijing_datetime)
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
@@ -29,6 +36,7 @@ class DetectionTask(db.Model):
     confidence_threshold = Column(Float, default=0.5)
     input_size = Column(Integer, default=640)
     device = Column(String(20), default='cpu')
+    alert_behaviors = Column(Text, nullable=True)  # JSON格式存储报警行为列表
     
     # 统计信息
     total_frames = Column(Integer, default=0)
@@ -49,13 +57,14 @@ class DetectionTask(db.Model):
             'output_path': self.output_path,
             'status': self.status,
             'progress': self.progress,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'started_at': self.started_at.isoformat() if self.started_at else None,
-            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            'created_at': datetime_to_iso_beijing(self.created_at),
+            'started_at': datetime_to_iso_beijing(self.started_at),
+            'completed_at': datetime_to_iso_beijing(self.completed_at),
             'error_message': self.error_message,
             'confidence_threshold': self.confidence_threshold,
             'input_size': self.input_size,
             'device': self.device,
+            'alert_behaviors': json.loads(self.alert_behaviors) if self.alert_behaviors else [],
             'total_frames': self.total_frames,
             'processed_frames': self.processed_frames,
             'detected_objects': self.detected_objects,
@@ -91,7 +100,7 @@ class DetectionResult(db.Model):
     # 其他信息
     velocity_x = Column(Float, nullable=True)  # X方向速度
     velocity_y = Column(Float, nullable=True)  # Y方向速度
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=get_beijing_datetime)
     
     def to_dict(self):
         """转换为字典格式"""
@@ -116,7 +125,7 @@ class DetectionResult(db.Model):
                 'x': self.velocity_x,
                 'y': self.velocity_y
             },
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': datetime_to_iso_beijing(self.created_at)
         }
 
 
@@ -150,7 +159,7 @@ class AlertRecord(db.Model):
     description = Column(Text, nullable=True)
     note = Column(Text, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=get_beijing_datetime)
     
     def to_dict(self):
         """转换为字典格式"""
@@ -169,12 +178,12 @@ class AlertRecord(db.Model):
                 'y': self.location_y
             },
             'status': self.status,
-            'acknowledged_at': self.acknowledged_at.isoformat() if self.acknowledged_at else None,
+            'acknowledged_at': datetime_to_iso_beijing(self.acknowledged_at),
             'acknowledged_by': self.acknowledged_by,
-            'resolved_at': self.resolved_at.isoformat() if self.resolved_at else None,
+            'resolved_at': datetime_to_iso_beijing(self.resolved_at),
             'description': self.description,
             'note': self.note,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': datetime_to_iso_beijing(self.created_at)
         }
 
 
@@ -189,8 +198,8 @@ class SystemConfig(db.Model):
     description = Column(Text, nullable=True)
     category = Column(String(50), default='general')  # general, detection, alert, system
     is_editable = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    created_at = Column(DateTime, default=get_beijing_datetime)
+    updated_at = Column(DateTime, default=get_beijing_datetime, onupdate=get_beijing_datetime)
     
     def to_dict(self):
         """转换为字典格式"""
@@ -202,8 +211,8 @@ class SystemConfig(db.Model):
             'description': self.description,
             'category': self.category,
             'is_editable': self.is_editable,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'created_at': datetime_to_iso_beijing(self.created_at),
+            'updated_at': datetime_to_iso_beijing(self.updated_at)
         }
 
 
@@ -227,7 +236,7 @@ class SystemLog(db.Model):
     exception_message = Column(Text, nullable=True)
     stack_trace = Column(Text, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=get_beijing_datetime)
     
     def to_dict(self):
         """转换为字典格式"""
@@ -243,7 +252,7 @@ class SystemLog(db.Model):
             'exception_type': self.exception_type,
             'exception_message': self.exception_message,
             'stack_trace': self.stack_trace,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': datetime_to_iso_beijing(self.created_at)
         }
 
 
