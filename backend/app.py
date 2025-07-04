@@ -12,16 +12,8 @@ from flask import Flask, request, jsonify, send_file, send_from_directory, Respo
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, disconnect, join_room, leave_room
 import threading
-from engineio.async_drivers import gevent
 import traceback
 
-hiddenimports=[
-    "gevent",                    # 核心协程库
-    "geventwebsocket",           # WebSocket 支持
-    "gevent.ssl",                # SSL 加密支持
-    "gevent.builtins",           # 替换 Python 内置函数
-    "engineio.async_drivers.threading"  # 强制指定线程模式驱动
-]
 
 # 添加项目路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +26,7 @@ try:
     from services.detection_service import get_detection_service
     from utils.logger import setup_logger
     from utils.file_utils import allowed_file, get_file_size, cleanup_old_files
+    from utils.time_utils import get_beijing_datetime, get_beijing_now, datetime_to_iso_beijing, get_today_start_end_beijing
 except ImportError as e:
     print(f"导入模块失败: {e}")
 
@@ -82,7 +75,7 @@ def create_app(config_name='development'):
             'message': '智能行为检测系统API',
             'version': '1.0.0',
             'status': 'running',
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime_to_iso_beijing(get_beijing_now())
         })
     
     @app.route('/api/health')
@@ -99,7 +92,7 @@ def create_app(config_name='development'):
         return jsonify({
             'status': 'healthy',
             'database': db_status,
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime_to_iso_beijing(get_beijing_now())
         })
     
     # ========================= 文件上传API =========================
@@ -129,14 +122,40 @@ def create_app(config_name='development'):
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_filename)
             file.save(file_path)
             
+            # 🔧 解析配置参数（支持统一配置格式）
+            config_str = request.form.get('config')
+            if config_str:
+                try:
+                    config = json.loads(config_str)
+                    logger.info(f"解析到配置参数: {config}")
+
+                    confidence_threshold = config.get('confidence_threshold', 0.5)
+                    input_size = config.get('input_size', 640)
+                    device = config.get('device', 'auto')
+                    alert_behaviors = config.get('alert_behaviors', [])
+
+                except json.JSONDecodeError as e:
+                    logger.warning(f"配置JSON解析失败: {e}，使用默认配置")
+                    confidence_threshold = 0.5
+                    input_size = 640
+                    device = 'auto'
+                    alert_behaviors = []
+            else:
+                # 兼容旧的单独参数格式
+                confidence_threshold = float(request.form.get('confidence', 0.5))
+                input_size = int(request.form.get('input_size', 640))
+                device = request.form.get('device', 'auto')
+                alert_behaviors = []
+
             # 创建检测任务
             task = DetectionTask(
                 task_name=request.form.get('task_name', filename),
                 source_type='video',
                 source_path=file_path,
-                confidence_threshold=float(request.form.get('confidence', 0.5)),
-                input_size=int(request.form.get('input_size', 640)),
-                device=request.form.get('device', 'cpu')
+                confidence_threshold=confidence_threshold,
+                input_size=input_size,
+                device=device,
+                alert_behaviors=json.dumps(alert_behaviors) if alert_behaviors else None
             )
             
             db.session.add(task)
@@ -186,7 +205,7 @@ def create_app(config_name='development'):
             
             # 更新任务状态
             task.status = 'running'
-            task.started_at = datetime.now()
+            task.started_at = get_beijing_datetime()
             db.session.commit()
             
             # 启动检测线程
@@ -195,10 +214,22 @@ def create_app(config_name='development'):
                 try:
                     # 在检测线程中创建应用上下文
                     with app.app_context():
+                        # 🔧 解析报警行为配置
+                        alert_behaviors = []
+                        if current_task.alert_behaviors:
+                            try:
+                                alert_behaviors = json.loads(current_task.alert_behaviors)
+                            except json.JSONDecodeError:
+                                logger.warning(f"任务{current_task.id}的报警行为配置解析失败")
+                                alert_behaviors = ['fall down', 'fight', 'enter', 'exit']  # 默认值
+                        else:
+                            alert_behaviors = ['fall down', 'fight', 'enter', 'exit']  # 默认值
+
                         detection_service = get_detection_service({
                             'device': current_task.device,
                             'input_size': current_task.input_size,
-                            'confidence_threshold': current_task.confidence_threshold
+                            'confidence_threshold': current_task.confidence_threshold,
+                            'alert_behaviors': alert_behaviors
                         })
                         
                         def progress_callback(task_id, progress):
@@ -260,7 +291,7 @@ def create_app(config_name='development'):
                                     
                                     # 更新任务状态
                                     task_obj.status = 'completed'
-                                    task_obj.completed_at = datetime.now()
+                                    task_obj.completed_at = get_beijing_datetime()
                                     task_obj.progress = 100.0
                                     task_obj.detected_objects = len(result['results'])
                                     task_obj.detected_behaviors = len([r for r in result['results'] if r.get('behavior_type')])
@@ -378,7 +409,7 @@ def create_app(config_name='development'):
             
             # 更新任务状态
             task.status = 'running'
-            task.started_at = datetime.now()
+            task.started_at = get_beijing_datetime()
             db.session.commit()
             
             return jsonify({
@@ -411,7 +442,7 @@ def create_app(config_name='development'):
             
             # 更新任务状态
             task.status = 'stopped'
-            task.completed_at = datetime.now()
+            task.completed_at = get_beijing_datetime()
             db.session.commit()
             
             return jsonify({
@@ -459,32 +490,36 @@ def create_app(config_name='development'):
         logger.info(f"收到video_feed请求，视频源: {source}")
 
         try:
-            # 检查是否为预览模式
-            preview_only = request.args.get('preview_only', 'false').lower() == 'true'
-            
-            if preview_only:
-                # 🔧 优化：预览模式使用简化的配置，不初始化AI模型
-                logger.info("使用预览模式 - 跳过AI模型初始化")
-                config = {
-                    'device': 'cpu',  # 预览模式使用CPU即可
-                    'input_size': 640,
-                    'confidence_threshold': 0.5
-                }
+            # 🔧 新增：支持统一配置格式
+            config_str = request.args.get('config')
+            if config_str:
+                try:
+                    # 解析JSON配置
+                    config = json.loads(config_str)
+                    logger.info(f"使用统一配置格式: {config}")
+                except json.JSONDecodeError:
+                    logger.warning("配置JSON解析失败，使用默认配置")
+                    config = {
+                        'device': 'auto',
+                        'input_size': 640,
+                        'confidence_threshold': 0.5,
+                        'alert_behaviors': ['fall down', 'fight', 'enter', 'exit']
+                    }
             else:
-                # 检测模式使用完整配置
+                # 🔧 保持向后兼容：支持旧的URL参数格式
                 config = {
                     'device': 'auto',  # 默认auto，优先GPU
                     'input_size': int(request.args.get('input_size', 640)),
                     'confidence_threshold': float(request.args.get('confidence', 0.5))
                 }
 
-                # 🔧 修复：处理报警行为配置
+                # 处理报警行为配置
                 alert_behaviors_str = request.args.get('alert_behaviors', '')
                 if alert_behaviors_str:
                     alert_behaviors = [behavior.strip() for behavior in alert_behaviors_str.split(',')]
                     config['alert_behaviors'] = alert_behaviors
                 else:
-                    alert_behaviors = None  # 表示使用默认配置
+                    config['alert_behaviors'] = ['fall down', 'fight', 'enter', 'exit']  # 默认行为
 
             # 获取检测服务实例
             detection_service = get_detection_service(config)
@@ -799,13 +834,13 @@ def create_app(config_name='development'):
             
             # 根据状态更新相应的时间戳
             if new_status == 'acknowledged':
-                alert.acknowledged_at = datetime.now()
+                alert.acknowledged_at = get_beijing_datetime()
                 alert.acknowledged_by = data.get('acknowledged_by', 'system')
             elif new_status == 'resolved':
-                alert.resolved_at = datetime.now()
+                alert.resolved_at = get_beijing_datetime()
                 # 如果之前没有被确认，同时设置确认时间
                 if not alert.acknowledged_at:
-                    alert.acknowledged_at = datetime.now()
+                    alert.acknowledged_at = get_beijing_datetime()
                     alert.acknowledged_by = data.get('acknowledged_by', 'system')
             
             # 添加备注
@@ -842,12 +877,12 @@ def create_app(config_name='development'):
             active_alerts = AlertRecord.query.filter_by(status='active').count()
             
             # 今日统计
-            today = datetime.now().date()
+            today_start, today_end = get_today_start_end_beijing()
             today_tasks = DetectionTask.query.filter(
-                DetectionTask.created_at >= today
+                DetectionTask.created_at >= today_start
             ).count()
             today_alerts = AlertRecord.query.filter(
-                AlertRecord.created_at >= today
+                AlertRecord.created_at >= today_start
             ).count()
             
             return jsonify({
@@ -881,9 +916,9 @@ def create_app(config_name='development'):
             active_tasks = DetectionTask.query.filter_by(status='running').count()
             
             # 今日统计
-            today = datetime.now().date()
+            today_start, today_end = get_today_start_end_beijing()
             today_alerts = AlertRecord.query.filter(
-                AlertRecord.created_at >= today
+                AlertRecord.created_at >= today_start
             ).count()
             
             # 总检测数（从检测结果表统计）
@@ -910,7 +945,7 @@ def create_app(config_name='development'):
             end_time = request.args.get('endTime')
             
             # 设置时间范围
-            end_dt = datetime.now()
+            end_dt = get_beijing_now()
             if period == '24h':
                 start_dt = end_dt - timedelta(hours=24)
             elif period == '7d':
@@ -1066,7 +1101,7 @@ def create_app(config_name='development'):
             first_task = DetectionTask.query.order_by(DetectionTask.created_at.asc()).first()
             if first_task:
                 start_time = first_task.created_at
-                now = datetime.now()
+                now = get_beijing_now()
                 uptime_delta = now - start_time
                 
                 days = uptime_delta.days
@@ -1093,7 +1128,7 @@ def create_app(config_name='development'):
             end_time = request.args.get('endTime')
             
             # 设置默认时间范围（最近30天）
-            end_dt = datetime.now()
+            end_dt = get_beijing_now()
             start_dt = end_dt - timedelta(days=30)
             
             if start_time and end_time:

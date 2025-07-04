@@ -142,11 +142,21 @@
         </el-form-item>
 
         <el-form-item label="保存结果">
-          <el-switch
-            v-model="detectConfig.saveResults"
-            active-text="保存到数据库"
-            inactive-text="仅临时处理"
-          />
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <el-switch
+              v-model="detectConfig.saveResults"
+              active-text="保存到数据库"
+              inactive-text="仅临时处理"
+            />
+            <el-button
+              type="primary"
+              size="default"
+              @click="saveUploadConfig"
+              style="margin-left: auto; margin-right: 20px;"
+            >
+              保存配置
+            </el-button>
+          </div>
         </el-form-item>
       </el-form>
     </el-card>
@@ -297,11 +307,12 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Upload, VideoPlay, Delete, Refresh, DocumentRemove 
+import {
+  Upload, VideoPlay, Delete, Refresh, DocumentRemove
 } from '@element-plus/icons-vue'
+import { configManager } from '@/utils/configManager'
 
 export default {
   name: 'VideoUpload',
@@ -319,13 +330,37 @@ export default {
     const showResultDialog = ref(false)
     const currentResult = ref(null)
 
-    const detectConfig = reactive({
-      confidence: 0.5,
-      inputSize: 640,
-      device: 'cpu',
-      outputFormat: 'video',
-      alertBehaviors: ['fall down', 'fight', 'enter', 'exit'],
-      saveResults: true
+    // 🔧 使用统一配置管理
+    const detectConfig = reactive(configManager.getConfig('upload'))
+
+    // 调试信息
+    console.log('📹 [视频上传] 页面初始配置:', detectConfig)
+    console.log('📹 [视频上传] 初始报警行为:', detectConfig.alertBehaviors)
+
+    // 监听配置变化并保存
+    const saveConfigChanges = () => {
+      console.log('🔧 [视频上传] 保存配置变化:', detectConfig)
+      configManager.saveConfig(detectConfig, 'upload')
+    }
+
+    // 监听报警行为配置变化
+    watch(() => detectConfig.alertBehaviors, (newBehaviors, oldBehaviors) => {
+      console.log('🚨 [视频上传] 报警行为配置变化:')
+      console.log('  旧值:', oldBehaviors)
+      console.log('  新值:', newBehaviors)
+      console.log('  选中数量:', newBehaviors?.length || 0)
+      saveConfigChanges()
+    }, { deep: true })
+
+    // 监听其他配置变化
+    watch(() => detectConfig.confidence, (newVal, oldVal) => {
+      console.log('🎯 [视频上传] 置信度变化:', oldVal, '->', newVal)
+      saveConfigChanges()
+    })
+
+    watch(() => detectConfig.device, (newVal, oldVal) => {
+      console.log('💻 [视频上传] 设备变化:', oldVal, '->', newVal)
+      saveConfigChanges()
     })
 
     // 文件选择处理
@@ -378,9 +413,13 @@ export default {
       uploadStatusText.value = '准备上传...'
 
       try {
+        // 🔧 使用统一配置管理，转换为后端格式（与实时监控保持一致）
+        const config = configManager.toBackendFormat(detectConfig, 'upload')
+        console.log('📤 [视频上传] 发送配置到后端:', config)
+
         const formData = new FormData()
         formData.append('video', selectedFile.value)
-        formData.append('config', JSON.stringify(detectConfig))
+        formData.append('config', JSON.stringify(config))
 
         const xhr = new XMLHttpRequest()
         
@@ -593,6 +632,15 @@ export default {
       return textMap[status] || '未知'
     }
 
+    // 保存配置（直接调用配置管理器的保存功能，与实时监控共用单例）
+    const saveUploadConfig = () => {
+      console.log('💾 [视频上传] 手动保存配置:', detectConfig)
+
+      // 直接保存当前配置到单例配置管理器
+      configManager.saveConfig(detectConfig, 'upload')
+      ElMessage.success('配置已保存')
+    }
+
     onMounted(() => {
       refreshHistory()
     })
@@ -621,7 +669,8 @@ export default {
       getFileExtension,
       formatDateTime,
       getStatusType,
-      getStatusText
+      getStatusText,
+      saveUploadConfig
     }
   }
 }

@@ -8,7 +8,24 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'behavior-detection-secret-key-2023'
     
     # 数据库配置
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///behavior_detection.db'
+    @staticmethod
+    def get_database_uri():
+        """获取数据库URI"""
+        if os.environ.get('DATABASE_URL'):
+            return os.environ.get('DATABASE_URL')
+
+        # 构建指向instance目录的数据库路径
+        config_dir = os.path.dirname(__file__)  # config目录
+        backend_dir = os.path.dirname(config_dir)  # backend目录
+        instance_dir = os.path.join(backend_dir, 'instance')  # instance目录
+        db_path = os.path.join(instance_dir, 'behavior_detection.db')
+
+        # 确保instance目录存在
+        os.makedirs(instance_dir, exist_ok=True)
+
+        return f'sqlite:///{db_path}'
+
+    SQLALCHEMY_DATABASE_URI = get_database_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
     

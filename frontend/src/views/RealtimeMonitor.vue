@@ -249,7 +249,7 @@
     <el-dialog
       v-model="showSettings"
       title="监控设置"
-      width="600px"
+      width="800px"
     >
       <el-form :model="settings" label-width="120px">
         <el-form-item label="检测置信度">
@@ -260,21 +260,53 @@
             :step="0.05"
             show-stops
             show-input
+            :input-size="'small'"
           />
         </el-form-item>
-        
+
+        <el-form-item label="设备类型">
+          <el-radio-group v-model="settings.device">
+            <el-radio
+              v-for="option in deviceOptions"
+              :key="option.label"
+              :label="option.label"
+            >
+              {{ option.name }}
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
+
         <el-form-item label="报警行为">
-          <el-checkbox-group v-model="settings.alertBehaviors">
-            <el-checkbox label="fall down">跌倒</el-checkbox>
-            <el-checkbox label="fight">打斗</el-checkbox>
-            <el-checkbox label="enter">闯入</el-checkbox>
-            <el-checkbox label="exit">离开</el-checkbox>
+          <el-checkbox-group v-model="settings.alertBehaviors" class="alert-behaviors-grid">
+            <!-- 第一行：前4个行为 -->
+            <div class="behavior-row">
+              <el-checkbox
+                v-for="behavior in availableBehaviors.slice(0, 4)"
+                :key="behavior.label"
+                :label="behavior.label"
+                class="behavior-item"
+              >
+                {{ behavior.name }}
+              </el-checkbox>
+            </div>
+            <!-- 第二行：后4个行为 -->
+            <div class="behavior-row">
+              <el-checkbox
+                v-for="behavior in availableBehaviors.slice(4, 8)"
+                :key="behavior.label"
+                :label="behavior.label"
+                class="behavior-item"
+              >
+                {{ behavior.name }}
+              </el-checkbox>
+            </div>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
-      
+
       <template #footer>
-        <el-button @click="showSettings = false">取消</el-button>
+        <el-button @click="cancelSettings">取消</el-button>
+        <el-button @click="resetSettings">重置</el-button>
         <el-button type="primary" @click="saveSettings">保存</el-button>
       </template>
     </el-dialog>
@@ -282,13 +314,17 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { 
-  VideoCamera, VideoPause, Setting, Warning, User, Search, Check 
+import {
+  VideoCamera, VideoPause, Setting, Warning, User, Search, Check
 } from '@element-plus/icons-vue'
 import io from 'socket.io-client'
-import { apiRequest } from '@/utils/api'
+import {
+  configManager,
+  AVAILABLE_BEHAVIORS,
+  DEVICE_OPTIONS
+} from '@/utils/configManager'
 
 export default {
   name: 'RealtimeMonitor',
@@ -319,9 +355,38 @@ export default {
       alertEnabled: true
     })
     
-    const settings = reactive({
-      confidence: 0.5,
-      alertBehaviors: ['fall down', 'fight', 'enter', 'exit']
+    // 🔧 使用统一配置管理
+    const settings = reactive(configManager.getConfig('realtime'))
+
+    // 调试信息
+    console.log('📺 [实时监控] 页面初始配置:', settings)
+    console.log('📺 [实时监控] 初始报警行为:', settings.alertBehaviors)
+
+    // 配置选项
+    const availableBehaviors = AVAILABLE_BEHAVIORS
+    const deviceOptions = DEVICE_OPTIONS
+
+    console.log('📺 [实时监控] 可用报警行为:', availableBehaviors)
+
+    // 监听报警行为配置变化
+    watch(() => settings.alertBehaviors, (newBehaviors, oldBehaviors) => {
+      console.log('🚨 [实时监控] 报警行为配置变化:')
+      console.log('  旧值:', oldBehaviors)
+      console.log('  新值:', newBehaviors)
+      console.log('  选中数量:', newBehaviors?.length || 0)
+      // 自动保存配置
+      configManager.saveConfig(settings, 'realtime')
+    }, { deep: true })
+
+    // 监听其他配置变化
+    watch(() => settings.confidence, (newVal, oldVal) => {
+      console.log('🎯 [实时监控] 置信度变化:', oldVal, '->', newVal)
+      configManager.saveConfig(settings, 'realtime')
+    })
+
+    watch(() => settings.device, (newVal, oldVal) => {
+      console.log('💻 [实时监控] 设备变化:', oldVal, '->', newVal)
+      configManager.saveConfig(settings, 'realtime')
     })
     
     let websocket = null
@@ -334,22 +399,20 @@ export default {
 
       isMonitoring.value = true
 
-      // 🔧 保持原有的简单实现，只在需要时传递额外配置
-      const modeParam = monitorConfig.mode === 'preview' ? 'preview_only=true' : ''
-      const confidenceParam = `confidence=${settings.confidence}`
-
-      // 🔧 修复：始终传递报警行为配置，确保后端日志显示正确
-      let alertBehaviorsParam = ''
-      if (settings.alertBehaviors && settings.alertBehaviors.length > 0) {
-        alertBehaviorsParam = `alert_behaviors=${settings.alertBehaviors.join(',')}`
-      }
+      // 🔧 使用统一配置管理，构建完整配置
+      const config = configManager.toBackendFormat(settings, 'realtime')
 
       // 构建URL参数
-      const params = [confidenceParam, modeParam, alertBehaviorsParam, `_t=${new Date().getTime()}`]
-        .filter(p => p) // 过滤空参数
-        .join('&')
+      const params = new URLSearchParams()
+      params.append('source', source)
+      params.append('config', JSON.stringify(config))
+      params.append('_t', new Date().getTime().toString())
 
-      videoStreamUrl.value = `/video_feed?source=${source}&${params}`
+      if (monitorConfig.mode === 'preview') {
+        params.append('preview_only', 'true')
+      }
+
+      videoStreamUrl.value = `/video_feed?${params.toString()}`
 
       monitoringStartTime = new Date()
 
@@ -709,9 +772,30 @@ export default {
     }
 
     const saveSettings = () => {
-      localStorage.setItem('realtimeMonitorSettings', JSON.stringify(settings))
+      // 验证配置
+      const validation = configManager.validateConfig(settings)
+      if (!validation.isValid) {
+        ElMessage.error('配置验证失败: ' + validation.errors.join(', '))
+        return
+      }
+
+      // 保存配置
+      configManager.saveConfig(settings, 'realtime')
       ElMessage.success('设置已保存')
       showSettings.value = false
+    }
+
+    const cancelSettings = () => {
+      // 重新加载配置，取消更改
+      Object.assign(settings, configManager.getConfig('realtime'))
+      showSettings.value = false
+    }
+
+    const resetSettings = () => {
+      // 重置为默认配置
+      configManager.resetConfig()
+      Object.assign(settings, configManager.getConfig('realtime'))
+      ElMessage.success('配置已重置为默认值')
     }
 
     const formatTime = (timestamp) => {
@@ -755,11 +839,17 @@ export default {
       videoStreamUrl,
       isStopping,
       realtimeStats, // 🔧 新增：实时统计数据
+      // 配置选项
+      availableBehaviors,
+      deviceOptions,
+      // 方法
       startMonitoring,
       stopMonitoring,
       handleCanvasClick,
       handleStreamError,
       saveSettings,
+      cancelSettings,
+      resetSettings,
       formatTime
     }
   }
@@ -1010,4 +1100,50 @@ export default {
   color: #303133;
   font-weight: bold;
 }
-</style> 
+
+/* 报警行为自适应布局 */
+.alert-behaviors-grid {
+  width: 100%;
+}
+
+.behavior-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.behavior-row:last-child {
+  margin-bottom: 0;
+}
+
+.behavior-item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin: 0 4px;
+}
+
+.behavior-item:first-child {
+  margin-left: 0;
+}
+
+.behavior-item:last-child {
+  margin-right: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  /* 小屏幕下报警行为布局调整 */
+  .behavior-row {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .behavior-item {
+    flex: 0 0 calc(50% - 8px);
+    margin: 4px;
+    justify-content: flex-start;
+  }
+}
+</style>
