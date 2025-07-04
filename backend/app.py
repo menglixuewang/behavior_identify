@@ -459,33 +459,44 @@ def create_app(config_name='development'):
         logger.info(f"收到video_feed请求，视频源: {source}")
 
         try:
-            # 🔧 修复：保持原有的简单配置，默认优先GPU
-            config = {
-                'device': 'auto',  # 默认auto，优先GPU
-                'input_size': int(request.args.get('input_size', 640)),
-                'confidence_threshold': float(request.args.get('confidence', 0.5))
-            }
-
-            # 🔧 修复：处理报警行为配置
-            alert_behaviors_str = request.args.get('alert_behaviors', '')
-            if alert_behaviors_str:
-                alert_behaviors = [behavior.strip() for behavior in alert_behaviors_str.split(',')]
-                config['alert_behaviors'] = alert_behaviors
+            # 检查是否为预览模式
+            preview_only = request.args.get('preview_only', 'false').lower() == 'true'
+            
+            if preview_only:
+                # 🔧 优化：预览模式使用简化的配置，不初始化AI模型
+                logger.info("使用预览模式 - 跳过AI模型初始化")
+                config = {
+                    'device': 'cpu',  # 预览模式使用CPU即可
+                    'input_size': 640,
+                    'confidence_threshold': 0.5
+                }
             else:
-                alert_behaviors = None  # 表示使用默认配置
+                # 检测模式使用完整配置
+                config = {
+                    'device': 'auto',  # 默认auto，优先GPU
+                    'input_size': int(request.args.get('input_size', 640)),
+                    'confidence_threshold': float(request.args.get('confidence', 0.5))
+                }
+
+                # 🔧 修复：处理报警行为配置
+                alert_behaviors_str = request.args.get('alert_behaviors', '')
+                if alert_behaviors_str:
+                    alert_behaviors = [behavior.strip() for behavior in alert_behaviors_str.split(',')]
+                    config['alert_behaviors'] = alert_behaviors
+                else:
+                    alert_behaviors = None  # 表示使用默认配置
 
             # 获取检测服务实例
             detection_service = get_detection_service(config)
 
-            if not detection_service.models_initialized:
+            # 🔧 优化：预览模式下不初始化AI模型
+            if not preview_only and not detection_service.models_initialized:
                 if not detection_service.initialize_models():
                     return Response("模型初始化失败", status=503)
 
             # 🔧 修复：获取实际使用的报警行为配置
             actual_alert_behaviors = getattr(detection_service, 'alert_behaviors', ['fall down', 'fight', 'enter', 'exit'])
 
-            # 检查是否为预览模式
-            preview_only = request.args.get('preview_only', 'false').lower() == 'true'
             mode_text = "预览模式" if preview_only else "实时检测模式"
             logger.info(f"开始返回video_feed流响应 - {mode_text}, 报警行为: {actual_alert_behaviors}")
 

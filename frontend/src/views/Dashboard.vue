@@ -66,7 +66,7 @@
         <el-card class="preview-card">
           <template #header>
             <div class="card-header">
-              <span>实时监控预览</span>
+              <span>实时预览</span>
               <div class="header-buttons">
                 <el-button
                   v-if="isMonitoring"
@@ -75,7 +75,7 @@
                   @click="stopMonitoring"
                 >
                   <el-icon><VideoPause /></el-icon>
-                  停止监控
+                  停止预览
                 </el-button>
                 <el-button type="primary" size="small" @click="$router.push('/realtime')">
                   查看详情
@@ -87,22 +87,22 @@
           <div class="monitor-preview">
             <div v-if="!isMonitoring" class="no-monitor">
               <el-icon size="64"><VideoCamera /></el-icon>
-              <p>暂无实时监控</p>
-              <el-button type="primary" @click="startMonitoring">开始监控</el-button>
+              <p>暂无实时预览</p>
+              <el-button type="primary" @click="startMonitoring">开始预览</el-button>
             </div>
             
             <div v-else class="monitor-active">
               <img
                 :src="videoStreamUrl"
                 class="video-preview"
-                alt="实时监控视频流"
+                alt="实时预览视频流"
                 @error="handleStreamError"
               />
               <div class="monitor-overlay">
-                <div class="monitor-info">
-                  <span class="status-indicator online"></span>
-                  <span>监控中 - {{ currentFPS }} FPS</span>
-                </div>
+                              <div class="monitor-info">
+                <span class="status-indicator online"></span>
+                <span>预览中</span>
+              </div>
               </div>
             </div>
           </div>
@@ -437,61 +437,65 @@ export default {
     // 开始监控
     const startMonitoring = async () => {
       try {
-        // 使用我们统一的apiRequest，它会自动处理body的序列化
-        const response = await apiRequest('/api/detect/realtime', {
-          method: 'POST',
-          body: {
-            source: 0,
-            confidence: 0.4, // 使用一个合理的默认值
-            preview: true
-          }
-        })
+        // Dashboard预览模式：直接使用预览模式，不进行AI检测
+        isMonitoring.value = true
+        // 设置视频流URL，使用preview_only=true参数
+        videoStreamUrl.value = `${API_BASE_URL}/video_feed?source=0&preview_only=true&_t=${new Date().getTime()}`
+        ElMessage.success('预览模式已启动')
         
-        if (response.success) {
-          isMonitoring.value = true
-          currentTaskId = response.task_id
-          // 设置视频流URL
-          videoStreamUrl.value = `${API_BASE_URL}/video_feed?source=0&confidence=0.4&_t=${new Date().getTime()}`
-          ElMessage.success('监控预览已启动')
-          connectWebSocket()
-        } else {
-          ElMessage.error(response.error || '启动监控失败')
-        }
+        // 预览模式下不连接WebSocket，因为不会有检测数据
+        // connectWebSocket()
       } catch (error) {
-        ElMessage.error(`启动监控失败: ${error.message}`)
-        console.error('启动监控错误:', error)
+        ElMessage.error(`启动预览失败: ${error.message}`)
+        console.error('启动预览错误:', error)
+        // 如果失败，重置状态
+        isMonitoring.value = false
+        videoStreamUrl.value = ''
       }
     }
 
     // 停止监控
     const stopMonitoring = async () => {
-      console.log('停止监控按钮被点击')
+      console.log('🛑 Dashboard：开始停止预览流程')
       try {
-        console.log('发送停止监控请求...')
-        const response = await apiRequest('/api/stop_monitoring', {
-          method: 'POST'
+        // 🔧 参考RealtimeMonitor的方式：先断开视频流连接
+        // 1. 立即断开视频流连接，模拟页面关闭的效果
+        console.log('🛑 Dashboard：断开视频流连接')
+        videoStreamUrl.value = ''  // 清空视频流URL，断开img标签的连接
+
+        // 2. 等待一小段时间，确保连接断开
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+        // 3. 调用后端停止监控API（即使预览模式也调用，确保资源释放）
+        console.log('🛑 Dashboard：调用停止监控API')
+        const response = await fetch('/api/stop_monitoring', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         })
 
-        console.log('停止监控响应:', response)
-        if (response.success) {
-          // 更新前端状态
-          isMonitoring.value = false
-          videoStreamUrl.value = ''
-          currentFPS.value = 0
-          currentTaskId = null
-          ElMessage.success('监控已停止')
-
-          // 清理WebSocket连接
-          if (websocket) {
-            websocket.close()
-            websocket = null
-          }
-        } else {
-          ElMessage.error(response.error || '停止监控失败')
+        if (response.ok) {
+          const result = await response.json()
+          console.log('🛑 Dashboard：收到API响应', result)
         }
+
+        // 更新前端状态
+        isMonitoring.value = false
+        currentFPS.value = 0
+        currentTaskId = null
+        ElMessage.success('预览已停止')
+
+        // 清理WebSocket连接（如果有的话）
+        if (websocket) {
+          websocket.close()
+          websocket = null
+        }
+
+        console.log('🛑 Dashboard：停止预览完成')
       } catch (error) {
-        ElMessage.error(`停止监控失败: ${error.message}`)
-        console.error('停止监控错误:', error)
+        console.error('🛑 Dashboard：停止预览失败:', error)
+        ElMessage.error(`停止预览失败: ${error.message}`)
 
         // 即使后端调用失败，也要清理前端状态
         isMonitoring.value = false
@@ -508,47 +512,14 @@ export default {
 
     // 处理视频流错误
     const handleStreamError = (event) => {
-      console.error('视频流加载错误:', event)
-      ElMessage.error('视频流连接失败，请检查网络连接')
+      console.error('预览视频流加载错误:', event)
+      ElMessage.error('预览视频流连接失败，请检查网络连接')
     }
 
-    // WebSocket连接
+    // WebSocket连接（预览模式下不使用）
     const connectWebSocket = () => {
-      // 确保URL正确指向后端的SocketIO服务
-      const wsUrl = `ws://localhost:5001/detection`
-      const socket = io(wsUrl, {
-        transports: ['websocket'],
-        path: '/socket.io/'
-      });
-
-      socket.on('connect', () => {
-        console.log('Dashboard WebSocket 连接成功');
-        if (currentTaskId) {
-          socket.emit('join_task', { task_id: currentTaskId });
-        }
-      });
-      
-      socket.on('realtime_result', (data) => {
-        // Dashboard 预览只关心FPS和报警信息
-        if (data.fps) {
-          currentFPS.value = data.fps;
-        }
-        if (data.type === 'alert') {
-          // 收到新报警，可以触发相关数据刷新
-          fetchRecentAlerts()
-          // 也可以考虑只在前端列表加一个，减少API请求
-        }
-      });
-      
-      socket.on('disconnect', () => {
-        console.log('Dashboard WebSocket 断开连接');
-      });
-
-      socket.on('connect_error', (error) => {
-        console.error('Dashboard WebSocket 连接错误:', error);
-      });
-
-      websocket = socket;
+      // Dashboard预览模式不需要WebSocket连接，因为不会有检测数据
+      console.log('Dashboard预览模式：跳过WebSocket连接')
     }
 
     // 格式化时间

@@ -1,3 +1,145 @@
 2025-07-02 16:45:11,727 - behavior_detection - INFO - app:upload_video:139 - 视频上传成功: fall_1.mp4, 任务ID: 1
 2025-07-02 16:49:51,715 - behavior_detection - INFO - app:delete_task:641 - 删除输出文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751445911.mp4
 2025-07-02 16:49:51,720 - behavior_detection - INFO - app:delete_task:649 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751445911_fall_1.mp4
+2025-07-04 09:41:19,824 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 09:41:23,451 - behavior_detection - INFO - app:video_feed:490 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 09:42:12,254 - behavior_detection - INFO - app:stop_monitoring:519 - 实时监控已停止
+2025-07-04 09:42:13,183 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 09:42:13,184 - behavior_detection - INFO - app:video_feed:490 - 开始返回video_feed流响应 - 实时检测模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 09:42:13,192 - behavior_detection - INFO - app:handle_connect:1274 - WebSocket客户端连接: 491469fd-afb2-4aa2-9f41-3406b031a5b0
+2025-07-04 09:42:43,151 - behavior_detection - INFO - app:stop_monitoring:519 - 实时监控已停止
+2025-07-04 09:42:43,158 - behavior_detection - INFO - app:handle_disconnect:1280 - WebSocket客户端断开: 491469fd-afb2-4aa2-9f41-3406b031a5b0
+2025-07-04 09:42:45,723 - behavior_detection - INFO - app:stop_monitoring:519 - 实时监控已停止
+2025-07-04 09:45:09,386 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 09:45:09,387 - behavior_detection - INFO - app:video_feed:490 - 开始返回video_feed流响应 - 实时检测模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 09:45:10,686 - behavior_detection - INFO - app:handle_connect:1274 - WebSocket客户端连接: 98535b33-07c1-4989-b6dc-14714a572370
+2025-07-04 09:46:24,699 - behavior_detection - INFO - app:stop_monitoring:519 - 实时监控已停止
+2025-07-04 09:46:24,705 - behavior_detection - INFO - app:handle_disconnect:1280 - WebSocket客户端断开: 98535b33-07c1-4989-b6dc-14714a572370
+2025-07-04 09:46:37,247 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 09:46:37,250 - behavior_detection - INFO - app:video_feed:490 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 09:47:33,749 - behavior_detection - INFO - app:stop_monitoring:519 - 实时监控已停止
+2025-07-04 09:47:33,830 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 09:47:33,832 - behavior_detection - INFO - app:video_feed:490 - 开始返回video_feed流响应 - 实时检测模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 09:47:33,836 - behavior_detection - INFO - app:handle_connect:1274 - WebSocket客户端连接: 1f44485b-dc1b-4b6c-9b0b-e5d674f5e93e
+2025-07-04 09:47:50,938 - behavior_detection - INFO - app:stop_monitoring:519 - 实时监控已停止
+2025-07-04 09:47:50,944 - behavior_detection - INFO - app:handle_disconnect:1280 - WebSocket客户端断开: 1f44485b-dc1b-4b6c-9b0b-e5d674f5e93e
+2025-07-04 09:48:03,821 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 09:48:03,822 - behavior_detection - INFO - app:video_feed:490 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 09:51:00,255 - behavior_detection - INFO - app:stop_monitoring:519 - 实时监控已停止
+2025-07-04 09:51:15,194 - behavior_detection - INFO - app:upload_video:145 - 视频上传成功: fall_1.mp4, 任务ID: 3
+2025-07-04 09:52:24,214 - behavior_detection - INFO - app:serve_output_file:1161 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 09:52:24,215 - behavior_detection - INFO - app:serve_output_file:1168 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 09:52:24,221 - behavior_detection - INFO - app:serve_output_file:1169 - 当前工作目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\yolo_slowfast-master
+2025-07-04 09:52:24,224 - behavior_detection - INFO - app:serve_output_file:1170 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 09:52:24,226 - behavior_detection - INFO - app:serve_output_file:1171 - 文件存在: True
+2025-07-04 09:52:24,228 - behavior_detection - INFO - app:serve_output_file:1179 - 文件大小: 21561894 bytes
+2025-07-04 09:52:24,232 - behavior_detection - INFO - app:serve_output_file:1184 - Range请求: bytes=0-
+2025-07-04 09:52:24,253 - behavior_detection - INFO - app:serve_output_file:1216 - 返回Range响应: 0-21561893/21561894
+2025-07-04 09:52:24,470 - behavior_detection - INFO - app:serve_output_file:1161 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 09:52:24,472 - behavior_detection - INFO - app:serve_output_file:1168 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 09:52:24,473 - behavior_detection - INFO - app:serve_output_file:1169 - 当前工作目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\yolo_slowfast-master
+2025-07-04 09:52:24,474 - behavior_detection - INFO - app:serve_output_file:1170 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 09:52:24,476 - behavior_detection - INFO - app:serve_output_file:1171 - 文件存在: True
+2025-07-04 09:52:24,479 - behavior_detection - INFO - app:serve_output_file:1179 - 文件大小: 21561894 bytes
+2025-07-04 09:52:24,480 - behavior_detection - INFO - app:serve_output_file:1184 - Range请求: bytes=21528576-
+2025-07-04 09:52:24,482 - behavior_detection - INFO - app:serve_output_file:1216 - 返回Range响应: 21528576-21561893/21561894
+2025-07-04 09:52:24,578 - behavior_detection - INFO - app:serve_output_file:1161 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 09:52:24,579 - behavior_detection - INFO - app:serve_output_file:1168 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 09:52:24,579 - behavior_detection - INFO - app:serve_output_file:1169 - 当前工作目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\yolo_slowfast-master
+2025-07-04 09:52:24,579 - behavior_detection - INFO - app:serve_output_file:1170 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 09:52:24,580 - behavior_detection - INFO - app:serve_output_file:1171 - 文件存在: True
+2025-07-04 09:52:24,580 - behavior_detection - INFO - app:serve_output_file:1179 - 文件大小: 21561894 bytes
+2025-07-04 09:52:24,581 - behavior_detection - INFO - app:serve_output_file:1184 - Range请求: bytes=65536-
+2025-07-04 09:52:24,589 - behavior_detection - INFO - app:serve_output_file:1216 - 返回Range响应: 65536-21561893/21561894
+2025-07-04 09:52:25,317 - behavior_detection - INFO - app:serve_output_file:1161 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 09:52:25,317 - behavior_detection - INFO - app:serve_output_file:1168 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 09:52:25,317 - behavior_detection - INFO - app:serve_output_file:1169 - 当前工作目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\yolo_slowfast-master
+2025-07-04 09:52:25,318 - behavior_detection - INFO - app:serve_output_file:1170 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 09:52:25,318 - behavior_detection - INFO - app:serve_output_file:1171 - 文件存在: True
+2025-07-04 09:52:25,319 - behavior_detection - INFO - app:serve_output_file:1179 - 文件大小: 21561894 bytes
+2025-07-04 09:52:25,319 - behavior_detection - INFO - app:serve_output_file:1235 - 普通文件请求
+2025-07-04 09:52:25,320 - behavior_detection - INFO - app:serve_output_file:1258 - 返回普通文件响应
+2025-07-04 09:52:27,357 - behavior_detection - INFO - app:serve_output_file:1161 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 09:52:27,358 - behavior_detection - INFO - app:serve_output_file:1168 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 09:52:27,359 - behavior_detection - INFO - app:serve_output_file:1169 - 当前工作目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\yolo_slowfast-master
+2025-07-04 09:52:27,360 - behavior_detection - INFO - app:serve_output_file:1170 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 09:52:27,361 - behavior_detection - INFO - app:serve_output_file:1171 - 文件存在: True
+2025-07-04 09:52:27,362 - behavior_detection - INFO - app:serve_output_file:1179 - 文件大小: 21561894 bytes
+2025-07-04 09:52:27,363 - behavior_detection - INFO - app:serve_output_file:1184 - Range请求: bytes=9502720-
+2025-07-04 09:52:27,369 - behavior_detection - INFO - app:serve_output_file:1216 - 返回Range响应: 9502720-21561893/21561894
+2025-07-04 09:59:36,732 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 09:59:40,177 - behavior_detection - INFO - app:video_feed:490 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:02:08,924 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:02:10,132 - behavior_detection - INFO - app:video_feed:490 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:06:28,096 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:06:28,101 - behavior_detection - INFO - app:video_feed:467 - 使用预览模式 - 跳过AI模型初始化
+2025-07-04 10:06:28,104 - behavior_detection - INFO - app:video_feed:501 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:08:28,654 - behavior_detection - INFO - app:stop_monitoring:530 - 实时监控已停止
+2025-07-04 10:08:51,639 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:08:51,641 - behavior_detection - INFO - app:video_feed:467 - 使用预览模式 - 跳过AI模型初始化
+2025-07-04 10:08:51,644 - behavior_detection - INFO - app:video_feed:501 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:09:14,237 - behavior_detection - INFO - app:stop_monitoring:530 - 实时监控已停止
+2025-07-04 10:09:17,429 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:09:17,435 - behavior_detection - INFO - app:video_feed:467 - 使用预览模式 - 跳过AI模型初始化
+2025-07-04 10:09:17,437 - behavior_detection - INFO - app:video_feed:501 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:09:32,475 - behavior_detection - INFO - app:stop_monitoring:530 - 实时监控已停止
+2025-07-04 10:10:37,378 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:10:38,546 - behavior_detection - INFO - app:video_feed:501 - 开始返回video_feed流响应 - 实时检测模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:10:38,711 - behavior_detection - INFO - app:handle_connect:1285 - WebSocket客户端连接: 15b2b2d9-e51a-4a08-87f1-f8c3c9143b4c
+2025-07-04 10:12:55,019 - behavior_detection - INFO - app:stop_monitoring:530 - 实时监控已停止
+2025-07-04 10:12:55,033 - behavior_detection - INFO - app:handle_disconnect:1291 - WebSocket客户端断开: 15b2b2d9-e51a-4a08-87f1-f8c3c9143b4c
+2025-07-04 10:13:20,828 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:13:20,830 - behavior_detection - INFO - app:video_feed:501 - 开始返回video_feed流响应 - 实时检测模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:13:22,152 - behavior_detection - INFO - app:handle_connect:1285 - WebSocket客户端连接: 86558b82-e668-4b6f-91b1-221b0e119225
+2025-07-04 10:14:29,809 - behavior_detection - INFO - app:stop_monitoring:530 - 实时监控已停止
+2025-07-04 10:14:29,819 - behavior_detection - INFO - app:handle_disconnect:1291 - WebSocket客户端断开: 86558b82-e668-4b6f-91b1-221b0e119225
+2025-07-04 10:14:42,102 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:14:42,103 - behavior_detection - INFO - app:video_feed:467 - 使用预览模式 - 跳过AI模型初始化
+2025-07-04 10:14:42,104 - behavior_detection - INFO - app:video_feed:501 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:14:54,691 - behavior_detection - INFO - app:stop_monitoring:530 - 实时监控已停止
+2025-07-04 10:17:17,652 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:17:17,653 - behavior_detection - INFO - app:video_feed:467 - 使用预览模式 - 跳过AI模型初始化
+2025-07-04 10:17:17,655 - behavior_detection - INFO - app:video_feed:501 - 开始返回video_feed流响应 - 预览模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:18:06,315 - behavior_detection - INFO - app:stop_monitoring:530 - 实时监控已停止
+2025-07-04 10:22:51,659 - behavior_detection - INFO - app:video_feed:459 - 收到video_feed请求，视频源: 0
+2025-07-04 10:22:53,235 - behavior_detection - INFO - app:handle_connect:1285 - WebSocket客户端连接: 7d7e93fa-0a22-42f7-b6c2-762a7ebdd6f6
+2025-07-04 10:22:53,974 - behavior_detection - INFO - app:video_feed:501 - 开始返回video_feed流响应 - 实时检测模式, 报警行为: ['fall down', 'fight', 'enter', 'exit']
+2025-07-04 10:23:49,931 - behavior_detection - INFO - app:stop_monitoring:530 - 实时监控已停止
+2025-07-04 10:23:49,936 - behavior_detection - INFO - app:handle_disconnect:1291 - WebSocket客户端断开: 7d7e93fa-0a22-42f7-b6c2-762a7ebdd6f6
+2025-07-04 10:26:14,999 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 10:26:14,999 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 10:26:15,001 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 10:26:15,001 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 10:26:15,002 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:26:15,002 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 21561894 bytes
+2025-07-04 10:26:15,003 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=0-
+2025-07-04 10:26:15,014 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 0-21561893/21561894
+2025-07-04 10:26:15,263 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 10:26:15,264 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 10:26:15,264 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 10:26:15,264 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 10:26:15,265 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:26:15,265 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 21561894 bytes
+2025-07-04 10:26:15,265 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=21528576-
+2025-07-04 10:26:15,266 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 21528576-21561893/21561894
+2025-07-04 10:26:15,326 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 10:26:15,326 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 10:26:15,326 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 10:26:15,327 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 10:26:15,328 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:26:15,328 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 21561894 bytes
+2025-07-04 10:26:15,328 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=32768-
+2025-07-04 10:26:15,336 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 32768-21561893/21561894
+2025-07-04 10:26:15,578 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_3_1751593875.mp4
+2025-07-04 10:26:15,579 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 10:26:15,581 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 10:26:15,581 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 10:26:15,582 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:26:15,584 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 21561894 bytes
+2025-07-04 10:26:15,585 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=8421376-
+2025-07-04 10:26:15,593 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 8421376-21561893/21561894
+2025-07-04 10:34:07,496 - behavior_detection - INFO - app:upload_video:145 - 视频上传成功: fall_1.mp4, 任务ID: 4
+2025-07-04 10:45:18,557 - behavior_detection - INFO - app:delete_task:699 - 删除输出文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_4_1751596447813.mp4
+2025-07-04 10:45:18,558 - behavior_detection - INFO - app:delete_task:707 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751596447482_fall_1.mp4
+2025-07-04 10:45:20,693 - behavior_detection - INFO - app:delete_task:699 - 删除输出文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
+2025-07-04 10:45:20,695 - behavior_detection - INFO - app:delete_task:707 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751593875_fall_1.mp4

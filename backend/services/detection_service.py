@@ -368,7 +368,8 @@ class BehaviorDetectionService:
             last_stats_time = time.time()
             print(f"🔧 实时统计已初始化，报警行为: {self.alert_behaviors}")
 
-        if not self.models_initialized:
+        # 🔧 优化：预览模式下不检查模型初始化
+        if not preview_only and not self.models_initialized:
             print("模型未初始化，尝试初始化...")
             if not self.initialize_models():
                 print("模型初始化失败，无法生成视频帧")
@@ -379,8 +380,12 @@ class BehaviorDetectionService:
             original_cwd = os.getcwd()
             os.chdir(yolo_slowfast_path)
 
-            # 确保导入必要的模块
-            from yolo_slowfast import MyVideoCapture, ava_inference_transform, deepsort_update, plot_one_box
+            # 🔧 优化：预览模式下只导入必要的模块
+            if preview_only:
+                from yolo_slowfast import MyVideoCapture
+            else:
+                # 确保导入必要的模块
+                from yolo_slowfast import MyVideoCapture, ava_inference_transform, deepsort_update, plot_one_box
 
             # 处理视频源参数
             if source == '0' or source == 0:
@@ -455,8 +460,10 @@ class BehaviorDetectionService:
 
                 print("SlowFast worker线程已退出")
 
-            # 启动动作识别工作线程
-            threading.Thread(target=slowfast_worker, daemon=True).start()
+            # 🔧 优化：预览模式下不启动动作识别工作线程
+            if not preview_only:
+                # 启动动作识别工作线程
+                threading.Thread(target=slowfast_worker, daemon=True).start()
 
             # 主处理循环 - 按照标准实现逻辑（简化循环条件）
             frame_count = 0
@@ -489,7 +496,14 @@ class BehaviorDetectionService:
                 # 🔧 预览模式：跳过复杂的检测逻辑，直接显示原始画面
                 if preview_only:
                     # 预览模式：只显示原始摄像头画面，不进行任何检测
-                    pass  # img保持原始状态
+                    # 🔧 优化：预览模式下可以适当调整图像大小，减少传输数据
+                    height, width = img.shape[:2]
+                    if width > 640:  # 如果图像太宽，适当缩小
+                        scale = 640 / width
+                        new_width = int(width * scale)
+                        new_height = int(height * scale)
+                        img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_AREA)
+                    pass  # img保持处理后的状态
                 else:
                     # 实时检测模式：执行完整的YOLO + SlowFast检测
                     # YOLO检测
@@ -601,8 +615,11 @@ class BehaviorDetectionService:
                     print("🎥 在发送帧前收到停止信号，退出...")
                     return  # 直接返回，结束生成器
 
-                # 编码为JPEG
-                ret, buffer = cv2.imencode('.jpg', img)
+                # 🔧 优化：# 检测模式降低图像质量
+                if not preview_only:
+                    encode_params = [cv2.IMWRITE_JPEG_QUALITY, 60]  # 60%质量
+
+                ret, buffer = cv2.imencode('.jpg', img, encode_params)
                 if ret:
                     frame = buffer.tobytes()
 
@@ -619,13 +636,15 @@ class BehaviorDetectionService:
                         print("🎥 在yield后收到停止信号，退出...")
                         return
 
-                # 控制帧率 - 在sleep期间也检查停止标志（按照标准实现）
-                for i in range(33):  # 分解sleep为多个小间隔，便于快速响应停止信号
-                    if self.should_stop_realtime:
-                        print(f"🎥 在帧率控制期间({i}/33)收到停止信号，退出...")
-                        return  # 直接返回，结束生成器
-                    # 使用__import__确保获取正确的time模块
-                    __import__('time').sleep(0.001)  # 1ms * 33 = 33ms ≈ 30FPS
+                # 🔧 优化：预览模式不进行帧率控制
+                if not preview_only:
+                    # 检测模式：保持原有的帧率控制
+                    for i in range(33):  # 分解sleep为多个小间隔，便于快速响应停止信号
+                        if self.should_stop_realtime:
+                            print(f"🎥 在帧率控制期间({i}/33)收到停止信号，退出...")
+                            return  # 直接返回，结束生成器
+                        # 使用__import__确保获取正确的time模块
+                        __import__('time').sleep(0.001)  # 1ms * 33 = 33ms ≈ 30FPS
 
         except Exception as e:
             print(f"🎥 生成视频帧时出错: {e}")
