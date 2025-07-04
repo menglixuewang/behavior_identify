@@ -24,7 +24,7 @@ NProgress.configure({
 })
 
 // API配置
-const API_BASE_URL = 'http://localhost:5000'
+const API_BASE_URL = 'http://localhost:5001'
 
 // 导入页面组件
 import Dashboard from './views/Dashboard.vue'
