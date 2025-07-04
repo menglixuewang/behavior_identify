@@ -12,6 +12,9 @@ from datetime import datetime
 import base64
 from typing import Dict, List, Optional, Tuple, Any
 
+# 导入实时统计服务
+from .realtime_statistics import get_realtime_statistics, reset_realtime_statistics
+
 # 添加算法模块路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(current_dir))
@@ -41,11 +44,21 @@ class BehaviorDetectionService:
         Args:
             config: 配置字典，包含设备、输入尺寸、置信度阈值等参数
         """
-        # 设备配置 - GPU检测
-        if config.get('device', 'cpu').lower() == 'cuda':
+        # 🔧 修复：设备配置 - 默认优先使用GPU，GPU不可用时使用CPU
+        device_config = config.get('device', 'auto').lower()
+
+        if device_config == 'auto':
+            # 自动选择设备 - 优先GPU，不可用时回退CPU
             if torch.cuda.is_available():
                 self.device = 'cuda'
-                print(f"✓ 使用GPU: {torch.cuda.get_device_name()}")
+                print(f"✓ 自动选择GPU: {torch.cuda.get_device_name()}")
+            else:
+                self.device = 'cpu'
+                print("✓ GPU不可用，自动选择CPU")
+        elif device_config == 'cuda':
+            if torch.cuda.is_available():
+                self.device = 'cuda'
+                print(f"✓ 强制使用GPU: {torch.cuda.get_device_name()}")
             else:
                 self.device = 'cpu'
                 print("⚠ CUDA不可用，回退到CPU")
@@ -73,7 +86,10 @@ class BehaviorDetectionService:
         self.task_lock = threading.Lock()
         self.stopped_tasks = set()
         self.current_tasks = {}
-        self.should_stop_realtime = False  # 添加停止实时监控的标志
+        self.should_stop_realtime = False  # 停止实时监控的标志（对应标准实现的should_stop）
+        self.is_running = False  # 检测器运行状态标志（按照标准实现添加）
+        self.stop_event = threading.Event()  # 添加停止事件对象
+        self.active_streams = {}  # 活跃流跟踪
         
         # 模型相关路径
         self.yolo_model_path = 'yolov8n.pt'
@@ -319,21 +335,38 @@ class BehaviorDetectionService:
         
         return task_id
 
-    def generate_realtime_frames(self, source: Any):
+    def generate_realtime_frames(self, source: Any, preview_only: bool = False, websocket_callback=None):
         """
         生成实时视频帧流，用于HTTP视频流传输
         这是从 behavior_identify 项目迁移的功能
 
         Args:
             source: 视频源（摄像头ID或视频文件路径）
+            preview_only: 是否仅预览模式（不进行行为检测）
+            websocket_callback: WebSocket回调函数，用于发送统计数据
 
         Yields:
             bytes: JPEG格式的视频帧数据
         """
-        print(f"开始生成实时视频帧流，视频源: {source}")
+        mode_text = "仅预览" if preview_only else "实时检测"
+        print(f"🎥 开始生成实时视频帧流，视频源: {source}，模式: {mode_text}")
 
-        # 重置停止标志
-        self.should_stop_realtime = False
+        # 按照标准实现：开始新会话时重置停止标志
+        self.should_stop_realtime = False  # 重置停止标志，开始新的监控会话
+        self.stop_event.clear()  # 清除停止事件
+        self.is_running = True  # 设置运行状态
+        print(f"🎥 开始新监控会话 - should_stop: {self.should_stop_realtime}, is_running: {self.is_running}")
+
+        # 🔧 新增：初始化实时统计（如果有WebSocket回调）
+        realtime_stats = None
+        last_stats_time = 0
+        stats_interval = 2.0  # 每2秒发送一次统计数据
+        if websocket_callback and not preview_only:
+            from services.realtime_statistics import get_realtime_statistics
+            realtime_stats = get_realtime_statistics(self.alert_behaviors)
+            realtime_stats.reset()
+            last_stats_time = time.time()
+            print(f"🔧 实时统计已初始化，报警行为: {self.alert_behaviors}")
 
         if not self.models_initialized:
             print("模型未初始化，尝试初始化...")
@@ -425,108 +458,213 @@ class BehaviorDetectionService:
             # 启动动作识别工作线程
             threading.Thread(target=slowfast_worker, daemon=True).start()
 
-            # 主处理循环
+            # 主处理循环 - 按照标准实现逻辑（简化循环条件）
+            frame_count = 0
+            print(f"🎥 开始主处理循环")
             while not cap.end and not self.should_stop_realtime:
-                ret, img = cap.read()
-                if not ret:
-                    continue
+                frame_count += 1
+                # 每100帧打印一次状态
+                if frame_count % 100 == 0:
+                    print(f"🎥 处理第{frame_count}帧 - should_stop: {self.should_stop_realtime}, event_set: {self.stop_event.is_set()}")
 
-                # 检查是否需要停止
+                # 在循环开始时检查停止标志（按照标准实现）
                 if self.should_stop_realtime:
-                    print("收到停止信号，正在退出实时监控...")
+                    print(f"🎥 在第{frame_count}帧收到停止信号，正在退出实时监控...")
+                    print(f"🎥 停止标志状态: should_stop={self.should_stop_realtime}, is_running={self.is_running}")
                     break
 
-                # YOLO检测
-                results = self.yolo_model.predict(source=img, imgsz=self.input_size, device=self.device, verbose=False)
-                boxes = results[0].boxes  # YOLOv8 Results object
-
-                # 处理YOLO检测结果
-                if boxes is not None and len(boxes) > 0:
-                    # 再次检查停止信号
+                ret, img = cap.read()
+                if not ret:
+                    # 如果读取失败，也检查停止标志
                     if self.should_stop_realtime:
-                        print("在YOLO处理阶段收到停止信号，退出...")
+                        print("🎥 读取失败时收到停止信号，退出...")
                         break
+                    continue
 
-                    pred_xyxy = boxes.xyxy.cpu().numpy()
-                    pred_conf = boxes.conf.cpu().numpy().reshape(-1, 1)
-                    pred_cls = boxes.cls.cpu().numpy().reshape(-1, 1)
+                # 再次检查是否需要停止（按照标准实现）
+                if self.should_stop_realtime:
+                    print("🎥 收到停止信号，正在退出实时监控...")
+                    break
 
-                    pred = np.hstack((pred_xyxy, pred_conf, pred_cls))
-                    xywh = np.hstack(((pred[:, 0:2] + pred[:, 2:4]) / 2, pred[:, 2:4] - pred[:, 0:2]))
+                # 🔧 预览模式：跳过复杂的检测逻辑，直接显示原始画面
+                if preview_only:
+                    # 预览模式：只显示原始摄像头画面，不进行任何检测
+                    pass  # img保持原始状态
+                else:
+                    # 实时检测模式：执行完整的YOLO + SlowFast检测
+                    # YOLO检测
+                    results = self.yolo_model.predict(source=img, imgsz=self.input_size, device=self.device, verbose=False)
+                    boxes = results[0].boxes  # YOLOv8 Results object
 
-                    # DeepSort跟踪
-                    temp = deepsort_update(self.deepsort_tracker, pred, xywh, img)
-                    temp = temp if len(temp) else np.ones((0, 8)).astype(np.float32)
-
-                    # 再次检查停止信号
-                    if self.should_stop_realtime:
-                        print("在DeepSort处理阶段收到停止信号，退出...")
-                        break
-
-                    # 格式化检测结果
-                    pred_result = type("YoloPred", (), {})()
-                    pred_result.ims = [img]
-                    pred_result.pred = [temp.astype(np.float32)]
-                    pred_result.names = self.yolo_model.names
-
-                    # 行为识别（SlowFast） - 当积累了25帧时
-                    if len(cap.stack) == 25:
-                        clip = cap.get_video_clip()
-                        clip_queue.put((cap.idx, clip, pred_result))
-
-                    # 处理动作识别结果
-                    while not result_queue.empty():
-                        try:
-                            _, tids, avalabels = result_queue.get_nowait()
-                            for tid, avalabel in zip(tids, avalabels):
-                                id_to_ava_labels[tid] = self.ava_labelnames[avalabel + 1]
-                        except queue.Empty:
+                    # 处理YOLO检测结果
+                    if boxes is not None and len(boxes) > 0:
+                        # 再次检查停止信号
+                        if self.should_stop_realtime:
+                            print("在YOLO处理阶段收到停止信号，退出...")
                             break
 
-                    # 再次检查停止信号
-                    if self.should_stop_realtime:
-                        print("在结果处理阶段收到停止信号，退出...")
-                        break
+                        pred_xyxy = boxes.xyxy.cpu().numpy()
+                        pred_conf = boxes.conf.cpu().numpy().reshape(-1, 1)
+                        pred_cls = boxes.cls.cpu().numpy().reshape(-1, 1)
 
-                    # 绘制检测结果 - 使用与behavior_identify相同的逻辑
-                    annotated_frame = img.copy()
-                    for _, pred in enumerate(pred_result.pred):
-                        if pred.shape[0]:
-                            for _, (*box, cls, trackid, _, _) in enumerate(pred):
-                                if int(cls) != 0:
-                                    ava_label = ''
-                                elif trackid in id_to_ava_labels.keys():
-                                    ava_label = id_to_ava_labels[trackid].split(' ')[0]
-                                else:
-                                    ava_label = 'Unknown'
-                                text = '{} {} {}'.format(int(trackid), pred_result.names[int(cls)], ava_label)
-                                color = coco_color_map[int(cls)]
-                                annotated_frame = plot_one_box(box, annotated_frame, color, text)
+                        pred = np.hstack((pred_xyxy, pred_conf, pred_cls))
+                        xywh = np.hstack(((pred[:, 0:2] + pred[:, 2:4]) / 2, pred[:, 2:4] - pred[:, 0:2]))
 
-                    # 使用绘制后的帧
-                    img = annotated_frame
+                        # DeepSort跟踪
+                        temp = deepsort_update(self.deepsort_tracker, pred, xywh, img)
+                        temp = temp if len(temp) else np.ones((0, 8)).astype(np.float32)
+
+                        # 再次检查停止信号
+                        if self.should_stop_realtime:
+                            print("在DeepSort处理阶段收到停止信号，退出...")
+                            break
+
+                        # 格式化检测结果
+                        pred_result = type("YoloPred", (), {})()
+                        pred_result.ims = [img]
+                        pred_result.pred = [temp.astype(np.float32)]
+                        pred_result.names = self.yolo_model.names
+
+                        # 行为识别（SlowFast） - 当积累了25帧时
+                        if len(cap.stack) == 25:
+                            clip = cap.get_video_clip()
+                            clip_queue.put((cap.idx, clip, pred_result))
+
+                        # 处理动作识别结果
+                        while not result_queue.empty():
+                            try:
+                                _, tids, avalabels = result_queue.get_nowait()
+                                for tid, avalabel in zip(tids, avalabels):
+                                    id_to_ava_labels[tid] = self.ava_labelnames[avalabel + 1]
+                            except queue.Empty:
+                                break
+
+                        # 再次检查停止信号
+                        if self.should_stop_realtime:
+                            print("在结果处理阶段收到停止信号，退出...")
+                            break
+
+                        # 绘制检测结果 - 使用与behavior_identify相同的逻辑
+                        annotated_frame = img.copy()
+                        for _, pred in enumerate(pred_result.pred):
+                            if pred.shape[0]:
+                                for _, (*box, cls, trackid, _, _) in enumerate(pred):
+                                    if int(cls) != 0:
+                                        ava_label = ''
+                                    elif trackid in id_to_ava_labels.keys():
+                                        ava_label = id_to_ava_labels[trackid].split(' ')[0]
+                                    else:
+                                        ava_label = 'Unknown'
+                                    text = '{} {} {}'.format(int(trackid), pred_result.names[int(cls)], ava_label)
+                                    color = coco_color_map[int(cls)]
+                                    annotated_frame = plot_one_box(box, annotated_frame, color, text)
+
+                        # 使用绘制后的帧
+                        img = annotated_frame
+
+                        # 🔧 新增：更新实时统计数据
+                        if realtime_stats and not preview_only:
+                            # 构建检测结果
+                            detections = []
+                            for _, pred in enumerate(pred_result.pred):
+                                if pred.shape[0]:
+                                    for _, (*box, cls, trackid, _, _) in enumerate(pred):
+                                        if int(cls) == 0:  # 只统计人员检测
+                                            behavior_type = id_to_ava_labels.get(trackid, 'Unknown')
+                                            detections.append({
+                                                'object_id': int(trackid),
+                                                'behavior_type': behavior_type,
+                                                'confidence': 0.8,  # 默认置信度
+                                                'is_anomaly': self._is_anomaly_behavior(behavior_type),
+                                                'frame_number': frame_count,
+                                                'timestamp': time.time()
+                                            })
+
+                            # 更新统计数据
+                            current_time = time.time()
+                            realtime_stats.update_frame_stats(fps=30.0, processing_time=0.033)
+                            if detections:
+                                realtime_stats.add_detections(detections)
+
+                            # 定期发送统计数据
+                            if current_time - last_stats_time >= stats_interval:
+                                stats_data = realtime_stats.get_statistics()
+                                if websocket_callback:
+                                    websocket_callback({
+                                        'type': 'statistics_update',
+                                        'statistics': stats_data
+                                    })
+                                last_stats_time = current_time
+
+                # 在发送帧之前最后一次检查停止标志（按照标准实现）
+                if self.should_stop_realtime:
+                    print("🎥 在发送帧前收到停止信号，退出...")
+                    return  # 直接返回，结束生成器
 
                 # 编码为JPEG
                 ret, buffer = cv2.imencode('.jpg', img)
                 if ret:
                     frame = buffer.tobytes()
+
+                    # 在yield前再次检查停止标志
+                    if self.should_stop_realtime:
+                        print("🎥 在yield前收到停止信号，退出...")
+                        return
+
                     yield (b'--frame\r\n'
                            b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-                # 控制帧率
-                time.sleep(0.033)  # 约30FPS
+                    # yield后立即检查停止标志
+                    if self.should_stop_realtime:
+                        print("🎥 在yield后收到停止信号，退出...")
+                        return
+
+                # 控制帧率 - 在sleep期间也检查停止标志（按照标准实现）
+                for i in range(33):  # 分解sleep为多个小间隔，便于快速响应停止信号
+                    if self.should_stop_realtime:
+                        print(f"🎥 在帧率控制期间({i}/33)收到停止信号，退出...")
+                        return  # 直接返回，结束生成器
+                    # 使用__import__确保获取正确的time模块
+                    __import__('time').sleep(0.001)  # 1ms * 33 = 33ms ≈ 30FPS
 
         except Exception as e:
-            print(f"生成视频帧时出错: {e}")
+            print(f"🎥 生成视频帧时出错: {e}")
         finally:
-            # 清理资源
+            # 按照标准实现进行资源清理
+            print("🎥 正在清理资源...")
+            self.is_running = False  # 按照标准实现重置运行状态
+
+            # 强制释放摄像头资源
             try:
-                clip_queue.put(None)  # 停止工作线程
-                cap.release()
-                os.chdir(original_cwd)
-            except:
-                pass
-            print("视频帧生成结束")
+                if 'clip_queue' in locals():
+                    clip_queue.put(None)  # 停止工作线程
+                    print("🎥 工作线程停止信号已发送")
+            except Exception as e:
+                print(f"🎥 停止工作线程时出错: {e}")
+
+            try:
+                if 'cap' in locals() and cap is not None:
+                    print(f"🎥 释放摄像头资源...")
+                    cap.release()  # 释放视频捕获资源
+                    print("🎥 摄像头资源已释放")
+
+                    # 强制等待一段时间确保资源完全释放
+                    time.sleep(0.2)
+                    print("🎥 摄像头资源释放完成")
+                else:
+                    print("🎥 警告：摄像头对象不存在或已为None")
+            except Exception as cleanup_error:
+                print(f"🎥 释放摄像头资源时出错: {cleanup_error}")
+
+            try:
+                if 'original_cwd' in locals():
+                    os.chdir(original_cwd)
+                    print("🎥 工作目录已恢复")
+            except Exception as e:
+                print(f"🎥 恢复工作目录时出错: {e}")
+
+            print("🎥 检测器已停止")
+            print(f"🎥 最终状态 - should_stop: {self.should_stop_realtime}, is_running: {self.is_running}")
 
     def stop_realtime_detection(self, task_id: str) -> bool:
         """
@@ -545,19 +683,73 @@ class BehaviorDetectionService:
         return False
 
     def stop_realtime_monitoring(self):
-        """停止所有实时监控"""
-        print("收到停止实时监控请求")
-        self.should_stop_realtime = True
+        """停止所有实时监控 - 按照标准实现逻辑"""
+        print("🛑 SERVICE: Stopping monitoring...")
+        print(f"🛑 停止前状态 - should_stop: {self.should_stop_realtime}, is_running: {self.is_running}")
+
+        # 按照标准实现设置状态标志
+        self.should_stop_realtime = True  # 对应标准实现的should_stop
+        self.is_running = False  # 按照标准实现设置运行状态
+        self.stop_event.set()  # 设置停止事件
+
+        print(f"🛑 停止后状态 - should_stop: {self.should_stop_realtime}, is_running: {self.is_running}")
+
+        # 强制等待一小段时间，确保生成器有机会检查停止标志
+        time.sleep(0.1)
+        print("🛑 停止信号已发送，等待生成器响应...")
 
         # 停止所有当前任务
         with self.task_lock:
             for task_id in list(self.current_tasks.keys()):
                 if self.current_tasks[task_id]['status'] == 'running':
                     self.current_tasks[task_id]['status'] = 'stopped'
-                    print(f"停止任务: {task_id}")
+                    print(f"🛑 停止任务: {task_id}")
 
-        print("实时监控已停止")
-    
+        # 显示活跃流信息
+        print(f"🛑 当前活跃流数量: {len(self.active_streams)}")
+        for stream_id, stream_info in self.active_streams.items():
+            print(f"🛑 活跃流: {stream_id} - 摄像头: {stream_info['camera_id']}")
+
+        # 🔧 新增：强制释放所有摄像头资源
+        self._force_release_cameras()
+
+        print("🛑 SERVICE: Monitoring stopped successfully.")
+
+    def _force_release_cameras(self):
+        """强制释放所有摄像头资源"""
+        print("🎥 强制释放摄像头资源...")
+        try:
+            # 使用OpenCV强制释放所有摄像头
+            import cv2
+
+            # 尝试释放常用的摄像头索引
+            for camera_id in range(1):  # 检查摄像头0
+                try:
+                    temp_cap = cv2.VideoCapture(camera_id)
+                    if temp_cap.isOpened():
+                        print(f"🎥 发现活跃摄像头 {camera_id}，正在释放...")
+                        temp_cap.release()
+                        print(f"🎥 摄像头 {camera_id} 已释放")
+                    temp_cap = None
+                except Exception as e:
+                    print(f"🎥 释放摄像头 {camera_id} 时出错: {e}")
+
+            # 额外等待时间确保资源完全释放
+            time.sleep(0.3)
+            print("🎥 摄像头强制释放完成")
+
+        except Exception as e:
+            print(f"🎥 强制释放摄像头时出错: {e}")
+
+    def stop_monitoring(self):
+        """停止实时监控 - 标准接口（按照分析文档的标准实现）"""
+        print("🛑 SERVICE: Stopping monitoring...")
+        print(f"🛑 当前状态检查 - is_running: {getattr(self, 'is_running', False)}, should_stop: {getattr(self, 'should_stop_realtime', False)}")
+
+        # 无论是否有活跃检测器，都发送停止信号
+        self.stop_realtime_monitoring()  # 调用具体的停止逻辑
+        print("🛑 SERVICE: Stop signal sent.")
+
     def get_task_status(self, task_id: str) -> Dict[str, Any]:
         """
         获取任务状态
@@ -825,6 +1017,14 @@ class BehaviorDetectionService:
             cap = MyVideoCapture(config.input)
             id_to_ava_labels = {}
             frame_count = 0
+
+            # 🔧 新增：初始化实时统计服务
+            realtime_stats = get_realtime_statistics(self.alert_behaviors)
+            realtime_stats.reset()  # 重置统计数据
+
+            # 统计相关变量
+            last_stats_time = time.time()
+            stats_interval = 2.0  # 每2秒推送一次统计数据
             
             while not cap.end:
                 # 检查任务状态
@@ -909,16 +1109,24 @@ class BehaviorDetectionService:
                             except Exception as e:
                                 print(f"实时SlowFast处理错误: {e}")
                 
+                # 🔧 新增：更新实时统计数据
+                current_time = time.time()
+                frame_processing_time = current_time - (current_time - 0.04)  # 估算处理时间
+                realtime_stats.update_frame_stats(fps=25.0, processing_time=frame_processing_time)
+
+                if detections:
+                    realtime_stats.add_detections(detections)
+
                 # 发送实时结果
                 if websocket_callback and detections:
                     websocket_callback({
                         'type': 'detection_result',
                         'task_id': task_id,
                         'frame_number': frame_count,
-                        'timestamp': time.time(),
+                        'timestamp': current_time,
                         'detections': detections
                     })
-                
+
                 # 检查异常行为并发送报警
                 for detection in detections:
                     if detection['is_anomaly'] and websocket_callback:
@@ -928,7 +1136,17 @@ class BehaviorDetectionService:
                             'alert_type': detection['behavior_type'],
                             'detection': detection
                         })
-                
+
+                # 🔧 新增：定期推送统计数据
+                if current_time - last_stats_time >= stats_interval and websocket_callback:
+                    stats_data = realtime_stats.get_statistics()
+                    websocket_callback({
+                        'type': 'statistics_update',
+                        'task_id': task_id,
+                        'statistics': stats_data
+                    })
+                    last_stats_time = current_time
+
                 # 控制帧率
                 time.sleep(0.04)  # 约25 FPS
             
@@ -969,21 +1187,34 @@ class BehaviorDetectionService:
     def update_config(self, new_config: Dict[str, Any]):
         """
         更新配置参数
-        
+
         Args:
             new_config: 新的配置参数
         """
+        # 🔧 修复：确保config属性存在
+        if not hasattr(self, 'config'):
+            self.config = {}
+
         self.config.update(new_config)
-        
+
         # 更新相关参数
         if 'device' in new_config:
             self.device = new_config['device']
+            print(f"✓ 更新设备配置: {self.device}")
+
         if 'input_size' in new_config:
             self.input_size = new_config['input_size']
+            print(f"✓ 更新输入尺寸: {self.input_size}")
+
         if 'confidence_threshold' in new_config:
             self.confidence_threshold = new_config['confidence_threshold']
+            print(f"✓ 更新置信度阈值: {self.confidence_threshold}")
+
         if 'alert_behaviors' in new_config:
             self.alert_behaviors = new_config['alert_behaviors']
+            print(f"✓ 更新报警行为配置: {self.alert_behaviors}")
+
+        print(f"✓ 配置更新完成，当前配置: device={self.device}, confidence={self.confidence_threshold}, alert_behaviors={self.alert_behaviors}")
 
 
 # 全局检测服务实例
@@ -992,14 +1223,32 @@ detection_service = None
 def get_detection_service(config: Dict[str, Any] = None) -> BehaviorDetectionService:
     """
     获取检测服务实例（单例模式）
-    
+
     Args:
         config: 配置参数
-        
+
     Returns:
         BehaviorDetectionService: 检测服务实例
     """
     global detection_service
+
+    # 🔧 修复：保持原有的简单实现，默认优先GPU
     if detection_service is None:
+        if config is None:
+            config = {
+                'device': 'auto',  # 默认auto，优先GPU
+                'input_size': 640,
+                'confidence_threshold': 0.5,
+                'alert_behaviors': ['fall down', 'fight', 'enter', 'exit']
+            }
         detection_service = BehaviorDetectionService(config)
-    return detection_service 
+        print(f"✓ 创建检测服务实例，设备: {detection_service.device}")
+    elif config is not None:
+        # 🔧 只更新关键配置，避免影响运行中的服务
+        if 'confidence_threshold' in config:
+            detection_service.confidence_threshold = config['confidence_threshold']
+        if 'alert_behaviors' in config:
+            detection_service.alert_behaviors = config['alert_behaviors']
+        print(f"✓ 更新检测服务配置: confidence={detection_service.confidence_threshold}, alert_behaviors={detection_service.alert_behaviors}")
+
+    return detection_service

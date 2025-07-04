@@ -38,6 +38,10 @@ except ImportError as e:
     print(f"导入模块失败: {e}")
 
 
+# 全局变量
+websocket_clients = {}  # 存储WebSocket客户端信息
+
+
 def create_app(config_name='development'):
     """创建Flask应用实例"""
     app = Flask(__name__)
@@ -50,12 +54,14 @@ def create_app(config_name='development'):
     db.init_app(app)
     CORS(app)
     
-    # 初始化SocketIO
-    socketio = SocketIO(app, 
-                       cors_allowed_origins="*", 
-                       async_mode='eventlet',
-                       logger=True, 
-                       engineio_logger=True)
+    # 初始化SocketIO - 修复兼容性配置
+    socketio = SocketIO(app,
+                       cors_allowed_origins="*",
+                       async_mode='threading',  # 使用threading模式，更稳定
+                       logger=False,  # 减少日志输出
+                       engineio_logger=False,
+                       ping_timeout=60,  # 增加ping超时时间
+                       ping_interval=25)  # 设置ping间隔
     
     # 设置日志
     logger = setup_logger(app.config['LOG_FILE'], app.config['LOG_LEVEL'])
@@ -317,7 +323,10 @@ def create_app(config_name='development'):
         try:
             data = request.get_json()
             source = data.get('source', 0)  # 摄像头ID
-            
+
+            # 🔧 修复：获取报警行为配置
+            alert_behaviors = data.get('alert_behaviors', ['fall down', 'fight', 'enter', 'exit'])
+
             # 创建实时检测任务
             task = DetectionTask(
                 task_name=f"实时检测_{int(time.time())}",
@@ -325,23 +334,24 @@ def create_app(config_name='development'):
                 source_path=str(source),
                 confidence_threshold=float(data.get('confidence', 0.5)),
                 input_size=int(data.get('input_size', 640)),
-                device=data.get('device', 'cpu')
+                device=data.get('device', 'auto')
             )
-            
+
             db.session.add(task)
             db.session.commit()
-            
-            # 启动实时检测
+
+            # 启动实时检测，传递完整配置
             detection_service = get_detection_service({
                 'device': task.device,
                 'input_size': task.input_size,
-                'confidence_threshold': task.confidence_threshold
+                'confidence_threshold': task.confidence_threshold,
+                'alert_behaviors': alert_behaviors
             })
             
             def websocket_callback(data):
                 """WebSocket回调函数"""
                 socketio.emit('realtime_result', data, namespace='/detection')
-                
+
                 # 如果是报警，记录到数据库
                 if data.get('type') == 'alert':
                     detection = data['detection']
@@ -357,6 +367,12 @@ def create_app(config_name='development'):
                     )
                     db.session.add(alert)
                     db.session.commit()
+
+                # 🔧 新增：处理统计数据推送
+                elif data.get('type') == 'statistics_update':
+                    # 直接转发统计数据到前端，不需要存储到数据库
+                    # 统计数据是实时的，用于前端界面显示
+                    pass
             
             service_task_id = detection_service.start_realtime_detection(source, websocket_callback)
             
@@ -443,20 +459,45 @@ def create_app(config_name='development'):
         logger.info(f"收到video_feed请求，视频源: {source}")
 
         try:
-            # 获取检测服务实例
-            detection_service = get_detection_service({
-                'device': 'cuda' if request.args.get('device') == 'cuda' else 'cpu',
+            # 🔧 修复：保持原有的简单配置，默认优先GPU
+            config = {
+                'device': 'auto',  # 默认auto，优先GPU
                 'input_size': int(request.args.get('input_size', 640)),
                 'confidence_threshold': float(request.args.get('confidence', 0.5))
-            })
+            }
+
+            # 🔧 修复：处理报警行为配置
+            alert_behaviors_str = request.args.get('alert_behaviors', '')
+            if alert_behaviors_str:
+                alert_behaviors = [behavior.strip() for behavior in alert_behaviors_str.split(',')]
+                config['alert_behaviors'] = alert_behaviors
+            else:
+                alert_behaviors = None  # 表示使用默认配置
+
+            # 获取检测服务实例
+            detection_service = get_detection_service(config)
 
             if not detection_service.models_initialized:
                 if not detection_service.initialize_models():
                     return Response("模型初始化失败", status=503)
 
-            logger.info("开始返回video_feed流响应")
+            # 🔧 修复：获取实际使用的报警行为配置
+            actual_alert_behaviors = getattr(detection_service, 'alert_behaviors', ['fall down', 'fight', 'enter', 'exit'])
+
+            # 检查是否为预览模式
+            preview_only = request.args.get('preview_only', 'false').lower() == 'true'
+            mode_text = "预览模式" if preview_only else "实时检测模式"
+            logger.info(f"开始返回video_feed流响应 - {mode_text}, 报警行为: {actual_alert_behaviors}")
+
+            # 🔧 新增：如果不是预览模式，设置WebSocket回调
+            websocket_callback = None
+            if not preview_only:
+                def websocket_callback(data):
+                    """WebSocket回调函数"""
+                    socketio.emit('realtime_result', data, namespace='/detection')
+
             return Response(
-                detection_service.generate_realtime_frames(source),
+                detection_service.generate_realtime_frames(source, preview_only=preview_only, websocket_callback=websocket_callback),
                 mimetype='multipart/x-mixed-replace; boundary=frame'
             )
         except Exception as e:
@@ -465,11 +506,16 @@ def create_app(config_name='development'):
 
     @app.route('/api/stop_monitoring', methods=['POST'])
     def stop_monitoring():
-        """停止实时监控"""
+        """停止实时监控 - 使用标准接口"""
         try:
+            print("🛑 收到停止监控API请求")
             detection_service = get_detection_service()
-            # 调用停止实时监控方法
-            detection_service.stop_realtime_monitoring()
+            print(f"🛑 获取到检测服务实例: {detection_service is not None}")
+
+            # 调用标准的停止监控方法（按照分析文档的标准实现）
+            detection_service.stop_monitoring()
+
+            print("🛑 停止监控API调用完成")
             logger.info("实时监控已停止")
             return jsonify({
                 'success': True,
@@ -477,6 +523,7 @@ def create_app(config_name='development'):
             })
 
         except Exception as e:
+            print(f"🛑 停止监控API异常: {e}")
             logger.error(f"停止监控失败: {str(e)}")
             return jsonify({'error': f'停止失败: {str(e)}'}), 500
 
