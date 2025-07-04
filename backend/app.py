@@ -186,7 +186,7 @@ def create_app(config_name='development'):
             
             # 更新任务状态
             task.status = 'running'
-            task.started_at = datetime.utcnow()
+            task.started_at = datetime.now()
             db.session.commit()
             
             # 启动检测线程
@@ -260,7 +260,7 @@ def create_app(config_name='development'):
                                     
                                     # 更新任务状态
                                     task_obj.status = 'completed'
-                                    task_obj.completed_at = datetime.utcnow()
+                                    task_obj.completed_at = datetime.now()
                                     task_obj.progress = 100.0
                                     task_obj.detected_objects = len(result['results'])
                                     task_obj.detected_behaviors = len([r for r in result['results'] if r.get('behavior_type')])
@@ -378,7 +378,7 @@ def create_app(config_name='development'):
             
             # 更新任务状态
             task.status = 'running'
-            task.started_at = datetime.utcnow()
+            task.started_at = datetime.now()
             db.session.commit()
             
             return jsonify({
@@ -411,7 +411,7 @@ def create_app(config_name='development'):
             
             # 更新任务状态
             task.status = 'stopped'
-            task.completed_at = datetime.utcnow()
+            task.completed_at = datetime.now()
             db.session.commit()
             
             return jsonify({
@@ -598,15 +598,34 @@ def create_app(config_name='development'):
     def get_task(task_id):
         """获取单个任务详情"""
         try:
+            print(f"🔍 获取任务详情: {task_id}")  # 调试信息
             task = DetectionTask.query.get(task_id)
             if not task:
                 return jsonify({'error': '任务不存在'}), 404
-            
+
+            # 🔧 修复：获取完整的任务信息，包括文件大小
+            task_dict = task.to_dict()
+            print(f"📋 原始任务数据: {list(task_dict.keys())}")  # 调试信息
+
+            # 计算文件大小
+            file_size = 0
+            try:
+                if task.source_path and os.path.exists(task.source_path):
+                    file_size = os.path.getsize(task.source_path)
+                    print(f"📁 文件大小: {file_size} bytes")  # 调试信息
+            except Exception as e:
+                print(f"❌ 文件大小计算失败: {e}")  # 调试信息
+                file_size = 0
+
+            # 添加文件大小到返回数据
+            task_dict['file_size'] = file_size
+            print(f"✅ 添加文件大小后: {list(task_dict.keys())}")  # 调试信息
+
             return jsonify({
                 'success': True,
-                'task': task.to_dict()
+                'task': task_dict
             })
-            
+
         except Exception as e:
             logger.error(f"获取任务详情失败: {str(e)}")
             return jsonify({'error': f'获取失败: {str(e)}'}), 500
@@ -780,13 +799,13 @@ def create_app(config_name='development'):
             
             # 根据状态更新相应的时间戳
             if new_status == 'acknowledged':
-                alert.acknowledged_at = datetime.utcnow()
+                alert.acknowledged_at = datetime.now()
                 alert.acknowledged_by = data.get('acknowledged_by', 'system')
             elif new_status == 'resolved':
-                alert.resolved_at = datetime.utcnow()
+                alert.resolved_at = datetime.now()
                 # 如果之前没有被确认，同时设置确认时间
                 if not alert.acknowledged_at:
-                    alert.acknowledged_at = datetime.utcnow()
+                    alert.acknowledged_at = datetime.now()
                     alert.acknowledged_by = data.get('acknowledged_by', 'system')
             
             # 添加备注
@@ -1047,7 +1066,7 @@ def create_app(config_name='development'):
             first_task = DetectionTask.query.order_by(DetectionTask.created_at.asc()).first()
             if first_task:
                 start_time = first_task.created_at
-                now = datetime.utcnow()
+                now = datetime.now()
                 uptime_delta = now - start_time
                 
                 days = uptime_delta.days

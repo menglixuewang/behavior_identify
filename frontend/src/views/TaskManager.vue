@@ -534,45 +534,84 @@ export default {
     // 查看任务结果 - 使用统一API方法
     const viewResults = async (task) => {
       try {
-        // 获取任务详细结果
-        const data = await apiRequest(`/api/tasks/${task.id}/results`)
-        
-        if (data.success) {
-          // 更新当前任务信息，合并API返回的数据
+        // 🔧 修复：同时获取任务详情和结果数据
+        const [taskDetailData, taskResultsData] = await Promise.all([
+          getTask(task.id),
+          apiRequest(`/api/tasks/${task.id}/results`)
+        ])
+
+        if (taskDetailData.success && taskResultsData.success) {
+          const taskDetail = taskDetailData.task
+
+          // 🔧 修复：计算处理耗时
+          let duration = null
+          if (taskDetail.started_at && taskDetail.completed_at) {
+            const startTime = new Date(taskDetail.started_at)
+            const endTime = new Date(taskDetail.completed_at)
+            duration = Math.round((endTime - startTime) / 1000) // 秒
+          }
+
+          // 🔧 修复：获取文件大小
+          let fileSize = taskDetail.file_size || 0
+
+          // 🔧 修复：构建完整的任务信息，包含所有数据库字段
           currentTask.value = {
             ...task,
-            totalFrames: data.totalFrames,
-            detections: data.totalDetections,
-            alerts: data.alertCount,
-            behaviors: data.behaviors,
-            videoUrl: data.videoUrl,
-            downloadUrl: data.downloadUrl
+            // 基本信息
+            id: taskDetail.id,
+            name: taskDetail.task_name,
+            type: taskDetail.source_type,
+            status: taskDetail.status,
+            createTime: taskDetail.created_at,
+            startTime: taskDetail.started_at,
+            endTime: taskDetail.completed_at,
+            duration: duration,
+            fileSize: fileSize,
+
+            // 检测配置 - 从数据库获取
+            config: {
+              confidence: taskDetail.confidence_threshold,
+              inputSize: taskDetail.input_size,
+              device: taskDetail.device,
+              alertBehaviors: ['fall down', 'fight', 'enter', 'exit'] // 默认报警行为，后续可扩展
+            },
+
+            // 统计结果
+            totalFrames: taskResultsData.totalFrames,
+            detections: taskResultsData.totalDetections,
+            alerts: taskResultsData.alertCount,
+            behaviors: taskResultsData.behaviors,
+            videoUrl: taskResultsData.videoUrl,
+            downloadUrl: taskResultsData.downloadUrl,
+            avgConfidence: taskResultsData.behaviors?.length > 0
+              ? Math.round(taskResultsData.behaviors.reduce((sum, b) => sum + parseFloat(b.confidence), 0) / taskResultsData.behaviors.length)
+              : 0
           }
-          
+
           // 生成日志信息显示
           const logLines = [
             `任务 ${task.id} 处理完成`,
-            `文件名: ${data.filename}`,
-            `总帧数: ${data.totalFrames}`,
-            `检测帧数: ${data.detectedFrames}`,
-            `检测总数: ${data.totalDetections}`,
-            `报警次数: ${data.alertCount}`,
+            `文件名: ${taskResultsData.filename}`,
+            `总帧数: ${taskResultsData.totalFrames}`,
+            `检测帧数: ${taskResultsData.detectedFrames}`,
+            `检测总数: ${taskResultsData.totalDetections}`,
+            `报警次数: ${taskResultsData.alertCount}`,
             ''
           ]
-          
-          if (data.behaviors && data.behaviors.length > 0) {
+
+          if (taskResultsData.behaviors && taskResultsData.behaviors.length > 0) {
             logLines.push('检测到的行为:')
-            data.behaviors.forEach(behavior => {
+            taskResultsData.behaviors.forEach(behavior => {
               logLines.push(`- ${behavior.behavior}: ${behavior.count}次 (置信度: ${behavior.confidence}, 持续: ${behavior.duration})`)
             })
           } else {
             logLines.push('未检测到特定行为')
           }
-          
+
           taskLogs.value = logLines.join('\n')
           showTaskDialog.value = true
         } else {
-          ElMessage.error(data.error || '获取任务结果失败')
+          ElMessage.error('获取任务详情失败')
         }
       } catch (error) {
         console.error('获取任务详情失败:', error)

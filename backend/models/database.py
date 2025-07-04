@@ -20,7 +20,7 @@ class DetectionTask(db.Model):
     output_path = Column(String(500), nullable=True)  # 输出文件路径
     status = Column(String(50), default='pending')  # pending, running, completed, failed
     progress = Column(Float, default=0.0)  # 处理进度 0-100
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
@@ -91,7 +91,7 @@ class DetectionResult(db.Model):
     # 其他信息
     velocity_x = Column(Float, nullable=True)  # X方向速度
     velocity_y = Column(Float, nullable=True)  # Y方向速度
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
     
     def to_dict(self):
         """转换为字典格式"""
@@ -150,7 +150,7 @@ class AlertRecord(db.Model):
     description = Column(Text, nullable=True)
     note = Column(Text, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
     
     def to_dict(self):
         """转换为字典格式"""
@@ -189,8 +189,8 @@ class SystemConfig(db.Model):
     description = Column(Text, nullable=True)
     category = Column(String(50), default='general')  # general, detection, alert, system
     is_editable = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
     def to_dict(self):
         """转换为字典格式"""
@@ -227,7 +227,7 @@ class SystemLog(db.Model):
     exception_message = Column(Text, nullable=True)
     stack_trace = Column(Text, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
     
     def to_dict(self):
         """转换为字典格式"""

@@ -143,3 +143,199 @@
 2025-07-04 10:45:18,558 - behavior_detection - INFO - app:delete_task:707 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751596447482_fall_1.mp4
 2025-07-04 10:45:20,693 - behavior_detection - INFO - app:delete_task:699 - 删除输出文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_3_1751593875.mp4
 2025-07-04 10:45:20,695 - behavior_detection - INFO - app:delete_task:707 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751593875_fall_1.mp4
+2025-07-04 10:51:16,888 - behavior_detection - INFO - app:upload_video:145 - 视频上传成功: c40f768cce29eac75d05b119fb05c438.mp4, 任务ID: 1
+2025-07-04 10:53:46,451 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:53:46,452 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:53:46,452 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 10:53:46,452 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:53:46,452 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:53:46,452 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:53:46,453 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=0-
+2025-07-04 10:53:46,458 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 0-14990674/14990675
+2025-07-04 10:53:46,714 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:53:46,714 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:53:46,714 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 10:53:46,715 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:53:46,715 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:53:46,716 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:53:46,716 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=14974976-
+2025-07-04 10:53:46,716 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 14974976-14990674/14990675
+2025-07-04 10:53:46,777 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:53:46,778 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:53:46,778 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 10:53:46,778 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:53:46,779 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:53:46,779 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:53:46,779 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=622592-
+2025-07-04 10:53:46,784 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 622592-14990674/14990675
+2025-07-04 10:53:47,043 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:53:47,043 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:53:47,043 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 10:53:47,043 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:53:47,043 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:53:47,044 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:53:47,044 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=1212416-
+2025-07-04 10:53:47,049 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 1212416-14990674/14990675
+2025-07-04 10:53:47,104 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:53:47,105 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:53:47,105 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 10:53:47,106 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:53:47,106 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:53:47,107 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:53:47,107 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=3276800-
+2025-07-04 10:53:47,111 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 3276800-14990674/14990675
+2025-07-04 10:53:47,367 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:53:47,368 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:53:47,368 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 10:53:47,368 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:53:47,368 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:53:47,369 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:53:47,369 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=4980736-
+2025-07-04 10:53:47,373 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 4980736-14990674/14990675
+2025-07-04 10:53:47,429 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:53:47,430 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:53:47,430 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 10:53:47,430 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:53:47,431 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:53:47,431 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:53:47,431 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=6651904-
+2025-07-04 10:53:47,435 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 6651904-14990674/14990675
+2025-07-04 10:53:47,710 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:53:47,711 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:53:47,711 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 10:53:47,711 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:53:47,711 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:53:47,712 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:53:47,712 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=8355840-
+2025-07-04 10:53:47,716 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 8355840-14990674/14990675
+2025-07-04 10:58:15,624 - behavior_detection - INFO - app:upload_video:145 - 视频上传成功: cf2eb096f9d83d6135525d40dfba9b82.mp4, 任务ID: 2
+2025-07-04 10:58:46,049 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:58:46,053 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:58:46,053 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: f:\shixun\behavior_identify_new\behavior_identify\yolo_slowfast-master
+2025-07-04 10:58:46,053 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:58:46,054 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:58:46,061 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:58:46,078 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=0-
+2025-07-04 10:58:46,095 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 0-14990674/14990675
+2025-07-04 10:58:46,313 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:58:46,314 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:58:46,314 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: f:\shixun\behavior_identify_new\behavior_identify\yolo_slowfast-master
+2025-07-04 10:58:46,314 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:58:46,315 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:58:46,315 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:58:46,316 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=14974976-
+2025-07-04 10:58:46,316 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 14974976-14990674/14990675
+2025-07-04 10:58:46,454 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:58:46,487 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:58:46,490 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: f:\shixun\behavior_identify_new\behavior_identify\yolo_slowfast-master
+2025-07-04 10:58:46,519 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:58:46,523 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:58:46,527 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:58:46,528 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=393216-
+2025-07-04 10:58:46,535 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 393216-14990674/14990675
+2025-07-04 10:58:46,669 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:58:46,681 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:58:46,681 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: f:\shixun\behavior_identify_new\behavior_identify\yolo_slowfast-master
+2025-07-04 10:58:46,681 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:58:46,682 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:58:46,682 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:58:46,684 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=1605632-
+2025-07-04 10:58:46,695 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 1605632-14990674/14990675
+2025-07-04 10:58:46,874 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:58:46,877 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:58:46,877 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: f:\shixun\behavior_identify_new\behavior_identify\yolo_slowfast-master
+2025-07-04 10:58:46,877 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:58:46,881 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:58:46,889 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:58:46,890 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=3014656-
+2025-07-04 10:58:46,895 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 3014656-14990674/14990675
+2025-07-04 10:58:47,032 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:58:47,033 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:58:47,033 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: f:\shixun\behavior_identify_new\behavior_identify\yolo_slowfast-master
+2025-07-04 10:58:47,033 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:58:47,034 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:58:47,037 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:58:47,038 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=3637248-
+2025-07-04 10:58:47,046 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 3637248-14990674/14990675
+2025-07-04 10:58:47,219 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:58:47,220 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:58:47,220 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: f:\shixun\behavior_identify_new\behavior_identify\yolo_slowfast-master
+2025-07-04 10:58:47,220 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:58:47,221 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:58:47,222 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:58:47,227 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=4947968-
+2025-07-04 10:58:47,238 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 4947968-14990674/14990675
+2025-07-04 10:58:47,414 - behavior_detection - INFO - app:serve_output_file:1172 - 请求静态文件: result_1_1751597477.mp4
+2025-07-04 10:58:47,528 - behavior_detection - INFO - app:serve_output_file:1179 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_1_1751597477.mp4
+2025-07-04 10:58:47,565 - behavior_detection - INFO - app:serve_output_file:1180 - 当前工作目录: f:\shixun\behavior_identify_new\behavior_identify\yolo_slowfast-master
+2025-07-04 10:58:47,580 - behavior_detection - INFO - app:serve_output_file:1181 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 10:58:47,597 - behavior_detection - INFO - app:serve_output_file:1182 - 文件存在: True
+2025-07-04 10:58:47,617 - behavior_detection - INFO - app:serve_output_file:1190 - 文件大小: 14990675 bytes
+2025-07-04 10:58:47,636 - behavior_detection - INFO - app:serve_output_file:1195 - Range请求: bytes=6848512-
+2025-07-04 10:58:47,655 - behavior_detection - INFO - app:serve_output_file:1227 - 返回Range响应: 6848512-14990674/14990675
+2025-07-04 11:35:33,483 - behavior_detection - INFO - app:upload_video:145 - 视频上传成功: c40f768cce29eac75d05b119fb05c438.mp4, 任务ID: 3
+2025-07-04 11:37:04,282 - behavior_detection - INFO - app:serve_output_file:1191 - 请求静态文件: result_3_1751600133.mp4
+2025-07-04 11:37:04,283 - behavior_detection - INFO - app:serve_output_file:1198 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_3_1751600133.mp4
+2025-07-04 11:37:04,284 - behavior_detection - INFO - app:serve_output_file:1199 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 11:37:04,284 - behavior_detection - INFO - app:serve_output_file:1200 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 11:37:04,284 - behavior_detection - INFO - app:serve_output_file:1201 - 文件存在: True
+2025-07-04 11:37:04,284 - behavior_detection - INFO - app:serve_output_file:1209 - 文件大小: 14990675 bytes
+2025-07-04 11:37:04,284 - behavior_detection - INFO - app:serve_output_file:1214 - Range请求: bytes=0-
+2025-07-04 11:37:04,289 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 0-14990674/14990675
+2025-07-04 11:37:04,528 - behavior_detection - INFO - app:serve_output_file:1191 - 请求静态文件: result_3_1751600133.mp4
+2025-07-04 11:37:04,528 - behavior_detection - INFO - app:serve_output_file:1198 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_3_1751600133.mp4
+2025-07-04 11:37:04,529 - behavior_detection - INFO - app:serve_output_file:1199 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 11:37:04,529 - behavior_detection - INFO - app:serve_output_file:1200 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 11:37:04,529 - behavior_detection - INFO - app:serve_output_file:1201 - 文件存在: True
+2025-07-04 11:37:04,529 - behavior_detection - INFO - app:serve_output_file:1209 - 文件大小: 14990675 bytes
+2025-07-04 11:37:04,529 - behavior_detection - INFO - app:serve_output_file:1214 - Range请求: bytes=14974976-
+2025-07-04 11:37:04,530 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 14974976-14990674/14990675
+2025-07-04 11:37:04,621 - behavior_detection - INFO - app:serve_output_file:1191 - 请求静态文件: result_3_1751600133.mp4
+2025-07-04 11:37:04,622 - behavior_detection - INFO - app:serve_output_file:1198 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_3_1751600133.mp4
+2025-07-04 11:37:04,622 - behavior_detection - INFO - app:serve_output_file:1199 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 11:37:04,622 - behavior_detection - INFO - app:serve_output_file:1200 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 11:37:04,623 - behavior_detection - INFO - app:serve_output_file:1201 - 文件存在: True
+2025-07-04 11:37:04,623 - behavior_detection - INFO - app:serve_output_file:1209 - 文件大小: 14990675 bytes
+2025-07-04 11:37:04,623 - behavior_detection - INFO - app:serve_output_file:1214 - Range请求: bytes=65536-
+2025-07-04 11:37:04,629 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 65536-14990674/14990675
+2025-07-04 11:37:28,599 - behavior_detection - INFO - app:serve_output_file:1191 - 请求静态文件: result_3_1751600133.mp4
+2025-07-04 11:37:28,599 - behavior_detection - INFO - app:serve_output_file:1198 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_3_1751600133.mp4
+2025-07-04 11:37:28,599 - behavior_detection - INFO - app:serve_output_file:1199 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 11:37:28,599 - behavior_detection - INFO - app:serve_output_file:1200 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 11:37:28,601 - behavior_detection - INFO - app:serve_output_file:1201 - 文件存在: True
+2025-07-04 11:37:28,601 - behavior_detection - INFO - app:serve_output_file:1209 - 文件大小: 14990675 bytes
+2025-07-04 11:37:28,601 - behavior_detection - INFO - app:serve_output_file:1214 - Range请求: bytes=8454144-
+2025-07-04 11:37:28,604 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 8454144-14990674/14990675
+2025-07-04 11:45:40,725 - behavior_detection - INFO - app:upload_video:145 - 视频上传成功: c40f768cce29eac75d05b119fb05c438.mp4, 任务ID: 4
+2025-07-04 11:47:28,605 - behavior_detection - INFO - app:serve_output_file:1191 - 请求静态文件: result_4_1751600741.mp4
+2025-07-04 11:47:28,607 - behavior_detection - INFO - app:serve_output_file:1198 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_4_1751600741.mp4
+2025-07-04 11:47:28,607 - behavior_detection - INFO - app:serve_output_file:1199 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 11:47:28,607 - behavior_detection - INFO - app:serve_output_file:1200 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 11:47:28,608 - behavior_detection - INFO - app:serve_output_file:1201 - 文件存在: True
+2025-07-04 11:47:28,609 - behavior_detection - INFO - app:serve_output_file:1209 - 文件大小: 14990675 bytes
+2025-07-04 11:47:28,609 - behavior_detection - INFO - app:serve_output_file:1214 - Range请求: bytes=0-
+2025-07-04 11:47:28,613 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 0-14990674/14990675
+2025-07-04 11:47:28,869 - behavior_detection - INFO - app:serve_output_file:1191 - 请求静态文件: result_4_1751600741.mp4
+2025-07-04 11:47:28,869 - behavior_detection - INFO - app:serve_output_file:1198 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_4_1751600741.mp4
+2025-07-04 11:47:28,869 - behavior_detection - INFO - app:serve_output_file:1199 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 11:47:28,870 - behavior_detection - INFO - app:serve_output_file:1200 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 11:47:28,870 - behavior_detection - INFO - app:serve_output_file:1201 - 文件存在: True
+2025-07-04 11:47:28,871 - behavior_detection - INFO - app:serve_output_file:1209 - 文件大小: 14990675 bytes
+2025-07-04 11:47:28,871 - behavior_detection - INFO - app:serve_output_file:1214 - Range请求: bytes=14974976-
+2025-07-04 11:47:28,871 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 14974976-14990674/14990675
+2025-07-04 11:47:28,931 - behavior_detection - INFO - app:serve_output_file:1191 - 请求静态文件: result_4_1751600741.mp4
+2025-07-04 11:47:28,931 - behavior_detection - INFO - app:serve_output_file:1198 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_4_1751600741.mp4
+2025-07-04 11:47:28,932 - behavior_detection - INFO - app:serve_output_file:1199 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 11:47:28,932 - behavior_detection - INFO - app:serve_output_file:1200 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 11:47:28,933 - behavior_detection - INFO - app:serve_output_file:1201 - 文件存在: True
+2025-07-04 11:47:28,934 - behavior_detection - INFO - app:serve_output_file:1209 - 文件大小: 14990675 bytes
+2025-07-04 11:47:28,934 - behavior_detection - INFO - app:serve_output_file:1214 - Range请求: bytes=65536-
+2025-07-04 11:47:28,940 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 65536-14990674/14990675
+2025-07-04 11:47:29,180 - behavior_detection - INFO - app:serve_output_file:1191 - 请求静态文件: result_4_1751600741.mp4
+2025-07-04 11:47:29,181 - behavior_detection - INFO - app:serve_output_file:1198 - 文件路径: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs\result_4_1751600741.mp4
+2025-07-04 11:47:29,181 - behavior_detection - INFO - app:serve_output_file:1199 - 当前工作目录: F:\shixun\behavior_identify_new\behavior_identify
+2025-07-04 11:47:29,182 - behavior_detection - INFO - app:serve_output_file:1200 - outputs目录: f:\shixun\behavior_identify_new\behavior_identify\backend\outputs
+2025-07-04 11:47:29,183 - behavior_detection - INFO - app:serve_output_file:1201 - 文件存在: True
+2025-07-04 11:47:29,183 - behavior_detection - INFO - app:serve_output_file:1209 - 文件大小: 14990675 bytes
+2025-07-04 11:47:29,184 - behavior_detection - INFO - app:serve_output_file:1214 - Range请求: bytes=8421376-
+2025-07-04 11:47:29,188 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 8421376-14990674/14990675
