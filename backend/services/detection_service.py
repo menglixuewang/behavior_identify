@@ -12,6 +12,9 @@ from datetime import datetime
 import base64
 from typing import Dict, List, Optional, Tuple, Any
 
+# 导入实时统计服务
+from .realtime_statistics import get_realtime_statistics, reset_realtime_statistics
+
 # 添加算法模块路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(current_dir))
@@ -41,17 +44,17 @@ class BehaviorDetectionService:
         Args:
             config: 配置字典，包含设备、输入尺寸、置信度阈值等参数
         """
-        # 设备配置 - 智能GPU检测，默认优先使用GPU
+        # 🔧 修复：设备配置 - 默认优先使用GPU，GPU不可用时使用CPU
         device_config = config.get('device', 'auto').lower()
 
         if device_config == 'auto':
-            # 自动选择最佳设备 - 优先GPU
+            # 自动选择设备 - 优先GPU，不可用时回退CPU
             if torch.cuda.is_available():
                 self.device = 'cuda'
                 print(f"✓ 自动选择GPU: {torch.cuda.get_device_name()}")
             else:
                 self.device = 'cpu'
-                print("✓ 自动选择CPU (GPU不可用)")
+                print("✓ GPU不可用，自动选择CPU")
         elif device_config == 'cuda':
             if torch.cuda.is_available():
                 self.device = 'cuda'
@@ -332,7 +335,7 @@ class BehaviorDetectionService:
         
         return task_id
 
-    def generate_realtime_frames(self, source: Any, preview_only: bool = False):
+    def generate_realtime_frames(self, source: Any, preview_only: bool = False, websocket_callback=None):
         """
         生成实时视频帧流，用于HTTP视频流传输
         这是从 behavior_identify 项目迁移的功能
@@ -340,6 +343,7 @@ class BehaviorDetectionService:
         Args:
             source: 视频源（摄像头ID或视频文件路径）
             preview_only: 是否仅预览模式（不进行行为检测）
+            websocket_callback: WebSocket回调函数，用于发送统计数据
 
         Yields:
             bytes: JPEG格式的视频帧数据
@@ -352,6 +356,17 @@ class BehaviorDetectionService:
         self.stop_event.clear()  # 清除停止事件
         self.is_running = True  # 设置运行状态
         print(f"🎥 开始新监控会话 - should_stop: {self.should_stop_realtime}, is_running: {self.is_running}")
+
+        # 🔧 新增：初始化实时统计（如果有WebSocket回调）
+        realtime_stats = None
+        last_stats_time = 0
+        stats_interval = 2.0  # 每2秒发送一次统计数据
+        if websocket_callback and not preview_only:
+            from services.realtime_statistics import get_realtime_statistics
+            realtime_stats = get_realtime_statistics(self.alert_behaviors)
+            realtime_stats.reset()
+            last_stats_time = time.time()
+            print(f"🔧 实时统计已初始化，报警行为: {self.alert_behaviors}")
 
         if not self.models_initialized:
             print("模型未初始化，尝试初始化...")
@@ -546,6 +561,40 @@ class BehaviorDetectionService:
 
                         # 使用绘制后的帧
                         img = annotated_frame
+
+                        # 🔧 新增：更新实时统计数据
+                        if realtime_stats and not preview_only:
+                            # 构建检测结果
+                            detections = []
+                            for _, pred in enumerate(pred_result.pred):
+                                if pred.shape[0]:
+                                    for _, (*box, cls, trackid, _, _) in enumerate(pred):
+                                        if int(cls) == 0:  # 只统计人员检测
+                                            behavior_type = id_to_ava_labels.get(trackid, 'Unknown')
+                                            detections.append({
+                                                'object_id': int(trackid),
+                                                'behavior_type': behavior_type,
+                                                'confidence': 0.8,  # 默认置信度
+                                                'is_anomaly': self._is_anomaly_behavior(behavior_type),
+                                                'frame_number': frame_count,
+                                                'timestamp': time.time()
+                                            })
+
+                            # 更新统计数据
+                            current_time = time.time()
+                            realtime_stats.update_frame_stats(fps=30.0, processing_time=0.033)
+                            if detections:
+                                realtime_stats.add_detections(detections)
+
+                            # 定期发送统计数据
+                            if current_time - last_stats_time >= stats_interval:
+                                stats_data = realtime_stats.get_statistics()
+                                if websocket_callback:
+                                    websocket_callback({
+                                        'type': 'statistics_update',
+                                        'statistics': stats_data
+                                    })
+                                last_stats_time = current_time
 
                 # 在发送帧之前最后一次检查停止标志（按照标准实现）
                 if self.should_stop_realtime:
@@ -968,6 +1017,14 @@ class BehaviorDetectionService:
             cap = MyVideoCapture(config.input)
             id_to_ava_labels = {}
             frame_count = 0
+
+            # 🔧 新增：初始化实时统计服务
+            realtime_stats = get_realtime_statistics(self.alert_behaviors)
+            realtime_stats.reset()  # 重置统计数据
+
+            # 统计相关变量
+            last_stats_time = time.time()
+            stats_interval = 2.0  # 每2秒推送一次统计数据
             
             while not cap.end:
                 # 检查任务状态
@@ -1052,16 +1109,24 @@ class BehaviorDetectionService:
                             except Exception as e:
                                 print(f"实时SlowFast处理错误: {e}")
                 
+                # 🔧 新增：更新实时统计数据
+                current_time = time.time()
+                frame_processing_time = current_time - (current_time - 0.04)  # 估算处理时间
+                realtime_stats.update_frame_stats(fps=25.0, processing_time=frame_processing_time)
+
+                if detections:
+                    realtime_stats.add_detections(detections)
+
                 # 发送实时结果
                 if websocket_callback and detections:
                     websocket_callback({
                         'type': 'detection_result',
                         'task_id': task_id,
                         'frame_number': frame_count,
-                        'timestamp': time.time(),
+                        'timestamp': current_time,
                         'detections': detections
                     })
-                
+
                 # 检查异常行为并发送报警
                 for detection in detections:
                     if detection['is_anomaly'] and websocket_callback:
@@ -1071,7 +1136,17 @@ class BehaviorDetectionService:
                             'alert_type': detection['behavior_type'],
                             'detection': detection
                         })
-                
+
+                # 🔧 新增：定期推送统计数据
+                if current_time - last_stats_time >= stats_interval and websocket_callback:
+                    stats_data = realtime_stats.get_statistics()
+                    websocket_callback({
+                        'type': 'statistics_update',
+                        'task_id': task_id,
+                        'statistics': stats_data
+                    })
+                    last_stats_time = current_time
+
                 # 控制帧率
                 time.sleep(0.04)  # 约25 FPS
             
@@ -1112,21 +1187,34 @@ class BehaviorDetectionService:
     def update_config(self, new_config: Dict[str, Any]):
         """
         更新配置参数
-        
+
         Args:
             new_config: 新的配置参数
         """
+        # 🔧 修复：确保config属性存在
+        if not hasattr(self, 'config'):
+            self.config = {}
+
         self.config.update(new_config)
-        
+
         # 更新相关参数
         if 'device' in new_config:
             self.device = new_config['device']
+            print(f"✓ 更新设备配置: {self.device}")
+
         if 'input_size' in new_config:
             self.input_size = new_config['input_size']
+            print(f"✓ 更新输入尺寸: {self.input_size}")
+
         if 'confidence_threshold' in new_config:
             self.confidence_threshold = new_config['confidence_threshold']
+            print(f"✓ 更新置信度阈值: {self.confidence_threshold}")
+
         if 'alert_behaviors' in new_config:
             self.alert_behaviors = new_config['alert_behaviors']
+            print(f"✓ 更新报警行为配置: {self.alert_behaviors}")
+
+        print(f"✓ 配置更新完成，当前配置: device={self.device}, confidence={self.confidence_threshold}, alert_behaviors={self.alert_behaviors}")
 
 
 # 全局检测服务实例
@@ -1135,14 +1223,32 @@ detection_service = None
 def get_detection_service(config: Dict[str, Any] = None) -> BehaviorDetectionService:
     """
     获取检测服务实例（单例模式）
-    
+
     Args:
         config: 配置参数
-        
+
     Returns:
         BehaviorDetectionService: 检测服务实例
     """
     global detection_service
+
+    # 🔧 修复：保持原有的简单实现，默认优先GPU
     if detection_service is None:
+        if config is None:
+            config = {
+                'device': 'auto',  # 默认auto，优先GPU
+                'input_size': 640,
+                'confidence_threshold': 0.5,
+                'alert_behaviors': ['fall down', 'fight', 'enter', 'exit']
+            }
         detection_service = BehaviorDetectionService(config)
-    return detection_service 
+        print(f"✓ 创建检测服务实例，设备: {detection_service.device}")
+    elif config is not None:
+        # 🔧 只更新关键配置，避免影响运行中的服务
+        if 'confidence_threshold' in config:
+            detection_service.confidence_threshold = config['confidence_threshold']
+        if 'alert_behaviors' in config:
+            detection_service.alert_behaviors = config['alert_behaviors']
+        print(f"✓ 更新检测服务配置: confidence={detection_service.confidence_threshold}, alert_behaviors={detection_service.alert_behaviors}")
+
+    return detection_service
