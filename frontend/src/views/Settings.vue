@@ -22,13 +22,14 @@
               <div class="form-tip">设置检测结果的最低置信度要求</div>
             </el-form-item>
             
-            <el-form-item label="默认输入尺寸">
-              <el-select v-model="detectionSettings.inputSize" placeholder="选择输入尺寸">
-                <el-option label="416x416 (快速)" :value="416" />
-                <el-option label="640x640 (平衡)" :value="640" />
-                <el-option label="832x832 (精确)" :value="832" />
-              </el-select>
-              <div class="form-tip">更大的输入尺寸可提高检测精度但会降低速度</div>
+            <el-form-item label="输入尺寸">
+              <el-input 
+                v-model="detectionSettings.inputSize" 
+                placeholder="640x640"
+                readonly
+                disabled
+              />
+              <div class="form-tip">输入尺寸固定为640x640，不可修改</div>
             </el-form-item>
             
             <el-form-item label="默认设备类型">

@@ -35,8 +35,6 @@
           <el-form-item label="视频源">
             <el-select v-model="monitorConfig.source" :disabled="isMonitoring">
               <el-option label="摄像头" value="camera" />
-              <el-option label="RTSP流" value="rtsp" />
-              <el-option label="本地文件" value="file" />
             </el-select>
           </el-form-item>
         </el-col>

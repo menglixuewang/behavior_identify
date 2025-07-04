@@ -101,33 +101,11 @@
           </el-col>
           
           <el-col :span="12">
-            <el-form-item label="输入尺寸">
-              <el-select v-model="detectConfig.inputSize" placeholder="选择输入尺寸">
-                <el-option label="416x416" :value="416" />
-                <el-option label="640x640" :value="640" />
-                <el-option label="832x832" :value="832" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
             <el-form-item label="设备类型">
               <el-radio-group v-model="detectConfig.device">
                 <el-radio label="cpu">CPU</el-radio>
                 <el-radio label="cuda">GPU</el-radio>
               </el-radio-group>
-            </el-form-item>
-          </el-col>
-          
-          <el-col :span="12">
-            <el-form-item label="输出格式">
-              <el-select v-model="detectConfig.outputFormat" placeholder="选择输出格式">
-                <el-option label="视频文件" value="video" />
-                <el-option label="JSON数据" value="json" />
-                <el-option label="视频+JSON" value="both" />
-              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -334,12 +312,17 @@ export default {
     const showResultDialog = ref(false)
     const currentResult = ref(null)
 
-    // 🔧 使用统一配置管理
-    const detectConfig = reactive(configManager.getConfig('upload'))
+    // 🔧 使用统一配置管理，确保包含默认值
+    const detectConfig = reactive({
+      ...configManager.getConfig('upload'),
+      inputSize: 640,  // 默认输入尺寸
+      outputFormat: 'video'  // 默认输出格式
+    })
 
     // 调试信息
     console.log('📹 [视频上传] 页面初始配置:', detectConfig)
     console.log('📹 [视频上传] 初始报警行为:', detectConfig.alertBehaviors)
+    console.log('📹 [视频上传] 固定配置 - 输入尺寸:', detectConfig.inputSize, '输出格式:', detectConfig.outputFormat)
 
     // 监听配置变化并保存
     const saveConfigChanges = () => {
@@ -365,6 +348,15 @@ export default {
     watch(() => detectConfig.device, (newVal, oldVal) => {
       console.log('💻 [视频上传] 设备变化:', oldVal, '->', newVal)
       saveConfigChanges()
+    })
+
+    // 监听输入尺寸和输出格式（固定值，不需要用户修改）
+    watch(() => detectConfig.inputSize, (newVal) => {
+      console.log('📐 [视频上传] 输入尺寸（固定）:', newVal)
+    })
+
+    watch(() => detectConfig.outputFormat, (newVal) => {
+      console.log('📄 [视频上传] 输出格式（固定）:', newVal)
     })
 
     // 文件选择处理

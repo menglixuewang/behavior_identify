@@ -390,3 +390,65 @@
 2025-07-04 14:54:42,610 - behavior_detection - INFO - app:serve_output_file:1246 - 返回Range响应: 8486912-21595616/21595617
 2025-07-04 14:54:53,274 - behavior_detection - INFO - app:delete_task:718 - 删除输出文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751611815.mp4
 2025-07-04 14:54:53,275 - behavior_detection - INFO - app:delete_task:726 - 删除源文件: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\uploads\1751611815_fall_1.mp4
+2025-07-04 17:09:21,245 - behavior_detection - ERROR - app:get_system_uptime:1120 - 获取系统运行时间失败: can't subtract offset-naive and offset-aware datetimes
+2025-07-04 17:11:14,011 - behavior_detection - INFO - app:upload_video:130 - 解析到配置参数: {'confidence_threshold': 0.5, 'device': 'cuda', 'alert_behaviors': ['walk'], 'input_size': 640, 'output_format': 'both', 'save_results': True}
+2025-07-04 17:11:14,025 - behavior_detection - INFO - app:upload_video:164 - 视频上传成功: fall_1.mp4, 任务ID: 1
+2025-07-04 17:16:11,291 - behavior_detection - ERROR - app:get_system_uptime:1120 - 获取系统运行时间失败: can't subtract offset-naive and offset-aware datetimes
+2025-07-04 17:16:25,597 - behavior_detection - INFO - app:serve_output_file:1227 - 请求静态文件: result_1_1751620274.mp4
+2025-07-04 17:16:25,600 - behavior_detection - INFO - app:serve_output_file:1234 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751620274.mp4
+2025-07-04 17:16:25,603 - behavior_detection - INFO - app:serve_output_file:1235 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 17:16:25,605 - behavior_detection - INFO - app:serve_output_file:1236 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 17:16:25,608 - behavior_detection - INFO - app:serve_output_file:1237 - 文件存在: True
+2025-07-04 17:16:25,611 - behavior_detection - INFO - app:serve_output_file:1245 - 文件大小: 21538336 bytes
+2025-07-04 17:16:25,614 - behavior_detection - INFO - app:serve_output_file:1250 - Range请求: bytes=0-
+2025-07-04 17:16:25,641 - behavior_detection - INFO - app:serve_output_file:1282 - 返回Range响应: 0-21538335/21538336
+2025-07-04 17:16:25,848 - behavior_detection - INFO - app:serve_output_file:1227 - 请求静态文件: result_1_1751620274.mp4
+2025-07-04 17:16:25,852 - behavior_detection - INFO - app:serve_output_file:1234 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751620274.mp4
+2025-07-04 17:16:25,853 - behavior_detection - INFO - app:serve_output_file:1235 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 17:16:25,858 - behavior_detection - INFO - app:serve_output_file:1236 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 17:16:25,861 - behavior_detection - INFO - app:serve_output_file:1237 - 文件存在: True
+2025-07-04 17:16:25,863 - behavior_detection - INFO - app:serve_output_file:1245 - 文件大小: 21538336 bytes
+2025-07-04 17:16:25,865 - behavior_detection - INFO - app:serve_output_file:1250 - Range请求: bytes=21528576-
+2025-07-04 17:16:25,868 - behavior_detection - INFO - app:serve_output_file:1282 - 返回Range响应: 21528576-21538335/21538336
+2025-07-04 17:16:25,983 - behavior_detection - INFO - app:serve_output_file:1227 - 请求静态文件: result_1_1751620274.mp4
+2025-07-04 17:16:25,985 - behavior_detection - INFO - app:serve_output_file:1234 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751620274.mp4
+2025-07-04 17:16:25,987 - behavior_detection - INFO - app:serve_output_file:1235 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 17:16:25,989 - behavior_detection - INFO - app:serve_output_file:1236 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 17:16:25,992 - behavior_detection - INFO - app:serve_output_file:1237 - 文件存在: True
+2025-07-04 17:16:25,994 - behavior_detection - INFO - app:serve_output_file:1245 - 文件大小: 21538336 bytes
+2025-07-04 17:16:25,995 - behavior_detection - INFO - app:serve_output_file:1250 - Range请求: bytes=32768-
+2025-07-04 17:16:26,018 - behavior_detection - INFO - app:serve_output_file:1282 - 返回Range响应: 32768-21538335/21538336
+2025-07-04 17:16:26,202 - behavior_detection - INFO - app:serve_output_file:1227 - 请求静态文件: result_1_1751620274.mp4
+2025-07-04 17:16:26,204 - behavior_detection - INFO - app:serve_output_file:1234 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751620274.mp4
+2025-07-04 17:16:26,206 - behavior_detection - INFO - app:serve_output_file:1235 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 17:16:26,207 - behavior_detection - INFO - app:serve_output_file:1236 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 17:16:26,209 - behavior_detection - INFO - app:serve_output_file:1237 - 文件存在: True
+2025-07-04 17:16:26,212 - behavior_detection - INFO - app:serve_output_file:1245 - 文件大小: 21538336 bytes
+2025-07-04 17:16:26,214 - behavior_detection - INFO - app:serve_output_file:1250 - Range请求: bytes=5275648-
+2025-07-04 17:16:26,230 - behavior_detection - INFO - app:serve_output_file:1282 - 返回Range响应: 5275648-21538335/21538336
+2025-07-04 17:16:26,328 - behavior_detection - INFO - app:serve_output_file:1227 - 请求静态文件: result_1_1751620274.mp4
+2025-07-04 17:16:26,330 - behavior_detection - INFO - app:serve_output_file:1234 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751620274.mp4
+2025-07-04 17:16:26,331 - behavior_detection - INFO - app:serve_output_file:1235 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 17:16:26,332 - behavior_detection - INFO - app:serve_output_file:1236 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 17:16:26,334 - behavior_detection - INFO - app:serve_output_file:1237 - 文件存在: True
+2025-07-04 17:16:26,336 - behavior_detection - INFO - app:serve_output_file:1245 - 文件大小: 21538336 bytes
+2025-07-04 17:16:26,337 - behavior_detection - INFO - app:serve_output_file:1301 - 普通文件请求
+2025-07-04 17:16:26,342 - behavior_detection - INFO - app:serve_output_file:1324 - 返回普通文件响应
+2025-07-04 17:16:26,436 - behavior_detection - INFO - app:serve_output_file:1227 - 请求静态文件: result_1_1751620274.mp4
+2025-07-04 17:16:26,437 - behavior_detection - INFO - app:serve_output_file:1234 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751620274.mp4
+2025-07-04 17:16:26,440 - behavior_detection - INFO - app:serve_output_file:1235 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 17:16:26,443 - behavior_detection - INFO - app:serve_output_file:1236 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 17:16:26,445 - behavior_detection - INFO - app:serve_output_file:1237 - 文件存在: True
+2025-07-04 17:16:26,448 - behavior_detection - INFO - app:serve_output_file:1245 - 文件大小: 21538336 bytes
+2025-07-04 17:16:26,450 - behavior_detection - INFO - app:serve_output_file:1250 - Range请求: bytes=6356992-
+2025-07-04 17:16:26,467 - behavior_detection - INFO - app:serve_output_file:1282 - 返回Range响应: 6356992-21538335/21538336
+2025-07-04 17:16:26,580 - behavior_detection - INFO - app:serve_output_file:1227 - 请求静态文件: result_1_1751620274.mp4
+2025-07-04 17:16:26,582 - behavior_detection - INFO - app:serve_output_file:1234 - 文件路径: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs\result_1_1751620274.mp4
+2025-07-04 17:16:26,583 - behavior_detection - INFO - app:serve_output_file:1235 - 当前工作目录: D:\PyCharm 2024.2.4\PycharmProjects\behavior_identify
+2025-07-04 17:16:26,584 - behavior_detection - INFO - app:serve_output_file:1236 - outputs目录: d:\PyCharm 2024.2.4\PycharmProjects\behavior_identify\backend\outputs
+2025-07-04 17:16:26,587 - behavior_detection - INFO - app:serve_output_file:1237 - 文件存在: True
+2025-07-04 17:16:26,590 - behavior_detection - INFO - app:serve_output_file:1245 - 文件大小: 21538336 bytes
+2025-07-04 17:16:26,591 - behavior_detection - INFO - app:serve_output_file:1250 - Range请求: bytes=7110656-
+2025-07-04 17:16:26,612 - behavior_detection - INFO - app:serve_output_file:1282 - 返回Range响应: 7110656-21538335/21538336
+2025-07-04 17:16:40,527 - behavior_detection - ERROR - app:get_system_uptime:1120 - 获取系统运行时间失败: can't subtract offset-naive and offset-aware datetimes
+2025-07-04 17:17:15,229 - behavior_detection - ERROR - app:get_system_uptime:1120 - 获取系统运行时间失败: can't subtract offset-naive and offset-aware datetimes

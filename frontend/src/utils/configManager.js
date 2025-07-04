@@ -14,7 +14,7 @@ export const DEFAULT_CONFIG = {
   alertBehaviors: ['fall down', 'fight', 'enter', 'exit'],
   
   // 高级配置（主要用于视频上传）
-  outputFormat: 'both',
+  outputFormat: 'video',
   saveResults: true,
   
   // 实时监控特有配置
@@ -46,18 +46,14 @@ export const DEVICE_OPTIONS = [
   { label: 'cuda', name: 'GPU' }
 ]
 
-// 输入尺寸选项
+// 输入尺寸选项（已废弃，使用固定值640）
 export const INPUT_SIZE_OPTIONS = [
-  { value: 416, label: '416x416' },
-  { value: 640, label: '640x640' },
-  { value: 832, label: '832x832' }
+  { value: 640, label: '640x640 (默认)' }
 ]
 
-// 输出格式选项
+// 输出格式选项（已废弃，使用固定值video）
 export const OUTPUT_FORMAT_OPTIONS = [
-  { value: 'video', label: '视频文件' },
-  { value: 'json', label: 'JSON数据' },
-  { value: 'both', label: '视频+JSON' }
+  { value: 'video', label: '视频文件 (默认)' }
 ]
 
 /**
